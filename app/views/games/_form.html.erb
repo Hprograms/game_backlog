@@ -1,0 +1,51 @@
+<%= form_with model: game, local: true do |f| %>
+  <% if game.errors.any? %>
+    <div class="alert alert-danger">
+      <% game.errors.full_messages.each do |msg| %>
+        <div><%= msg %></div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="mb-3">
+    <%= f.label :title, "タイトル", class: "form-label" %>
+    <%= f.text_field :title, class: "form-control" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :platform, "プラットフォーム", class: "form-label" %>
+    <%= f.select :platform, ["Switch", "PS5", "PS4", "Xbox", "PC", "その他"],
+        { include_blank: "選択してください" }, class: "form-select" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :genre, "ジャンル", class: "form-label" %>
+    <%= f.select :genre, ["RPG", "アクション", "アドベンチャー", "シミュレーション", "スポーツ", "その他"],
+        { include_blank: "選択してください" }, class: "form-select" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :status, "ステータス", class: "form-label" %>
+    <%= f.select :status, ["未着手", "プレイ中", "クリア済"],
+        { include_blank: "選択してください" }, class: "form-select" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :rating, "評価（1〜5）", class: "form-label" %>
+    <%= f.select :rating, [1, 2, 3, 4, 5],
+        { include_blank: "未評価" }, class: "form-select" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :memo, "メモ", class: "form-label" %>
+    <%= f.text_area :memo, class: "form-control", rows: 3 %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :purchased_at, "購入日", class: "form-label" %>
+    <%= f.date_field :purchased_at, class: "form-control" %>
+  </div>
+
+  <%= f.submit "保存する", class: "btn btn-primary" %>
+  <%= link_to "キャンセル", games_path, class: "btn btn-outline-secondary ms-2" %>
+<% end %>

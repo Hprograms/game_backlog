@@ -1,0 +1,42 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>マイゲームリスト</h1>
+  <%= link_to "＋ ゲームを追加", new_game_path, class: "btn btn-primary" %>
+</div>
+
+<% if @games.empty? %>
+  <div class="text-center text-muted py-5">
+    <p>まだゲームが登録されていません</p>
+    <%= link_to "最初のゲームを追加する", new_game_path, class: "btn btn-primary" %>
+  </div>
+<% else %>
+  <table class="table table-hover">
+    <thead class="table-dark">
+      <tr>
+        <th>タイトル</th>
+        <th>プラットフォーム</th>
+        <th>ジャンル</th>
+        <th>ステータス</th>
+        <th>評価</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @games.each do |game| %>
+        <tr>
+          <td><%= link_to game.title, game_path(game) %></td>
+          <td><%= game.platform %></td>
+          <td><%= game.genre %></td>
+          <td>
+            <% badge_class = { "未着手" => "secondary", "プレイ中" => "primary", "クリア済" => "success" } %>
+            <span class="badge bg-<%= badge_class[game.status] %>"><%= game.status %></span>
+          </td>
+          <td><%= game.rating ? "★" * game.rating : "-" %></td>
+          <td>
+            <%= link_to "編集", edit_game_path(game), class: "btn btn-sm btn-outline-secondary me-1" %>
+            <%= link_to "削除", game_path(game), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "btn btn-sm btn-outline-danger" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

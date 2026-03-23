@@ -1,0 +1,16 @@
+<div class="card">
+  <div class="card-body">
+    <h1 class="card-title"><%= @game.title %></h1>
+    <table class="table mt-3">
+      <tr><th>プラットフォーム</th><td><%= @game.platform %></td></tr>
+      <tr><th>ジャンル</th><td><%= @game.genre %></td></tr>
+      <tr><th>ステータス</th><td><%= @game.status %></td></tr>
+      <tr><th>評価</th><td><%= @game.rating ? "★" * @game.rating : "未評価" %></td></tr>
+      <tr><th>購入日</th><td><%= @game.purchased_at %></td></tr>
+      <tr><th>メモ</th><td><%= @game.memo %></td></tr>
+    </table>
+    <%= link_to "編集", edit_game_path(@game), class: "btn btn-primary me-2" %>
+    <%= link_to "削除", game_path(@game), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "btn btn-outline-danger me-2" %>
+    <%= link_to "一覧に戻る", games_path, class: "btn btn-outline-secondary" %>
+  </div>
+</div>

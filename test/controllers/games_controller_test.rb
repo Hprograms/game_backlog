@@ -1,10 +1,12 @@
 require "test_helper"
 
 class GamesControllerTest < ActionDispatch::IntegrationTest
-  setup do
+  def setup
     @user = User.create!(
       email: "test@example.com",
-      password: "password"
+      password: "password",
+      activated: true,
+      activated_at: Time.zone.now
     )
     @game = Game.create!(
       title: "ゼルダの伝説",

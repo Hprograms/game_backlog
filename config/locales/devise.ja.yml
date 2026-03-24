@@ -1,0 +1,26 @@
+ja:
+  devise:
+    sessions:
+      signed_in: "ログインしました"
+      signed_out: "ログアウトしました"
+    registrations:
+      signed_up: "アカウントを登録しました。メールを確認してください"
+      updated: "アカウント情報を更新しました"
+      destroyed: "アカウントを削除しました"
+    passwords:
+      send_instructions: "パスワードのリセット手順をメールで送信しました"
+      updated: "パスワードを変更しました"
+      no_token: "このページにはアクセスできません"
+    confirmations:
+      send_instructions: "確認メールを送信しました"
+    failure:
+      already_authenticated: "すでにログインしています"
+      inactive: "アカウントが有効化されていません"
+      invalid: "メールアドレスまたはパスワードが違います"
+      locked: "アカウントがロックされています"
+      not_found_in_database: "メールアドレスまたはパスワードが違います"
+      unauthenticated: "ログインしてください"
+      unconfirmed: "メールアドレスの確認が完了していません"
+    mailer:
+      reset_password_instructions:
+        subject: "パスワードのリセット手順"

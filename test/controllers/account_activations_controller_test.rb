@@ -21,4 +21,10 @@ class AccountActivationsControllerTest < ActionDispatch::IntegrationTest
     assert_not @user.activated?
     assert_redirected_to root_path
   end
+
+  test "未有効化ユーザーがログインすると有効化メールが再送される" do
+    sign_in @user
+    get games_path
+    assert_equal 1, ActionMailer::Base.deliveries.count
+  end
 end

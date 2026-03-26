@@ -6,8 +6,9 @@ class ApplicationController < ActionController::Base
 
   def check_activated
     if user_signed_in? && !current_user.activated?
+      UserMailer.activation_email(current_user).deliver_now
       sign_out current_user
-      redirect_to root_path, alert: "メールのリンクからアカウントを有効化してください"
+      redirect_to root_path, alert: "有効化メールを送信しました。メールのリンクからアカウントを有効化してください"
     end
   end
 

@@ -10,7 +10,7 @@ class UserMailerTest < ActionMailer::TestCase
     mail = UserMailer.activation_email(@user)
     assert_equal "アカウントを有効化してください", mail.subject
     assert_equal [@user.email], mail.to
-    assert_equal ["noreply@gamebacklog.com"], mail.from
+    assert_equal ["hika122025@gmail.com"], mail.from
     assert_match @user.activation_token, mail.body.parts.first.decoded
   end
 

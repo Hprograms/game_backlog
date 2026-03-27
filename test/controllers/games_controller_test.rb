@@ -137,4 +137,15 @@ end
     assert_redirected_to games_path
     assert_not_equal "書き換え", other_game.reload.title
   end
+
+  test "積みゲー総数とクリア率が正しく計算される" do
+    sign_in @user
+    Game.create!(title: "クリア済みゲーム", status: "クリア済", user: @user)
+    Game.create!(title: "プレイ中ゲーム", status: "プレイ中", user: @user)
+
+    get games_path
+    assert_response :success
+    assert_equal 3, assigns(:total_count)
+    assert_equal 33, assigns(:clear_rate)
+  end
 end 

@@ -4,6 +4,8 @@ class GamesController < ApplicationController
 
   def index
     @games = current_user.games.order(created_at: :desc)
+    @total_count = @games.count
+    @clear_rate = @total_count > 0 ? (@games.where(status: "クリア済").count * 100 / @total_count) : 0
   end
 
   def show

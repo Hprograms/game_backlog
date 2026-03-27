@@ -1,3 +1,30 @@
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card text-center">
+      <div class="card-body">
+        <h5 class="card-title">積みゲー総数</h5>
+        <p class="card-text display-6"><%= @total_count %> 本</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-center">
+      <div class="card-body">
+        <h5 class="card-title">クリア済み</h5>
+        <p class="card-text display-6"><%= @games.where(status: "クリア済").count %> 本</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-center">
+      <div class="card-body">
+        <h5 class="card-title">クリア率</h5>
+        <p class="card-text display-6"><%= @clear_rate %> %</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h1>マイゲームリスト</h1>
   <%= link_to "＋ ゲームを追加", new_game_path, class: "btn btn-primary" %>

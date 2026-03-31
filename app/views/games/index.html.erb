@@ -25,6 +25,13 @@
   </div>
 </div>
 
+<div class="mb-3">
+  <%= link_to "全て", games_path, class: "btn btn-outline-secondary me-1 #{params[:status].blank? ? 'active' : ''}" %>
+  <%= link_to "未着手", games_path(status: "未着手"), class: "btn btn-outline-secondary me-1 #{params[:status] == '未着手' ? 'active' : ''}" %>
+  <%= link_to "プレイ中", games_path(status: "プレイ中"), class: "btn btn-outline-primary me-1 #{params[:status] == 'プレイ中' ? 'active' : ''}" %>
+  <%= link_to "クリア済", games_path(status: "クリア済"), class: "btn btn-outline-success me-1 #{params[:status] == 'クリア済' ? 'active' : ''}" %>
+</div>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h1>マイゲームリスト</h1>
   <%= link_to "＋ ゲームを追加", new_game_path, class: "btn btn-primary" %>

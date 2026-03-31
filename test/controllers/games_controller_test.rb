@@ -148,4 +148,15 @@ end
     assert_equal 3, assigns(:total_count)
     assert_equal 33, assigns(:clear_rate)
   end
+
+  test "ステータスで絞り込みができる" do
+    sign_in @user
+    Game.create!(title: "プレイ中ゲーム", status: "プレイ中", user: @user)
+    Game.create!(title: "クリア済ゲーム", status: "クリア済", user: @user)
+
+    get games_path, params: { status: "プレイ中" }
+    assert_response :success
+    assert_equal 1, assigns(:games).count
+    assert_equal "プレイ中", assigns(:games).first.status
+  end
 end 

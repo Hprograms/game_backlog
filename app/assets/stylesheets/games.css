@@ -1,0 +1,706 @@
+/* ========================================
+   Game Backlog Dark Navy Theme
+   ======================================== */
+
+:root {
+  --navy-dark: #0a1428;
+  --navy-medium: #1a2847;
+  --navy-light: #2d4064;
+  --cyan-accent: #00d9ff;
+  --white-text: #f0f0f0;
+  --secondary-text: #b0b0b0;
+}
+
+/* ========================================
+   Global Styles
+   ======================================== */
+
+html, body {
+  background-color: var(--navy-dark);
+  color: var(--white-text);
+  font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ========================================
+   Form Styling (Dark Theme)
+   ======================================== */
+
+.form-label {
+  color: var(--white-text);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+.form-control,
+.form-select,
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--navy-medium);
+  color: var(--white-text);
+  border: 2px solid var(--navy-light);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control::placeholder {
+  color: var(--secondary-text);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--cyan-accent);
+  box-shadow: 0 0 15px rgba(0, 217, 255, 0.3), inset 0 0 10px rgba(0, 217, 255, 0.05);
+  background-color: rgba(26, 40, 71, 0.8);
+  color: var(--white-text);
+}
+
+.form-select option {
+  background-color: var(--navy-medium);
+  color: var(--white-text);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  background-color: var(--navy-light);
+  border-color: var(--navy-light);
+  color: var(--secondary-text);
+  opacity: 0.6;
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* File Input */
+.form-control[type="file"] {
+  padding: 0.5rem;
+}
+
+.form-control[type="date"] {
+  cursor: pointer;
+}
+
+.form-control[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+/* Error Styling */
+.form-control.is-invalid,
+.form-select.is-invalid {
+  border-color: #ff4444;
+  box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+}
+
+.invalid-feedback {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  display: block;
+}
+
+.alert-danger {
+  background-color: rgba(255, 68, 68, 0.1);
+  border: 1.5px solid #ff4444;
+  color: #ff6b6b;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ========================================
+   Navbar Styling
+   ======================================== */
+
+.navbar {
+  background-color: var(--navy-medium) !important;
+  border-bottom: 2px solid var(--cyan-accent);
+  box-shadow: 0 4px 15px rgba(0, 217, 255, 0.1);
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--cyan-accent) !important;
+  text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+  letter-spacing: 1px;
+}
+
+.navbar-brand:hover {
+  color: #fff !important;
+  text-shadow: 0 0 20px rgba(0, 217, 255, 0.8);
+}
+
+/* ========================================
+   Alert Messages
+   ======================================== */
+
+.alert-success {
+  background-color: rgba(0, 217, 255, 0.1);
+  border: 1px solid var(--cyan-accent);
+  color: var(--cyan-accent);
+}
+
+.alert-warning {
+  background-color: rgba(255, 193, 7, 0.1);
+  border: 1px solid #ffc107;
+  color: #fff;
+}
+
+/* ========================================
+   Statistics Section
+   ======================================== */
+
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, var(--navy-medium) 0%, var(--navy-light) 100%);
+  border: 2px solid var(--cyan-accent);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.2), inset 0 0 20px rgba(0, 217, 255, 0.05);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 8px 30px rgba(0, 217, 255, 0.4), inset 0 0 20px rgba(0, 217, 255, 0.1), 0 0 40px rgba(0, 217, 255, 0.5);
+}
+
+.stat-card:hover::before {
+  left: 100%;
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+  display: inline-block;
+  filter: drop-shadow(0 0 10px rgba(0, 217, 255, 0.5));
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.stat-card h5 {
+  font-size: 0.95rem;
+  color: var(--secondary-text);
+  font-weight: 600;
+  margin-bottom: 1rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.stat-card .number {
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--cyan-accent), #00b8d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+}
+
+.stat-card .unit {
+  font-size: 1rem;
+  color: var(--secondary-text);
+  margin-left: 0.5rem;
+}
+
+/* ========================================
+   Progress Bar
+   ======================================== */
+
+.progress-custom {
+  background-color: var(--navy-light);
+  height: 8px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 217, 255, 0.3);
+  margin-top: 0.5rem;
+}
+
+.progress-custom .progress-bar {
+  background: linear-gradient(90deg, #00d9ff, #0099cc);
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 217, 255, 0.5);
+}
+
+/* ========================================
+   Filter Buttons (Pill Style)
+   ======================================== */
+
+.filter-section {
+  display: flex;
+  gap: 0.75rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 0.65rem 1.75rem;
+  border: 2px solid var(--navy-light);
+  background-color: transparent;
+  color: var(--secondary-text);
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.filter-btn:hover {
+  border-color: var(--cyan-accent);
+  color: var(--cyan-accent);
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.4), inset 0 0 15px rgba(0, 217, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.filter-btn.active {
+  background: linear-gradient(135deg, var(--cyan-accent), #0099cc);
+  color: var(--navy-dark);
+  border-color: var(--cyan-accent);
+  box-shadow: 0 0 40px rgba(0, 217, 255, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.2);
+  font-weight: 700;
+}
+
+/* ========================================
+   Section Title
+   ======================================== */
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--white-text);
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.section-title::before {
+  content: '▶';
+  color: var(--cyan-accent);
+  font-size: 1.5rem;
+}
+
+/* ========================================
+   Game Cards Grid
+   ======================================== */
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.game-card {
+  background: linear-gradient(135deg, var(--navy-medium) 0%, var(--navy-light) 100%);
+  border: 2px solid var(--navy-light);
+  border-radius: 15px;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 217, 255, 0.1);
+}
+
+.game-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(0, 217, 255, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.game-card:hover {
+  border-color: var(--cyan-accent);
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 15px 50px rgba(0, 217, 255, 0.4), inset 0 0 20px rgba(0, 217, 255, 0.08), 0 0 40px rgba(0, 217, 255, 0.3);
+}
+
+.game-card:hover::after {
+  opacity: 1;
+}
+
+/* Game Card Image */
+.game-card-image {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--navy-light), var(--navy-dark));
+}
+
+.game-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+.game-card:hover .game-card-image img {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+.game-card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(10, 20, 40, 0.8) 100%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  display: flex;
+  align-items: flex-end;
+  padding: 1rem;
+}
+
+.game-card:hover .game-card-overlay {
+  opacity: 1;
+}
+
+/* Game Card Content */
+.game-card-content {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--white-text);
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+  word-break: break-word;
+  transition: color 0.3s ease;
+}
+
+.game-card:hover .game-card-title {
+  color: var(--cyan-accent);
+}
+
+.game-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex: 1;
+}
+
+.game-card-meta-item {
+  font-size: 0.85rem;
+  color: var(--secondary-text);
+}
+
+.game-card-meta-item strong {
+  color: var(--cyan-accent);
+  font-weight: 600;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1.5px solid;
+  margin-right: 0.5rem;
+}
+
+.status-badge.未着手 {
+  background-color: rgba(176, 176, 176, 0.15);
+  color: #b0b0b0;
+  border-color: #666;
+}
+
+.status-badge.プレイ中 {
+  background-color: rgba(0, 217, 255, 0.15);
+  color: var(--cyan-accent);
+  border-color: var(--cyan-accent);
+  box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+}
+
+.status-badge.クリア済 {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: #4caf50;
+  border-color: #4caf50;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+}
+
+/* Rating Stars */
+.rating-display {
+  display: flex;
+  gap: 0.25rem;
+  font-size: 1.5rem;
+  color: var(--cyan-accent);
+  margin-bottom: 1rem;
+  text-shadow: 0 0 8px rgba(0, 217, 255, 0.6), 0 0 15px rgba(0, 217, 255, 0.3);
+}
+
+.rating-display .star {
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 0 5px rgba(0, 217, 255, 0.8));
+  animation: twinkle 2s ease-in-out infinite;
+}
+
+.rating-display .star.empty {
+  color: var(--navy-light);
+  filter: none;
+  animation: none;
+  opacity: 0.5;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.game-card:hover .rating-display .star {
+  text-shadow: 0 0 15px rgba(0, 217, 255, 1), 0 0 25px rgba(0, 217, 255, 0.8);
+  filter: drop-shadow(0 0 10px rgba(0, 217, 255, 1));
+}
+
+/* Card Actions */
+.game-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--navy-light);
+}
+
+.card-action-btn {
+  flex: 1;
+  padding: 0.6rem;
+  font-size: 0.8rem;
+  border: 1.5px solid var(--cyan-accent);
+  background-color: transparent;
+  color: var(--cyan-accent);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.card-action-btn:hover {
+  background-color: var(--cyan-accent);
+  color: var(--navy-dark);
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.1);
+  transform: scale(1.08);
+}
+
+.card-action-btn.delete {
+  border-color: #ff3366;
+  color: #ff3366;
+}
+
+.card-action-btn.delete:hover {
+  background-color: #ff3366;
+  color: white;
+  box-shadow: 0 0 20px rgba(255, 51, 102, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+/* ========================================
+   Add Game Button
+   ======================================== */
+
+.btn-add-game {
+  padding: 0.8rem 2rem;
+  background: linear-gradient(135deg, var(--cyan-accent), #0099cc);
+  color: var(--navy-dark);
+  border: 2px solid var(--cyan-accent);
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 25px rgba(0, 217, 255, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
+  text-decoration: none;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-add-game::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.4s ease;
+}
+
+.btn-add-game:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 35px rgba(0, 217, 255, 0.7), inset 0 0 15px rgba(255, 255, 255, 0.2);
+  color: var(--navy-dark);
+  text-decoration: none;
+}
+
+.btn-add-game:hover::before {
+  left: 100%;
+}
+
+.btn-add-game:active {
+  transform: translateY(-1px);
+}
+
+/* ========================================
+   Empty State
+   ======================================== */
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--secondary-text);
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+/* ========================================
+   Responsive
+   ======================================== */
+
+@media (max-width: 1200px) {
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .games-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .stats-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .games-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  .game-card-image {
+    height: 140px;
+  }
+
+  .game-card-content {
+    padding: 1rem;
+  }
+
+  .filter-section {
+    gap: 0.5rem;
+  }
+
+  .filter-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+  }
+
+  .stat-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .btn-add-game {
+    padding: 0.65rem 1.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
+
+  .games-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .game-card-image {
+    height: 120px;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    gap: 0.5rem;
+  }
+
+  .section-title::before {
+    font-size: 1rem;
+  }
+}

@@ -1,6 +1,6 @@
 class GamesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_game, only: [:show, :edit, :update, :destroy]
+  before_action :set_game, only: [:show, :edit, :update, :destroy, :destroy_image]
 
   def index
     @games = current_user.games.order(created_at: :desc)
@@ -41,6 +41,11 @@ class GamesController < ApplicationController
     redirect_to games_path, notice: "削除しました！"
   end
 
+  def destroy_image
+    @game.image.purge if @game.image.attached?
+    redirect_to edit_game_path(@game), notice: "画像を削除しました！"
+  end
+
   private
 
   def set_game
@@ -51,6 +56,6 @@ class GamesController < ApplicationController
   end
   
   def game_params
-    params.require(:game).permit(:title, :platform, :genre, :status, :memo, :rating, :purchased_at)
+    params.require(:game).permit(:title, :platform, :genre, :status, :memo, :rating, :purchased_at, :image)
   end
 end

@@ -35,6 +35,44 @@
         color: var(--white-text);
       }
       
+      /* Form Controls */
+      .form-control,
+      .form-select,
+      input[type="text"],
+      input[type="email"],
+      input[type="password"],
+      input[type="number"],
+      input[type="date"],
+      input[type="datetime-local"],
+      textarea,
+      select {
+        background-color: var(--navy-medium) !important;
+        color: var(--white-text) !important;
+        border: 2px solid var(--navy-light) !important;
+        border-radius: 0.375rem;
+      }
+      
+      .form-control::placeholder,
+      textarea::placeholder {
+        color: var(--secondary-text) !important;
+      }
+      
+      .form-control:focus,
+      .form-select:focus,
+      input:focus,
+      textarea:focus,
+      select:focus {
+        background-color: rgba(26, 40, 71, 0.8) !important;
+        color: var(--white-text) !important;
+        border-color: var(--cyan-accent) !important;
+        box-shadow: 0 0 15px rgba(0, 217, 255, 0.3), inset 0 0 10px rgba(0, 217, 255, 0.05) !important;
+      }
+      
+      select option {
+        background-color: var(--navy-medium);
+        color: var(--white-text);
+      }
+      
       .alert-success {
         background-color: rgba(0, 217, 255, 0.1) !important;
         border: 1px solid var(--cyan-accent) !important;

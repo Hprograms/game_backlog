@@ -156,12 +156,10 @@
 }
 
 .form-control,
-.form-select,
-.form-control:focus,
-.form-select:focus {
-  background-color: var(--navy-medium);
-  color: var(--white-text);
-  border: 2px solid var(--navy-light);
+.form-select {
+  background-color: var(--navy-medium) !important;
+  color: var(--white-text) !important;
+  border: 2px solid var(--navy-light) !important;
   border-radius: 8px;
   padding: 0.75rem 1rem;
   font-size: 1rem;
@@ -169,27 +167,27 @@
 }
 
 .form-control::placeholder {
-  color: var(--secondary-text);
+  color: var(--secondary-text) !important;
 }
 
 .form-control:focus,
 .form-select:focus {
-  border-color: var(--cyan-accent);
-  box-shadow: 0 0 15px rgba(0, 217, 255, 0.3), inset 0 0 10px rgba(0, 217, 255, 0.05);
-  background-color: rgba(26, 40, 71, 0.8);
-  color: var(--white-text);
+  border-color: var(--cyan-accent) !important;
+  box-shadow: 0 0 15px rgba(0, 217, 255, 0.3), inset 0 0 10px rgba(0, 217, 255, 0.05) !important;
+  background-color: rgba(26, 40, 71, 0.8) !important;
+  color: var(--white-text) !important;
 }
 
 .form-select option {
-  background-color: var(--navy-medium);
-  color: var(--white-text);
+  background-color: var(--navy-medium) !important;
+  color: var(--white-text) !important;
 }
 
 .form-control:disabled,
 .form-select:disabled {
-  background-color: var(--navy-light);
-  border-color: var(--navy-light);
-  color: var(--secondary-text);
+  background-color: var(--navy-light) !important;
+  border-color: var(--navy-light) !important;
+  color: var(--secondary-text) !important;
   opacity: 0.6;
 }
 
@@ -215,8 +213,8 @@ textarea.form-control {
 /* Error Styling */
 .form-control.is-invalid,
 .form-select.is-invalid {
-  border-color: #ff4444;
-  box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+  border-color: #ff4444 !important;
+  box-shadow: 0 0 15px rgba(255, 68, 68, 0.3) !important;
 }
 
 .invalid-feedback {

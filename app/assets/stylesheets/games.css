@@ -1,26 +1,8 @@
 /* ========================================
-   Game Backlog Dark Navy Theme
+   Game Backlog Dark Navy Theme - Games-specific Styles
    ======================================== */
 
-:root {
-  --navy-dark: #0a1428;
-  --navy-medium: #1a2847;
-  --navy-light: #2d4064;
-  --cyan-accent: #00d9ff;
-  --white-text: #f0f0f0;
-  --secondary-text: #b0b0b0;
-}
-
-/* ========================================
-   Global Styles
-   ======================================== */
-
-html, body {
-  background-color: var(--navy-dark);
-  color: var(--white-text);
-  font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
-  overflow-x: hidden;
-}
+/* Color variables already defined in layout */
 
 /* ========================================
    Form Styling (Dark Theme)

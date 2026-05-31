@@ -5,9 +5,48 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom Application CSS (loaded AFTER Bootstrap to override) -->
     <%= stylesheet_link_tag "application", media: "all" %>
     <%= javascript_importmap_tags %>
+    
+    <!-- Dark Theme Override -->
+    <style>
+      :root {
+        --navy-dark: #0a1428;
+        --navy-medium: #1a2847;
+        --navy-light: #2d4064;
+        --cyan-accent: #00d9ff;
+        --white-text: #f0f0f0;
+        --secondary-text: #b0b0b0;
+      }
+      
+      html, body {
+        background-color: var(--navy-dark) !important;
+        color: var(--white-text) !important;
+      }
+      
+      .container {
+        background-color: transparent;
+      }
+      
+      p, span, div, li, td, th, h1, h2, h3, h4, h5, h6, label {
+        color: var(--white-text);
+      }
+      
+      .alert-success {
+        background-color: rgba(0, 217, 255, 0.1) !important;
+        border: 1px solid var(--cyan-accent) !important;
+        color: var(--cyan-accent) !important;
+      }
+      
+      .alert-danger {
+        background-color: rgba(255, 68, 68, 0.1) !important;
+        border: 1.5px solid #ff4444 !important;
+        color: #ff6b6b !important;
+      }
+    </style>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">

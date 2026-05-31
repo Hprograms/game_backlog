@@ -13,6 +13,21 @@
   </div>
 
   <div class="mb-3">
+    <%= f.label :image, "ゲーム画像", class: "form-label" %>
+    <div class="mb-2">
+      <% if game.image.attached? %>
+        <%= image_tag game.image, class: "img-thumbnail", style: "max-width: 200px; height: auto;" %>
+        <div class="mt-2">
+          <%= f.submit "画像を変更", class: "btn btn-sm btn-outline-info me-2", onclick: "document.querySelector('input[type=\"file\"]').click(); return false;" %>
+          <%= button_to "画像を削除", { action: :destroy_image }, method: :post, data: { confirm: "画像を削除してもよろしいですか？" }, class: "btn btn-sm btn-outline-danger", form_class: "d-inline" %>
+        </div>
+      <% end %>
+    </div>
+    <%= f.file_field :image, class: "form-control", accept: "image/*" %>
+    <small class="form-text text-muted d-block mt-2">サポートされている形式: JPG, PNG, GIF（最大10MB）</small>
+  </div>
+
+  <div class="mb-3">
     <%= f.label :platform, "プラットフォーム", class: "form-label" %>
     <%= f.select :platform, ["Switch", "PS5", "PS4", "Xbox", "PC", "その他"],
         { include_blank: "選択してください" }, class: "form-select" %>

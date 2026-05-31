@@ -11,6 +11,13 @@
 .card {
   border-width: 2px;
   border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.card-img-top {
+  object-fit: cover;
+  height: 200px;
+  width: 100%;
 }
 
 .card.border-info {

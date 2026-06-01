@@ -2,8 +2,9 @@
   <% if @game.image.attached? %>
     <%= image_tag @game.image, class: "card-img-top", style: "object-fit: cover; height: 300px; width: 100%;" %>
   <% else %>
-    <div style="background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(0, 153, 204, 0.1)); height: 300px; display: flex; align-items: center; justify-content: center; font-size: 5rem;">
-      🎮
+    <div style="background-color: #2a3a52; height: 300px; display: flex; align-items: center; justify-content: center; flex-direction: column; border-bottom: 1px solid #495057;">
+      <div style="font-size: 4rem; color: #6c757d; margin-bottom: 1rem;">📷</div>
+      <small style="color: #6c757d;">No Image</small>
     </div>
   <% end %>
   

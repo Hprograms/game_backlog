@@ -1,5 +1,5 @@
 <!-- Statistics Section -->
-<div class="row g-3 mb-5">
+<div class="row g-4 mb-6" style="margin-bottom: 4rem;">
   <div class="col-md-6 col-lg-4">
     <div class="card bg-dark border-info h-100">
       <div class="card-body text-center">
@@ -18,10 +18,10 @@
         <h6 class="card-title text-success mb-2">クリア済み</h6>
         <div class="display-5 text-light"><%= @games.where(status: "クリア済").count %></div>
         <small class="text-muted">本</small>
-        <div class="progress mt-3" style="height: 6px;">
+        <div class="progress mt-4" style="height: 10px;">
           <div class="progress-bar bg-success" style="width: <%= @clear_rate %>%"></div>
         </div>
-        <small class="text-muted mt-2 d-block">クリア率: <%= @clear_rate %>%</small>
+        <small class="text-muted mt-3 d-block">クリア率: <%= @clear_rate %>%</small>
       </div>
     </div>
   </div>
@@ -39,7 +39,7 @@
 </div>
 
 <!-- Filter Section -->
-<div class="mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+<div class="mb-5 d-flex align-items-center justify-content-between flex-wrap gap-4" style="margin-bottom: 3rem;">
   <div class="btn-group" role="group" aria-label="Status filter">
     <%= link_to "全て", games_path, class: "btn btn-outline-light #{params[:status].blank? ? 'active' : ''}", aria_current: params[:status].blank? ? "page" : nil %>
     <%= link_to "未着手", games_path(status: "未着手"), class: "btn btn-outline-light #{params[:status] == '未着手' ? 'active' : ''}", aria_current: params[:status] == '未着手' ? "page" : nil %>
@@ -47,30 +47,31 @@
     <%= link_to "クリア済", games_path(status: "クリア済"), class: "btn btn-outline-light #{params[:status] == 'クリア済' ? 'active' : ''}", aria_current: params[:status] == 'クリア済' ? "page" : nil %>
   </div>
 
-  <h2 class="mb-0">マイゲームリスト</h2>
+  <h2 class="mb-0">🎯 マイゲームリスト</h2>
   <%= link_to "＋ ゲームを追加", new_game_path, class: "btn btn-info btn-sm" %>
 </div>
 
 <% if @games.empty? %>
-  <div class="card bg-dark border-secondary text-center py-5">
+  <div class="card bg-dark border-secondary text-center py-5" style="margin-top: 3rem; margin-bottom: 3rem;">
     <div class="card-body">
-      <div style="font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.5;">🎮</div>
+      <div style="font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.5;">📭</div>
       <p class="text-muted mb-3">まだゲームが登録されていません</p>
       <%= link_to "最初のゲームを追加する", new_game_path, class: "btn btn-info" %>
     </div>
   </div>
 <% else %>
   <!-- Games Grid -->
-  <div class="row g-4">
+  <div class="row g-4" style="margin-bottom: 3rem;">
     <% @games.each do |game| %>
       <div class="col-md-6 col-lg-4">
         <div class="card bg-dark border-secondary h-100 d-flex flex-column">
-          <!-- Card Image -->
+          <!-- Card Image with hover effect -->
           <% if game.image.attached? %>
-            <%= image_tag game.image, class: "card-img-top", style: "object-fit: cover; height: 200px; width: 100%;" %>
+            <%= image_tag game.image, class: "card-img-top", style: "object-fit: cover; height: 180px; width: 100%; transition: filter 0.3s ease;" %>
           <% else %>
-            <div style="background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(0, 153, 204, 0.1)); height: 200px; display: flex; align-items: center; justify-content: center; font-size: 4rem; position: relative; overflow: hidden;">
-              🎮
+            <div style="background-color: #2a3a52; height: 180px; display: flex; align-items: center; justify-content: center; flex-direction: column; border-bottom: 1px solid #495057;">
+              <div style="font-size: 2.5rem; color: #6c757d; margin-bottom: 0.5rem;">📷</div>
+              <small style="color: #6c757d; text-align: center; padding: 0 1rem;">No Image</small>
             </div>
           <% end %>
 

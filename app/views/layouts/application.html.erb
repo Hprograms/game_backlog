@@ -89,7 +89,7 @@
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container">
-        <a class="navbar-brand" href="/">🎮 積みゲー管理</a>
+        <a class="navbar-brand glow-effect" href="/">🎮 積みゲー管理</a>
         <div class="ms-auto">
           <% if user_signed_in? %>
             <span class="text-light me-3"><%= current_user.email %></span>
@@ -102,12 +102,12 @@
       </div>
     </nav>
 
-    <div class="container mt-4">
+    <div class="container mt-5 mb-5">
       <% if notice %>
-        <div class="alert alert-success"><%= notice %></div>
+        <div class="alert alert-success animate-in"><%= notice %></div>
       <% end %>
       <% if alert %>
-        <div class="alert alert-danger"><%= alert %></div>
+        <div class="alert alert-danger animate-in"><%= alert %></div>
       <% end %>
       <%= yield %>
     </div>

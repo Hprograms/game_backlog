@@ -1,0 +1,68 @@
+<%# 画面全体のコンテナ %>
+<div class="d-flex flex-column min-vh-100 align-items-center justify-content-center login-wrapper">
+
+  <%# 中央のログインカード（mb-5などで少し上に配置） %>
+  <div class="card shadow-lg p-4 p-md-5 login-card">
+    
+    <%# 見出し領域 %>
+    <div class="text-center mb-4">
+      <h2 class="fw-bold mb-2 text-white">ログイン</h2>
+      <p class="login-subtext">おかえりなさい！ゲームの記録を続けましょう</p>
+    </div>
+
+    <%# Deviseのフォーム開始 %>
+    <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+      
+      <%# メールアドレス入力フォーム %>
+      <div class="mb-4">
+        <div class="input-group login-input-group">
+          <span class="input-group-text">
+            <i class="fas fa-at"></i>
+          </span>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control shadow-none", placeholder: "メールアドレス" %>
+        </div>
+      </div>
+
+      <%# パスワード入力フォーム %>
+      <div class="mb-4">
+        <div class="input-group login-input-group">
+          <span class="input-group-text">
+            <i class="fas fa-lock"></i>
+          </span>
+          <%= f.password_field :password, autocomplete: "current-password", class: "form-control shadow-none", placeholder: "パスワード", id: "password-input" %>
+          <button class="btn shadow-none" type="button" id="toggle-password">
+            <i class="fas fa-eye" id="toggle-icon"></i>
+          </button>
+        </div>
+      </div>
+
+      <%# 補助メニュー（記憶する ＆ パスワード忘れ） %>
+      <div class="d-flex justify-content-between align-items-center mb-4" style="font-size: 0.9rem;">
+        <% if devise_mapping.rememberable? %>
+          <div class="form-check">
+            <%= f.check_box :remember_me, class: "form-check-input cursor-pointer" %>
+            <%= f.label :remember_me, "ログイン状態を保持する", class: "form-check-label login-subtext cursor-pointer" %>
+          </div>
+        <% end %>
+        
+        <%- if devise_mapping.recoverable? && controller_name != 'passwords' && controller_name != 'registrations' %>
+          <%= link_to "パスワードを忘れた場合", new_password_path(resource_name), class: "login-accent-link fw-bold" %>
+        <% end %>
+      </div>
+
+      <%# アクションボタン %>
+      <div class="d-grid mt-2">
+        <%= f.submit "ログイン", class: "btn login-btn-primary fw-bold py-2" %>
+      </div>
+    <% end %>
+
+    <%# フッターリンク（新規登録） %>
+    <div class="text-center mt-4 pt-3 border-top login-footer-border" style="font-size: 0.95rem;">
+      <span class="login-subtext">アカウントをお持ちでないですか？</span>
+      <%- if devise_mapping.registerable? && controller_name != 'registrations' %>
+        <%= link_to "新規登録", new_registration_path(resource_name), class: "fw-bold login-accent-link ms-1" %>
+      <% end %>
+    </div>
+
+  </div>
+</div>

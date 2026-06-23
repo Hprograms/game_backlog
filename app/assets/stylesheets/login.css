@@ -1,0 +1,115 @@
+/* ログイン画面全体の背景 */
+.login-wrapper {
+  background-color: var(--navy-dark, #0f172a);
+  color: #e2e8f0;
+}
+
+/* 中央のカード */
+.login-card {
+  background-color: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 540px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  margin-bottom: 8vh;
+}
+
+.login-subtext {
+  color: #cbd5e1;
+  font-size: 0.95rem;
+}
+
+/* =========================================
+   修正1：入力フォームのグループ全体の統一
+   ========================================= */
+.login-input-group {
+  background-color: rgba(255, 255, 255, 0.08); /* 少し濃くして存在感を出す */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+/* フォーム選択（フォーカス）時のゲーミング発光エフェクト */
+.login-input-group:focus-within {
+  border-color: var(--cyan-accent, #00e5ff);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* 内部要素のBootstrapデフォルトスタイルを完全にリセット */
+.login-input-group .form-control,
+.login-input-group .input-group-text,
+.login-input-group .btn {
+  border: none !important; /* 枠線を完全に消す */
+  background-color: transparent !important; /* 背景の白残りを強制的に透明にする */
+  color: #f8fafc !important;
+  box-shadow: none !important; /* input固有の影を消す */
+}
+
+.login-input-group .input-group-text {
+  color: #94a3b8 !important; /* アイコンの色を少し落ち着かせる */
+}
+
+.login-input-group .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* =========================================
+   修正2：ログインボタンの強調と立体感
+   ========================================= */
+.login-btn-primary {
+  background-color: #7c3aed !important; /* ← ここに !important を追加 */
+  color: #ffffff !important;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+}
+
+.login-btn-primary:hover {
+  background-color: #6d28d9 !important; /* ← ここにも !important を追加 */
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
+  transform: translateY(-2px);
+}
+
+/* クリック（押下）時の動き（沈み込む） */
+.login-btn-primary:active {
+  transform: translateY(0); /* 元の位置に戻ることで「押した」感覚を出す */
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.4);
+}
+
+/* テキストリンク色 */
+.login-accent-link {
+  color: var(--cyan-accent, #00e5ff);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.login-accent-link:hover {
+  opacity: 0.8;
+}
+
+.login-footer-border {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* =========================================
+   修正3：ブラウザの自動入力（Autofill）による強制白背景の対策
+   ========================================= */
+.login-input-group .form-control:-webkit-autofill,
+.login-input-group .form-control:-webkit-autofill:hover, 
+.login-input-group .form-control:-webkit-autofill:focus, 
+.login-input-group .form-control:-webkit-autofill:active {
+    /* 自動入力された文字の色を白に */
+    -webkit-text-fill-color: #f8fafc !important;
+    /* 背景色が変わるのを遅延させて無効化する裏技 */
+    transition: background-color 5000s ease-in-out 0s;
+}

@@ -3,6 +3,41 @@
    ======================================== */
 
 /* ========================================
+   Base Styling - CRITICAL OVERRIDES
+   ======================================== */
+
+html, body {
+  background-color: var(--navy-dark) !important;
+  color: var(--white-text) !important;
+}
+
+body {
+  background-image: none !important;
+}
+
+.container, .container-fluid, main {
+  background-color: transparent !important;
+}
+
+p, span, div, li, td, th, small, a {
+  color: var(--white-text) !important;
+  background-color: transparent !important;
+}
+
+h1, h2, h3, h4, h5, h6, label {
+  color: var(--white-text) !important;
+  background-color: transparent !important;
+}
+
+.row {
+  background-color: transparent !important;
+}
+
+[class*="col-"] {
+  background-color: transparent !important;
+}
+
+/* ========================================
    Global Animations & Effects
    ======================================== */
 

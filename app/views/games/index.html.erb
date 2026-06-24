@@ -3,7 +3,7 @@
     <div class="row text-center">
       <div class="col-4 stat-col border-end border-secondary border-opacity-25">
         <div class="mb-2 text-info">
-          <i data-lucide="gamepad-2" class="hud-icon"></i>
+          <span class="material-symbols-outlined hud-icon">sports_esports</span>
         </div>
         <div class="stat-value text-white"><%= @total_count %></div>
         <div class="stat-label mt-1">Total Games</div>
@@ -11,7 +11,7 @@
       
       <div class="col-4 stat-col border-end border-secondary border-opacity-25">
         <div class="mb-2 text-success">
-          <i data-lucide="check-circle" class="hud-icon"></i>
+          <span class="material-symbols-outlined hud-icon">check_circle</span>
         </div>
         <div class="stat-value text-white"><%= @games.where(status: "クリア済").count %></div>
         <div class="stat-label mt-1 mb-2">Cleared (<%= @clear_rate %>%)</div>
@@ -22,7 +22,7 @@
       
       <div class="col-4 stat-col">
         <div class="mb-2 text-warning">
-          <i data-lucide="trophy" class="hud-icon"></i>
+          <span class="material-symbols-outlined hud-icon">emoji_events</span>
         </div>
         <div class="stat-value text-white"><%= @games.where(status: "プレイ中").count %></div>
         <div class="stat-label mt-1">Playing</div>
@@ -40,7 +40,7 @@
   </div>
 
   <%= link_to new_game_path, class: "btn-add-game" do %>
-    <i data-lucide="plus"></i> 新規追加
+    <span class="material-symbols-outlined" style="font-size: 20px;">add</span> 新規追加
   <% end %>
 </div>
 
@@ -48,7 +48,7 @@
   <div class="card gaming-hud-panel text-center py-5">
     <div class="card-body">
       <div class="text-muted mb-3" style="opacity: 0.5;">
-        <i data-lucide="package-open" style="width: 64px; height: 64px;"></i>
+        <span class="material-symbols-outlined" style="font-size: 64px;">inventory_2</span>
       </div>
       <p class="text-muted mb-4">まだゲームが登録されていません</p>
       <%= link_to "最初のゲームを追加する", new_game_path, class: "btn-add-game d-inline-flex" %>
@@ -57,14 +57,14 @@
 <% else %>
   <div class="row g-3 g-md-4 mb-5">
     <% @games.each do |game| %>
-      <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+      <div class="col-6 col-md-4 col-lg-3">
         <div class="game-poster-card">
           <div class="poster-actions">
             <%= link_to edit_game_path(game), class: "action-btn", title: "編集" do %>
-              <i data-lucide="edit-2"></i>
+              <span class="material-symbols-outlined">edit</span>
             <% end %>
             <%= link_to game_path(game), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "action-btn btn-delete", title: "削除" do %>
-              <i data-lucide="trash-2"></i>
+              <span class="material-symbols-outlined">delete</span>
             <% end %>
           </div>
 
@@ -73,7 +73,7 @@
               <%= image_tag game.image, class: "poster-image" %>
             <% else %>
               <div class="no-image-placeholder">
-                <i data-lucide="image" style="width: 48px; height: 48px; opacity: 0.5; margin-bottom: 0.5rem;"></i>
+                <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.5; margin-bottom: 0.5rem;">image</span>
                 <small>No Image</small>
               </div>
             <% end %>
@@ -88,10 +88,10 @@
 
               <div class="poster-details">
                 <div class="detail-item">
-                  <i data-lucide="monitor"></i> <%= game.platform %>
+                  <span class="material-symbols-outlined">desktop_windows</span> <%= game.platform %>
                 </div>
                 <div class="detail-item">
-                  <i data-lucide="star" style="color: #fbbf24;"></i> 
+                  <span class="material-symbols-outlined" style="color: #fbbf24;">star</span> 
                   <%= game.rating ? "#{game.rating}.0" : "未評価" %>
                 </div>
               </div>

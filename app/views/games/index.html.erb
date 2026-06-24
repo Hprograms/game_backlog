@@ -1,128 +1,102 @@
-<!-- Statistics Section -->
-<div class="row g-4 mb-6" style="margin-bottom: 4rem;">
-  <div class="col-md-6 col-lg-4">
-    <div class="card bg-dark border-info h-100">
-      <div class="card-body text-center">
-        <div class="stat-icon mb-3" style="font-size: 2.5rem;">🎮</div>
-        <h6 class="card-title text-info mb-2">積みゲー総数</h6>
-        <div class="display-5 text-light"><%= @total_count %></div>
-        <small class="text-muted">本</small>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-6 col-lg-4">
-    <div class="card bg-dark border-success h-100">
-      <div class="card-body text-center">
-        <div class="stat-icon mb-3" style="font-size: 2.5rem;">✅</div>
-        <h6 class="card-title text-success mb-2">クリア済み</h6>
-        <div class="display-5 text-light"><%= @games.where(status: "クリア済").count %></div>
-        <small class="text-muted">本</small>
-        <div class="progress mt-4" style="height: 10px;">
-          <div class="progress-bar bg-success" style="width: <%= @clear_rate %>%"></div>
+<div class="card gaming-hud-panel">
+  <div class="card-body p-4">
+    <div class="row text-center">
+      <div class="col-4 stat-col border-end border-secondary border-opacity-25">
+        <div class="mb-2 text-info">
+          <i data-lucide="gamepad-2" class="hud-icon"></i>
         </div>
-        <small class="text-muted mt-3 d-block">クリア率: <%= @clear_rate %>%</small>
+        <div class="stat-value text-white"><%= @total_count %></div>
+        <div class="stat-label mt-1">Total Games</div>
       </div>
-    </div>
-  </div>
-
-  <div class="col-md-6 col-lg-4">
-    <div class="card bg-dark border-warning h-100">
-      <div class="card-body text-center">
-        <div class="stat-icon mb-3" style="font-size: 2.5rem;">🏆</div>
-        <h6 class="card-title text-warning mb-2">プレイ中</h6>
-        <div class="display-5 text-light"><%= @games.where(status: "プレイ中").count %></div>
-        <small class="text-muted">本</small>
+      
+      <div class="col-4 stat-col border-end border-secondary border-opacity-25">
+        <div class="mb-2 text-success">
+          <i data-lucide="check-circle" class="hud-icon"></i>
+        </div>
+        <div class="stat-value text-white"><%= @games.where(status: "クリア済").count %></div>
+        <div class="stat-label mt-1 mb-2">Cleared (<%= @clear_rate %>%)</div>
+        <div class="progress hud-progress">
+          <div class="progress-bar glow-bar" style="width: <%= @clear_rate %>%"></div>
+        </div>
+      </div>
+      
+      <div class="col-4 stat-col">
+        <div class="mb-2 text-warning">
+          <i data-lucide="trophy" class="hud-icon"></i>
+        </div>
+        <div class="stat-value text-white"><%= @games.where(status: "プレイ中").count %></div>
+        <div class="stat-label mt-1">Playing</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Filter Section -->
-<div class="mb-5 d-flex align-items-center justify-content-between flex-wrap gap-4" style="margin-bottom: 3rem;">
-  <div class="btn-group" role="group" aria-label="Status filter">
-    <%= link_to "全て", games_path, class: "btn btn-outline-light #{params[:status].blank? ? 'active' : ''}", aria_current: params[:status].blank? ? "page" : nil %>
-    <%= link_to "未着手", games_path(status: "未着手"), class: "btn btn-outline-light #{params[:status] == '未着手' ? 'active' : ''}", aria_current: params[:status] == '未着手' ? "page" : nil %>
-    <%= link_to "プレイ中", games_path(status: "プレイ中"), class: "btn btn-outline-light #{params[:status] == 'プレイ中' ? 'active' : ''}", aria_current: params[:status] == 'プレイ中' ? "page" : nil %>
-    <%= link_to "クリア済", games_path(status: "クリア済"), class: "btn btn-outline-light #{params[:status] == 'クリア済' ? 'active' : ''}", aria_current: params[:status] == 'クリア済' ? "page" : nil %>
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 controls-bar">
+  <div class="btn-group filter-tabs" role="group">
+    <%= link_to "全て", games_path, class: "btn #{params[:status].blank? ? 'active' : ''}" %>
+    <%= link_to "未着手", games_path(status: "未着手"), class: "btn #{params[:status] == '未着手' ? 'active' : ''}" %>
+    <%= link_to "プレイ中", games_path(status: "プレイ中"), class: "btn #{params[:status] == 'プレイ中' ? 'active' : ''}" %>
+    <%= link_to "クリア済", games_path(status: "クリア済"), class: "btn #{params[:status] == 'クリア済' ? 'active' : ''}" %>
   </div>
 
-  <h2 class="mb-0">🎯 マイゲームリスト</h2>
-  <%= link_to "＋ ゲームを追加", new_game_path, class: "btn btn-info btn-sm" %>
+  <%= link_to new_game_path, class: "btn-add-game" do %>
+    <i data-lucide="plus"></i> 新規追加
+  <% end %>
 </div>
 
 <% if @games.empty? %>
-  <div class="card bg-dark border-secondary text-center py-5" style="margin-top: 3rem; margin-bottom: 3rem;">
+  <div class="card gaming-hud-panel text-center py-5">
     <div class="card-body">
-      <div style="font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.5;">📭</div>
-      <p class="text-muted mb-3">まだゲームが登録されていません</p>
-      <%= link_to "最初のゲームを追加する", new_game_path, class: "btn btn-info" %>
+      <div class="text-muted mb-3" style="opacity: 0.5;">
+        <i data-lucide="package-open" style="width: 64px; height: 64px;"></i>
+      </div>
+      <p class="text-muted mb-4">まだゲームが登録されていません</p>
+      <%= link_to "最初のゲームを追加する", new_game_path, class: "btn-add-game d-inline-flex" %>
     </div>
   </div>
 <% else %>
-  <!-- Games Grid -->
-  <div class="row g-4" style="margin-bottom: 3rem;">
+  <div class="row g-3 g-md-4 mb-5">
     <% @games.each do |game| %>
-      <div class="col-md-6 col-lg-4">
-        <div class="card bg-dark border-secondary h-100 d-flex flex-column">
-          <!-- Card Image with hover effect -->
-          <% if game.image.attached? %>
-            <%= image_tag game.image, class: "card-img-top", style: "object-fit: cover; height: 180px; width: 100%; transition: filter 0.3s ease;" %>
-          <% else %>
-            <div style="background-color: #2a3a52; height: 180px; display: flex; align-items: center; justify-content: center; flex-direction: column; border-bottom: 1px solid #495057;">
-              <div style="font-size: 2.5rem; color: #6c757d; margin-bottom: 0.5rem;">📷</div>
-              <small style="color: #6c757d; text-align: center; padding: 0 1rem;">No Image</small>
+      <div class="col-6 col-md-4 col-lg-3 col-xl-2">
+        <div class="game-poster-card">
+          <div class="poster-actions">
+            <%= link_to edit_game_path(game), class: "action-btn", title: "編集" do %>
+              <i data-lucide="edit-2"></i>
+            <% end %>
+            <%= link_to game_path(game), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "action-btn btn-delete", title: "削除" do %>
+              <i data-lucide="trash-2"></i>
+            <% end %>
+          </div>
+
+          <%= link_to game_path(game), class: "d-block h-100" do %>
+            <% if game.image.attached? %>
+              <%= image_tag game.image, class: "poster-image" %>
+            <% else %>
+              <div class="no-image-placeholder">
+                <i data-lucide="image" style="width: 48px; height: 48px; opacity: 0.5; margin-bottom: 0.5rem;"></i>
+                <small>No Image</small>
+              </div>
+            <% end %>
+
+            <div class="poster-overlay">
+              <div class="poster-title"><%= game.title %></div>
+              
+              <div class="poster-status">
+                <div class="status-dot status-<%= game.status %>"></div>
+                <%= game.status %>
+              </div>
+
+              <div class="poster-details">
+                <div class="detail-item">
+                  <i data-lucide="monitor"></i> <%= game.platform %>
+                </div>
+                <div class="detail-item">
+                  <i data-lucide="star" style="color: #fbbf24;"></i> 
+                  <%= game.rating ? "#{game.rating}.0" : "未評価" %>
+                </div>
+              </div>
             </div>
           <% end %>
-
-          <!-- Card Content -->
-          <div class="card-body flex-grow-1 d-flex flex-column">
-            <h5 class="card-title text-light mb-2">
-              <%= link_to game.title, game_path(game), class: "text-info text-decoration-none" %>
-            </h5>
-
-            <!-- Meta Information -->
-            <div class="small mb-3 flex-grow-1">
-              <div class="mb-2">
-                <span class="text-muted">🖥️</span>
-                <span class="text-light"><%= game.platform %></span>
-              </div>
-              <div class="mb-2">
-                <span class="text-muted">🎯</span>
-                <span class="text-light"><%= game.genre %></span>
-              </div>
-              <div class="mb-2">
-                <span class="text-muted">📅</span>
-                <span class="text-light"><%= game.purchased_at&.strftime('%Y年%m月%d日') || 'N/A' %></span>
-              </div>
-            </div>
-
-            <!-- Status Badge -->
-            <div class="mb-2">
-              <% status_badge_color = { "未着手" => "secondary", "プレイ中" => "info", "クリア済" => "success" } %>
-              <span class="badge bg-<%= status_badge_color[game.status] %>"><%= game.status %></span>
-            </div>
-
-            <!-- Rating Stars -->
-            <div class="mb-3">
-              <% if game.rating %>
-                <% game.rating.times do %>
-                  <span class="text-warning">⭐</span>
-                <% end %>
-                <% (5 - game.rating).times do %>
-                  <span class="text-muted">☆</span>
-                <% end %>
-              <% else %>
-                <small class="text-muted">未評価</small>
-              <% end %>
-            </div>
-          </div>
-
-          <!-- Card Actions -->
-          <div class="d-grid gap-2 d-sm-flex" style="gap: 0.5rem !important;">
-            <%= link_to "編集", edit_game_path(game), class: "btn btn-sm btn-outline-info flex-grow-1" %>
-            <%= link_to "削除", game_path(game), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "btn btn-sm btn-outline-danger flex-grow-1" %>
-          </div>
         </div>
       </div>
     <% end %>

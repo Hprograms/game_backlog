@@ -1,828 +1,273 @@
 /* ========================================
-   Game Backlog - Gaming-themed Styles
-   ======================================== */
-
-/* ========================================
-   Base Styling - CRITICAL OVERRIDES
+   Game Backlog - Library UI Styles
    ======================================== */
 
 html, body {
-  background-color: var(--navy-dark) !important;
-  color: var(--white-text) !important;
-}
-
-body {
+  background-color: var(--navy-dark, #0f172a) !important;
+  color: var(--white-text, #f8fafc) !important;
   background-image: none !important;
 }
 
-.container, .container-fluid, main {
-  background-color: transparent !important;
-}
-
-p, span, div, li, td, th, small, a {
-  color: var(--white-text) !important;
-  background-color: transparent !important;
-}
-
-h1, h2, h3, h4, h5, h6, label {
-  color: var(--white-text) !important;
-  background-color: transparent !important;
-}
-
-.row {
-  background-color: transparent !important;
-}
-
-[class*="col-"] {
-  background-color: transparent !important;
-}
-
-/* ========================================
-   Global Animations & Effects
-   ======================================== */
-
-@keyframes glow-pulse {
-  0%, 100% { text-shadow: 0 0 10px rgba(0, 217, 255, 0.5), 0 0 20px rgba(0, 217, 255, 0.3); }
-  50% { text-shadow: 0 0 20px rgba(0, 217, 255, 0.8), 0 0 40px rgba(0, 217, 255, 0.5); }
-}
-
-@keyframes float-up {
-  0% { transform: translateY(0px); opacity: 0; }
-  100% { transform: translateY(-10px); opacity: 1; }
-}
-
-@keyframes neon-flicker {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.95; }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 10px rgba(0, 217, 255, 0.3); }
-  50% { box-shadow: 0 0 30px rgba(0, 217, 255, 0.5); }
-}
-
-@keyframes slide-in {
-  from { opacity: 0; transform: translateX(-20px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-.glow-effect {
-  animation: glow-pulse 2s ease-in-out infinite;
-}
-
-.animate-in {
-  animation: float-up 0.5s ease-out;
-}
-
-/* ========================================
-   Cards - Gaming Style
-   ======================================== */
-
-.card {
-  border-width: 2px;
-  border-radius: 0.75rem;
-  overflow: hidden;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-}
-
-.card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 0.75rem;
-  background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(0, 255, 0, 0.05));
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.card:hover::before {
-  opacity: 1;
-}
-
-.card-img-top {
-  object-fit: cover;
-  height: 180px;
-  width: 100%;
-}
-
-.card.border-info {
-  border-color: var(--cyan-accent) !important;
-  background-color: rgba(10, 20, 40, 0.8) !important;
-  box-shadow: 0 0 15px rgba(0, 217, 255, 0.15);
-}
-
-.card.border-info:hover {
-  box-shadow: 0 0 35px rgba(0, 217, 255, 0.35), inset 0 0 20px rgba(0, 217, 255, 0.08);
-  border-color: #00ff00 !important;
-}
-
-.card.border-success {
-  border-color: #00ff00 !important;
-  background-color: rgba(10, 20, 40, 0.8) !important;
-  box-shadow: 0 0 15px rgba(0, 255, 0, 0.15);
-}
-
-.card.border-success:hover {
-  box-shadow: 0 0 35px rgba(0, 255, 0, 0.35);
-}
-
-.card.border-warning {
-  border-color: #ffd700 !important;
-  background-color: rgba(10, 20, 40, 0.8) !important;
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.15);
-}
-
-.card.border-warning:hover {
-  box-shadow: 0 0 35px rgba(255, 215, 0, 0.35);
-}
-
-.card.border-secondary {
-  border-color: var(--navy-light) !important;
-  background-color: rgba(10, 20, 40, 0.8) !important;
-  box-shadow: 0 0 10px rgba(45, 64, 100, 0.2);
-}
-
-.card.border-secondary:hover {
-  border-color: var(--cyan-accent) !important;
-  box-shadow: 0 0 30px rgba(0, 217, 255, 0.3);
-}
-
-/* Game Card Effects */
-.card.h-100 {
+/* --- HUD Panel (Bento Grid風) --- */
+.gaming-hud-panel {
+  background-color: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   margin-bottom: 2rem;
 }
 
-.card.h-100:hover {
-  transform: translateY(-12px) scale(1.02);
-  border-color: var(--cyan-accent) !important;
-  box-shadow: 0 25px 60px rgba(0, 217, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+.hud-icon {
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(0 0 8px currentColor);
 }
 
-.card.h-100:hover .card-img-top {
-  filter: brightness(0.7) contrast(1.15);
+.stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
-/* ========================================
-   Stat Cards - Gaming HUD Style
-   ======================================== */
-
-.card .stat-icon {
-  animation: float 3s ease-in-out infinite, neon-flicker 3s ease-in-out infinite;
-  font-size: 3.5rem;
-  filter: drop-shadow(0 0 12px rgba(0, 217, 255, 0.7));
-  text-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+.stat-label {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-15px); }
-}
-
-.card.border-info .card-body,
-.card.border-success .card-body,
-.card.border-warning .card-body {
-  padding: 2.5rem 1.5rem;
-}
-
-.card.border-info .card-title,
-.card.border-success .card-title,
-.card.border-warning .card-title {
-  font-size: 1rem;
-  letter-spacing: 0.8px;
-  text-shadow: 0 0 8px rgba(0, 217, 255, 0.4);
-}
-
-.card.border-info .display-5,
-.card.border-success .display-5,
-.card.border-warning .display-5 {
-  font-size: 3.5rem;
-  font-weight: 900;
-  letter-spacing: 2px;
-  text-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
-}
-
-/* ========================================
-   Progress Bar - HP Bar Style
-   ======================================== */
-
-.progress {
-  background-color: rgba(45, 64, 100, 0.6);
-  border: 1.5px solid var(--navy-light);
-  border-radius: 12px;
-  height: 10px;
-  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.5);
+.hud-progress {
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
   overflow: visible;
+  width: 60%;
+  margin: 0 auto;
 }
 
-.progress-bar {
-  background: linear-gradient(90deg, #00ff00, #00d9ff, #00ff00);
-  background-size: 200% 100%;
-  box-shadow: 0 0 20px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 217, 255, 0.5), inset 0 0 8px rgba(255, 255, 255, 0.4);
-  animation: neon-flicker 2s ease-in-out infinite, progress-shimmer 2s ease-in-out infinite;
-  border-radius: 10px;
+.hud-progress .glow-bar {
+  background-color: var(--cyan-accent, #00e5ff);
+  box-shadow: 0 0 10px var(--cyan-accent, #00e5ff);
 }
 
-@keyframes progress-shimmer {
-  0%, 100% { background-position: 0% center; }
-  50% { background-position: 100% center; }
+/* --- Controls Bar --- */
+.controls-bar {
+  margin-bottom: 2rem;
 }
 
-/* ========================================
-   Image Upload Zone (Drag & Drop)
-   ======================================== */
+.filter-tabs .btn {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
 
-.image-upload-zone {
-  border: 2px dashed var(--navy-light);
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(0, 217, 255, 0.08), rgba(0, 255, 0, 0.04));
-  padding: 4rem 2rem;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.4);
+.filter-tabs .btn:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.filter-tabs .btn.active {
+  color: var(--cyan-accent, #00e5ff);
+  background: rgba(0, 229, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(0, 229, 255, 0.3);
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+}
+
+.btn-add-game {
+  background-color: #7c3aed !important;
+  color: white !important;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.btn-add-game:hover {
+  background-color: #6d28d9 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6);
+  color: white;
+}
+
+/* --- Game Poster Card --- */
+.game-poster-card {
   position: relative;
-}
-
-.image-upload-zone::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 12px;
-  background: radial-gradient(circle at center, rgba(0, 217, 255, 0.05), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.image-upload-zone:hover::after {
-  opacity: 1;
-}
-
-.image-upload-zone.drag-over {
-  border-color: var(--cyan-accent);
-  background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(0, 255, 0, 0.1));
-  box-shadow: inset 0 0 35px rgba(0, 217, 255, 0.3), 0 0 50px rgba(0, 217, 255, 0.35);
-  transform: scale(1.03);
-}
-
-.image-upload-zone .upload-placeholder {
-  transition: all 0.3s ease;
-  animation: slide-in 0.5s ease-out;
-}
-
-.image-upload-zone:hover .upload-placeholder {
-  opacity: 1;
-  transform: translateY(-5px);
-}
-
-.image-preview-container {
+  aspect-ratio: 3/4; /* ポスター比率 */
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 0 40px rgba(0, 217, 255, 0.3), inset 0 0 20px rgba(0, 217, 255, 0.1);
-  border: 2px solid var(--cyan-accent);
-  position: relative;
-  animation: pulse-glow 2s ease-in-out infinite;
+  background-color: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  cursor: pointer;
+  display: block;
+  text-decoration: none !important;
 }
 
-.image-preview-overlay {
+.game-poster-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: var(--cyan-accent, #00e5ff);
+  box-shadow: 0 10px 30px rgba(0, 229, 255, 0.3), 0 0 15px rgba(124, 58, 237, 0.3);
+  z-index: 10;
+}
+
+.poster-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.game-poster-card:hover .poster-image {
+  transform: scale(1.05);
+}
+
+.no-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #1e293b;
+  color: #475569;
+}
+
+/* グラデーションオーバーレイ */
+.poster-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 217, 255, 0.15));
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 35%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.game-poster-card:hover .poster-overlay {
+  background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 60%, rgba(0,0,0,0.3) 100%);
+}
+
+.poster-title {
+  color: white;
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.3;
+  margin-bottom: 0.3rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.poster-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.status-dot.status-未着手 { background-color: #94a3b8; }
+.status-dot.status-プレイ中 { background-color: var(--cyan-accent, #00e5ff); box-shadow: 0 0 8px var(--cyan-accent, #00e5ff); }
+.status-dot.status-クリア済 { background-color: #10b981; box-shadow: 0 0 8px #10b981; }
+
+/* ホバー時に現れる詳細情報 */
+.poster-details {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.game-poster-card:hover .poster-details {
+  max-height: 100px;
+  opacity: 1;
+  margin-top: 0.8rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detail-item i {
+  width: 14px;
+  height: 14px;
+}
+
+/* アクションボタン（ホバーで右上に出現） */
+.poster-actions {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  display: flex;
+  gap: 0.4rem;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 20;
+}
+
+.game-poster-card:hover .poster-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: rgba(15, 23, 42, 0.7);
+  color: white !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(3px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+  text-decoration: none;
 }
 
-.image-preview-container:hover .image-preview-overlay {
-  opacity: 1;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(0, 217, 255, 0.25));
+.action-btn:hover {
+  background-color: var(--cyan-accent, #00e5ff);
+  color: #0f172a !important;
+  border-color: var(--cyan-accent, #00e5ff);
+  transform: scale(1.1);
 }
 
-.overlay-buttons {
-  display: flex;
-  gap: 1rem;
-  transform: scale(0.95);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.action-btn.btn-delete:hover {
+  background-color: #ef4444;
+  border-color: #ef4444;
+  color: white !important;
 }
 
-.image-preview-container:hover .overlay-buttons {
-  transform: scale(1);
-}
-
-/* ========================================
-   Form Sections - Gaming Card Style
-   ======================================== */
-
-.game-form .card {
-  margin-bottom: 3rem;
-  border: 2px solid var(--navy-light);
-  background: linear-gradient(135deg, rgba(10, 20, 40, 0.95), rgba(26, 40, 71, 0.85));
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 35px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.game-form .card:hover {
-  border-color: var(--cyan-accent);
-  box-shadow: 0 15px 50px rgba(0, 217, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  transform: translateY(-4px);
-}
-
-.game-form .card .card-body {
-  padding: 2.5rem;
-}
-
-.game-form .card .card-title {
-  font-weight: 800;
-  font-size: 1.3rem;
-  letter-spacing: 1px;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  color: var(--cyan-accent);
-  text-shadow: 0 0 12px rgba(0, 217, 255, 0.5);
-  margin-bottom: 2rem;
-  animation: slide-in 0.5s ease-out;
-}
-
-.game-form .badge {
-  font-size: 0.7rem;
-  padding: 0.5rem 0.9rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  background: linear-gradient(135deg, var(--cyan-accent), #00ff00);
-  color: var(--navy-dark);
-  box-shadow: 0 0 15px rgba(0, 217, 255, 0.5);
-  animation: neon-flicker 2s ease-in-out infinite;
-  border: none;
-}
-
-.game-form .mb-3 {
-  margin-bottom: 2rem !important;
-}
-
-.game-form .row {
-  margin-bottom: 2rem;
-}
-
-/* ========================================
-   Button Groups - Gaming Tab Style
-   ======================================== */
-
-.btn-group {
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-bottom: 3rem;
-}
-
-.btn-group .btn {
-  border: 2px solid var(--navy-light);
-  color: var(--secondary-text);
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 0.5rem;
-  font-weight: 700;
-  letter-spacing: 0.7px;
-  position: relative;
-  overflow: hidden;
-  text-transform: uppercase;
-  font-size: 0.95rem;
-}
-
-.btn-group .btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.4), transparent);
-  transform: translateX(-100%);
-  transition: transform 0.6s ease;
-}
-
-.btn-group .btn:hover::before {
-  transform: translateX(100%);
-}
-
-.btn-group .btn:hover {
-  border-color: var(--cyan-accent);
-  color: var(--cyan-accent);
-  box-shadow: 0 0 25px rgba(0, 217, 255, 0.5);
-  transform: translateY(-3px);
-}
-
-.btn-group .btn.active {
-  background: linear-gradient(135deg, var(--cyan-accent), #00ff00);
-  color: var(--navy-dark);
-  border: none;
-  box-shadow: 0 0 40px rgba(0, 217, 255, 0.7), 0 0 20px rgba(0, 255, 0, 0.5), inset 0 2px 5px rgba(255, 255, 255, 0.2);
-  animation: neon-flicker 1.5s ease-in-out infinite;
-  font-weight: 800;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-/* ========================================
-   Buttons - Enhanced Gaming Style
-   ======================================== */
-
-.btn {
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.3), transparent);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.btn:hover::after {
-  opacity: 1;
-}
-
-.btn:active {
-  transform: scale(0.98);
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--cyan-accent), #00ff00);
-  border: none;
-  color: var(--navy-dark);
-  box-shadow: 0 0 20px rgba(0, 217, 255, 0.4), 0 5px 20px rgba(0, 217, 255, 0.25);
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.btn-primary:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 0 40px rgba(0, 217, 255, 0.6), 0 10px 35px rgba(0, 255, 0, 0.4);
-  background: linear-gradient(135deg, #0099cc, #00ff00);
-}
-
-.btn-primary:active {
-  box-shadow: 0 0 20px rgba(0, 217, 255, 0.4), inset 0 3px 8px rgba(0, 0, 0, 0.3);
-  transform: translateY(-1px);
-}
-
-.btn-lg {
-  padding: 1.2rem 2.8rem;
-  font-size: 1.1rem;
-  letter-spacing: 0.8px;
-}
-
-.btn-info {
-  background-color: var(--cyan-accent);
-  border: 2px solid var(--cyan-accent);
-  color: var(--navy-dark);
-  box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
-  font-weight: 700;
-}
-
-.btn-info:hover {
-  background-color: #0099cc;
-  border-color: #0099cc;
-  box-shadow: 0 0 35px rgba(0, 217, 255, 0.6);
-  transform: translateY(-3px);
-}
-
-.btn-outline-info {
-  border: 2px solid var(--cyan-accent);
-  color: var(--cyan-accent);
-  transition: all 0.3s ease;
-}
-
-.btn-outline-info:hover {
-  background-color: var(--cyan-accent);
-  color: var(--navy-dark);
-  box-shadow: 0 0 30px rgba(0, 217, 255, 0.6);
-  transform: translateY(-3px);
-}
-
-.btn-outline-danger {
-  border: 2px solid #ff3366;
-  color: #ff3366;
-  transition: all 0.3s ease;
-}
-
-.btn-outline-danger:hover {
-  background-color: #ff3366;
-  color: white;
-  box-shadow: 0 0 30px rgba(255, 51, 102, 0.6);
-  transform: translateY(-3px);
-}
-
-.btn-outline-secondary {
-  border: 2px solid var(--navy-light);
-  color: var(--secondary-text);
-  transition: all 0.3s ease;
-}
-
-.btn-outline-secondary:hover {
-  background-color: var(--navy-light);
-  color: var(--white-text);
-  border-color: var(--cyan-accent);
-  box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
-  transform: translateY(-3px);
-}
-
-.btn-outline-light {
-  border: 2px solid var(--secondary-text);
-  color: var(--secondary-text);
-  transition: all 0.3s ease;
-}
-
-.btn-outline-light:hover {
-  background-color: var(--secondary-text);
-  color: var(--navy-dark);
-  box-shadow: 0 0 20px rgba(200, 200, 200, 0.4);
-}
-
-/* ========================================
-   Form Controls - Gaming Inputs
-   ======================================== */
-
-.form-label {
-  color: var(--cyan-accent);
-  font-weight: 800;
-  margin-bottom: 0.9rem;
-  text-transform: uppercase;
-  font-size: 0.95rem;
-  letter-spacing: 0.8px;
-  text-shadow: 0 0 8px rgba(0, 217, 255, 0.35);
-}
-
-.form-control,
-.form-select {
-  background-color: var(--navy-medium) !important;
-  color: var(--white-text) !important;
-  border: 2px solid var(--navy-light) !important;
-  border-radius: 8px;
-  padding: 0.95rem 1.25rem;
-  font-size: 1rem;
-  transition: all 0.35s ease;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
-  font-weight: 500;
-}
-
-.form-control::placeholder {
-  color: var(--secondary-text) !important;
-}
-
-.form-control:focus,
-.form-select:focus {
-  border-color: var(--cyan-accent) !important;
-  box-shadow: 0 0 25px rgba(0, 217, 255, 0.5), inset 0 0 15px rgba(0, 217, 255, 0.12) !important;
-  background-color: rgba(26, 40, 71, 0.95) !important;
-  color: var(--white-text) !important;
-  transform: translateY(-2px);
-}
-
-.form-select option {
-  background-color: var(--navy-medium) !important;
-  color: var(--white-text) !important;
-}
-
-.form-control:disabled,
-.form-select:disabled {
-  background-color: var(--navy-light) !important;
-  border-color: var(--navy-light) !important;
-  color: var(--secondary-text) !important;
-  opacity: 0.6;
-}
-
-textarea.form-control {
-  resize: vertical;
-  min-height: 150px;
-}
-
-.form-control[type="date"] {
-  cursor: pointer;
-}
-
-.form-control[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-  cursor: pointer;
-}
-
-/* Error Styling */
-.form-control.is-invalid,
-.form-select.is-invalid {
-  border-color: #ff4444 !important;
-  box-shadow: 0 0 25px rgba(255, 68, 68, 0.4) !important;
-}
-
-.invalid-feedback {
-  color: #ff6b6b;
-  font-size: 0.9rem;
-  margin-top: 0.7rem;
-  display: block;
-  font-weight: 600;
-}
-
-.alert-danger {
-  background: linear-gradient(135deg, rgba(255, 68, 68, 0.2), rgba(255, 51, 102, 0.15));
-  border: 2px solid #ff4444;
-  color: #ff6b6b;
-  border-radius: 10px;
-  padding: 1.5rem;
-  margin-bottom: 2.5rem;
-  box-shadow: 0 0 30px rgba(255, 68, 68, 0.35);
-  font-weight: 600;
-}
-
-.alert-success {
-  background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(0, 255, 0, 0.15));
-  border: 2px solid var(--cyan-accent);
-  color: var(--cyan-accent);
-  border-radius: 10px;
-  padding: 1.5rem;
-  margin-bottom: 2.5rem;
-  box-shadow: 0 0 30px rgba(0, 217, 255, 0.35);
-  font-weight: 600;
-  text-shadow: 0 0 8px rgba(0, 217, 255, 0.3);
-}
-
-/* ========================================
-   Navbar - Gaming Header
-   ======================================== */
-
-.navbar {
-  background: linear-gradient(90deg, var(--navy-medium), rgba(26, 40, 71, 0.85));
-  border-bottom: 3px solid var(--cyan-accent);
-  box-shadow: 0 8px 40px rgba(0, 217, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  margin-bottom: 2rem;
-}
-
-.navbar-brand {
-  font-size: 1.6rem;
-  font-weight: 900;
-  color: var(--cyan-accent) !important;
-  letter-spacing: 2px;
-  transition: all 0.3s ease;
-  text-shadow: 0 0 20px rgba(0, 217, 255, 0.6);
-}
-
-.navbar-brand:hover {
-  color: #00ff00 !important;
-  text-shadow: 0 0 30px rgba(0, 255, 0, 0.9);
-  transform: scale(1.08);
-}
-
-/* ========================================
-   Responsive Design
-   ======================================== */
-
-@media (max-width: 992px) {
-  .game-form .card {
-    margin-bottom: 2.5rem;
-  }
-  
-  .card.h-100 {
-    margin-bottom: 1.5rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .card {
-    margin-bottom: 2rem;
-  }
-
-  .game-form .card {
-    margin-bottom: 2.5rem;
-    border-radius: 0.6rem;
-  }
-
-  .card.h-100:hover {
-    transform: translateY(-6px) scale(1.01);
-  }
-
-  .btn-group {
-    width: 100%;
-    gap: 0.5rem;
-    margin-bottom: 2.5rem;
-  }
-
-  .btn-group .btn {
-    flex: 1;
-    margin: 0 !important;
-    font-size: 0.85rem;
-    padding: 0.6rem 0.5rem;
-  }
-
-  .game-form .card .row [class*="col-"] {
-    margin-bottom: 2rem;
-  }
-
-  .image-upload-zone {
-    padding: 2.5rem 1.5rem;
-  }
-
-  .form-label {
-    font-size: 0.9rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .btn-lg {
-    padding: 1rem 2rem;
-    font-size: 1rem;
-  }
-
-  .progress {
-    height: 8px;
-  }
-
-  .card .stat-icon {
-    font-size: 3rem;
-  }
-
-  .card.border-info .card-body,
-  .card.border-success .card-body,
-  .card.border-warning .card-body {
-    padding: 2rem 1.5rem;
-  }
-
-  .game-form .card .card-body {
-    padding: 2rem;
-  }
-
-  .navbar-brand {
-    font-size: 1.4rem;
-  }
-}
-
-@media (max-width: 576px) {
-  .game-form .card .card-title {
-    font-size: 1.1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .card .stat-icon {
-    font-size: 2.5rem;
-  }
-
-  .btn-group .btn {
-    padding: 0.5rem 0.4rem;
-    font-size: 0.8rem;
-  }
-
-  .btn-lg {
-    padding: 0.9rem 1.5rem;
-    font-size: 0.95rem;
-    width: 100%;
-    margin-bottom: 0.75rem;
-  }
-
-  .container {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-  }
-
-  .game-form .card {
-    margin-bottom: 2rem;
-  }
-
-  .card.h-100 {
-    margin-bottom: 1.5rem;
-  }
-
-  .game-form .card .card-body {
-    padding: 1.75rem;
-  }
-
-  .image-upload-zone {
-    padding: 2rem 1rem;
-  }
-
-  .progress {
-    height: 6px;
-  }
-
-  .card-img-top {
-    height: 150px;
-  }
-
-  .btn-group {
-    margin-bottom: 2rem;
-  }
-
-  .navbar {
-    margin-bottom: 1.5rem;
-  }
-
-  .navbar-brand {
-    font-size: 1.2rem;
-    letter-spacing: 1px;
-  }
+.action-btn i {
+  width: 14px;
+  height: 14px;
 }

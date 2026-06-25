@@ -1,244 +1,124 @@
-<%= form_with model: game, local: true, html: { multipart: true }, class: "game-form" do |f| %>
+<%= form_with model: game, local: true, html: { multipart: true }, class: "glass-panel position-relative", data: { controller: "game_form" } do |f| %>
+  
   <% if game.errors.any? %>
-    <div class="alert alert-danger mb-4">
+    <div class="alert alert-danger mb-3" style="background: rgba(239, 68, 68, 0.1); border-color: #ef4444; color: #fca5a5;">
       <strong>エラーが発生しました:</strong>
-      <% game.errors.full_messages.each do |msg| %>
-        <div><%= msg %></div>
-      <% end %>
+      <ul class="mb-0 mt-2">
+        <% game.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
     </div>
   <% end %>
 
-  <!-- 📷 ゲーム画像セクション（全幅） -->
-  <div class="card bg-dark border-info mb-4">
-    <div class="card-body">
-      <div class="d-flex align-items-center mb-3">
-        <h5 class="card-title text-info mb-0">📷 ゲーム画像</h5>
-        <span class="badge bg-secondary ms-2">必須</span>
+  <div class="d-flex align-items-center mb-4 pb-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+    <span class="material-symbols-outlined me-3" style="font-size: 32px; color: var(--cyan-accent, #00e5ff);">
+      <%= game.persisted? ? 'settings_suggest' : 'add_circle' %>
+    </span>
+    <h2 class="h4 mb-0 fw-bold text-white">
+      <%= game.persisted? ? 'ステータス設定' : '新しいゲームを登録' %>
+    </h2>
+  </div>
+
+  <div class="row g-4 mb-2">
+    
+    <div class="col-md-4">
+      <div class="poster-uploader" data-action="click->game_form#triggerUpload">
+        
+        <button type="button" class="btn-clear-image" data-action="click->game_form#clearImage" title="画像を削除">
+          <span class="material-symbols-outlined" style="font-size: 16px;">close</span>
+        </button>
+
+        <% if game.persisted? && game.image.attached? %>
+          <%= image_tag game.image, class: "poster-preview", data: { game_form_target: "preview" } %>
+        <% else %>
+          <img src="" class="poster-preview d-none" data-game-form-target="preview">
+        <% end %>
+        
+        <div class="text-center position-relative" style="z-index: 1;">
+          <span class="material-symbols-outlined mb-2" style="font-size: 32px; color: #64748b;">image</span>
+          <div style="font-size: 0.75rem; color: #64748b;">クリックして変更</div>
+        </div>
+      </div>
+      <%= f.file_field :image, class: "d-none", accept: "image/*", data: { game_form_target: "file", action: "change->game_form#previewImage" } %>
+    </div>
+
+    <div class="col-md-8 d-flex flex-column justify-content-between">
+      
+      <div class="mb-3">
+        <%= f.text_field :title, class: "form-control modern-input fw-bold", style: "font-size: 1.4rem; padding-bottom: 0.5rem;", placeholder: "ゲームのタイトルを入力 *" %>
       </div>
 
-      <!-- ドラッグ&ドロップエリア -->
-      <div class="image-upload-zone mb-3" id="imageDropZone">
-        <% if game.persisted? && game.image.attached? %>
-          <!-- 既存画像表示 -->
-          <div class="image-preview-container position-relative">
-            <%= image_tag game.image, class: "img-fluid rounded", style: "max-height: 300px; object-fit: cover; width: 100%; display: block;" %>
-            <div class="image-preview-overlay">
-              <div class="overlay-buttons">
-                <%= link_to "変更", "#", class: "btn btn-sm btn-info me-2", onclick: "document.getElementById('game_image').click(); return false;" %>
-                <%= link_to "削除", destroy_image_game_path(game), method: :post, data: { confirm: "画像を削除してもよろしいですか？" }, class: "btn btn-sm btn-outline-danger" %>
-              </div>
-            </div>
+      <div class="row g-3 mb-3">
+        <div class="col-sm-6">
+          <label class="modern-label">プラットフォーム <span class="text-info">*</span></label>
+          <%= f.select :platform, ["Switch", "PS5", "PS4", "Xbox", "PC", "その他"], { include_blank: "選択してください" }, class: "form-select modern-input" %>
+        </div>
+        <div class="col-sm-6">
+          <label class="modern-label">ジャンル <span class="text-info">*</span></label>
+          <%= f.select :genre, ["RPG", "アクション", "アドベンチャー", "シミュレーション", "スポーツ", "その他"], { include_blank: "選択してください" }, class: "form-select modern-input" %>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-sm-6">
+          <label class="modern-label">購入日</label>
+          <%= f.date_field :purchased_at, class: "form-control modern-input" %>
+        </div>
+        <div class="col-sm-6">
+          <label class="modern-label">プレイ時間</label>
+          <div class="d-flex align-items-end">
+            <%= f.number_field :play_time, class: "form-control modern-input me-2", placeholder: "0", min: 0 %>
+            <span style="color: #94a3b8; padding-bottom: 0.3rem; white-space: nowrap;">時間</span>
           </div>
-        <% else %>
-          <!-- ドラッグ&ドロップ表示 -->
-          <div class="upload-placeholder text-center py-5">
-            <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.7;">📁</div>
-            <p class="text-light mb-2">画像をここにドラッグ&ドロップ</p>
-            <p class="text-muted mb-3">または下のボタンをクリックして選択</p>
-            <small class="text-muted d-block">JPG, PNG, GIF（最大10MB）</small>
-          </div>
+        </div>
+      </div>
+
+      <div>
+        <label class="modern-label">プレイ期間</label>
+        <div class="d-flex align-items-center gap-2">
+          <%= f.date_field :started_at, class: "form-control modern-input" %>
+          <span style="color: #94a3b8; font-weight: bold;">〜</span>
+          <%= f.date_field :finished_at, class: "form-control modern-input" %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="row g-4 pt-3 mb-3" style="border-top: 1px dashed rgba(255,255,255,0.1);">
+    <div class="col-sm-6">
+      <label class="modern-label">ステータス <span class="text-info">*</span></label>
+      <div class="segment-control">
+        <%= f.radio_button :status, "未着手", id: "game_status_未着手" %>
+        <label for="game_status_未着手">未着手</label>
+        
+        <%= f.radio_button :status, "プレイ中", id: "game_status_プレイ中" %>
+        <label for="game_status_プレイ中">プレイ中</label>
+        
+        <%= f.radio_button :status, "クリア済", id: "game_status_クリア済" %>
+        <label for="game_status_クリア済">クリア済</label>
+      </div>
+    </div>
+    
+    <div class="col-sm-6 d-flex flex-column justify-content-center">
+      <label class="modern-label">評価</label>
+      <%= f.hidden_field :rating, data: { game_form_target: "rating" } %>
+      <div class="star-rating" data-action="mouseleave->game_form#resetStars">
+        <% 5.times do |i| %>
+          <span class="material-symbols-outlined star-icon" data-value="<%= i + 1 %>" data-game-form-target="star" data-action="mouseenter->game_form#hoverStar click->game_form#clickStar">star</span>
         <% end %>
       </div>
-
-      <!-- ファイル選択フィールド（非表示） -->
-      <%= f.file_field :image, class: "d-none", accept: "image/*", id: "imageFileInput" %>
-      
-      <!-- ファイル選択ボタン -->
-      <button type="button" class="btn btn-outline-info w-100" onclick="document.getElementById('game_image').click();">
-        画像を選択する
-      </button>
     </div>
   </div>
 
-  <!-- 📌 基本情報セクション -->
-  <div class="card bg-dark border-secondary mb-4">
-    <div class="card-body">
-      <h5 class="card-title text-info mb-3">📌 基本情報</h5>
-      
-      <div class="mb-3">
-        <%= f.label :title, "タイトル *", class: "form-label" %>
-        <%= f.text_field :title, class: "form-control", placeholder: "ゲームのタイトルを入力" %>
-      </div>
-
-      <div class="row">
-        <div class="col-md-6">
-          <div class="mb-3">
-            <%= f.label :platform, "プラットフォーム *", class: "form-label" %>
-            <%= f.select :platform, ["Switch", "PS5", "PS4", "Xbox", "PC", "その他"],
-                { include_blank: "選択してください" }, class: "form-select" %>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="mb-3">
-            <%= f.label :genre, "ジャンル *", class: "form-label" %>
-            <%= f.select :genre, ["RPG", "アクション", "アドベンチャー", "シミュレーション", "スポーツ", "その他"],
-                { include_blank: "選択してください" }, class: "form-select" %>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="mt-2">
+    <%= f.text_area :memo, class: "form-control memo-textarea", rows: 3, placeholder: "【総評・メモ】 ここに感想や攻略のメモ、次にやることなどを入力できます..." %>
   </div>
 
-  <!-- ⭐ 評価・ステータスセクション -->
-  <div class="card bg-dark border-secondary mb-4">
-    <div class="card-body">
-      <h5 class="card-title text-info mb-3">⭐ 評価・ステータス</h5>
-      
-      <div class="row">
-        <div class="col-md-6">
-          <div class="mb-3">
-            <%= f.label :status, "ステータス *", class: "form-label" %>
-            <%= f.select :status, ["未着手", "プレイ中", "クリア済"],
-                { include_blank: "選択してください" }, class: "form-select" %>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="mb-3">
-            <%= f.label :rating, "評価（1〜5）", class: "form-label" %>
-            <div class="d-flex align-items-center">
-              <%= f.select :rating, [1, 2, 3, 4, 5],
-                  { include_blank: "未評価" }, class: "form-select" %>
-              <span class="ms-2" id="ratingPreview">
-                <% if game.rating %>
-                  <% game.rating.times do %>
-                    <span class="text-warning">⭐</span>
-                  <% end %>
-                  <% (5 - game.rating).times do %>
-                    <span class="text-muted">☆</span>
-                  <% end %>
-                <% end %>
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="d-flex justify-content-end align-items-center gap-3 mt-4">
+    <%= link_to "キャンセル", request.referer || games_path, class: "text-decoration-none", style: "color: #94a3b8; transition: color 0.2s;", onmouseover: "this.style.color='#f8fafc'", onmouseout: "this.style.color='#94a3b8'" %>
+    <%= f.submit "保存する", class: "btn-submit-neon" %>
   </div>
 
-  <!-- 📝 詳細情報セクション -->
-  <div class="card bg-dark border-secondary mb-4">
-    <div class="card-body">
-      <h5 class="card-title text-info mb-3">📝 詳細情報</h5>
-      
-      <div class="row">
-        <div class="col-md-6">
-          <div class="mb-3">
-            <%= f.label :purchased_at, "購入日", class: "form-label" %>
-            <%= f.date_field :purchased_at, class: "form-control" %>
-          </div>
-        </div>
-      </div>
-
-      <div class="mb-3">
-        <%= f.label :memo, "メモ", class: "form-label" %>
-        <%= f.text_area :memo, class: "form-control", rows: 4, placeholder: "ゲームについてのメモやコメントを入力..." %>
-      </div>
-    </div>
-  </div>
-
-  <!-- アクションボタン -->
-  <div class="d-flex gap-2 mb-5">
-    <%= f.submit "保存する", class: "btn btn-primary btn-lg" %>
-    <%= link_to "キャンセル", games_path, class: "btn btn-outline-secondary btn-lg" %>
-  </div>
 <% end %>
-
-<!-- ドラッグ&ドロップ及び評価プレビュー用スクリプト -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const dropZone = document.getElementById('imageDropZone');
-  const fileInput = document.getElementById('game_image');
-  const ratingSelect = document.querySelector('select[id$="_rating"]');
-
-  // ドラッグ&ドロップ処理
-  if (dropZone) {
-    dropZone.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      dropZone.classList.add('drag-over');
-    });
-
-    dropZone.addEventListener('dragleave', function(e) {
-      e.preventDefault();
-      dropZone.classList.remove('drag-over');
-    });
-
-    dropZone.addEventListener('drop', function(e) {
-      e.preventDefault();
-      dropZone.classList.remove('drag-over');
-      
-      const files = e.dataTransfer.files;
-      if (files.length > 0) {
-        fileInput.files = files;
-        // プレビュー表示（オプション）
-        previewImage(files[0]);
-      }
-    });
-
-    // クリック時もファイル選択ダイアログを開く
-    dropZone.addEventListener('click', function(e) {
-      if (!e.target.closest('.overlay-buttons')) {
-        fileInput.click();
-      }
-    });
-  }
-
-  // ファイル選択時のプレビュー
-  if (fileInput) {
-    fileInput.addEventListener('change', function(e) {
-      if (this.files.length > 0) {
-        previewImage(this.files[0]);
-      }
-    });
-  }
-
-  // 評価変更時のプレビュー
-  if (ratingSelect) {
-    ratingSelect.addEventListener('change', function() {
-      const rating = parseInt(this.value);
-      const preview = document.getElementById('ratingPreview');
-      
-      if (isNaN(rating)) {
-        preview.innerHTML = '';
-      } else {
-        let stars = '';
-        for (let i = 0; i < rating; i++) {
-          stars += '<span class="text-warning">⭐</span>';
-        }
-        for (let i = rating; i < 5; i++) {
-          stars += '<span class="text-muted">☆</span>';
-        }
-        preview.innerHTML = stars;
-      }
-    });
-  }
-
-  function previewImage(file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const preview = document.querySelector('.image-preview-container') || 
-                      document.querySelector('.upload-placeholder').parentElement;
-      
-      const html = `
-        <div class="image-preview-container position-relative">
-          <img src="${e.target.result}" class="img-fluid rounded" style="max-height: 300px; object-fit: cover; width: 100%; display: block;">
-          <div class="image-preview-overlay">
-            <div class="overlay-buttons">
-              <button type="button" class="btn btn-sm btn-info me-2" onclick="document.getElementById('game_image').click(); return false;">変更</button>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      const parent = document.querySelector('.image-upload-zone');
-      const oldPreview = parent.querySelector('.image-preview-container');
-      const oldPlaceholder = parent.querySelector('.upload-placeholder');
-      
-      if (oldPreview) oldPreview.remove();
-      if (oldPlaceholder) oldPlaceholder.remove();
-      
-      parent.insertAdjacentHTML('afterbegin', html);
-    };
-    reader.readAsDataURL(file);
-  }
-});
-</script>

@@ -48,8 +48,8 @@
 
 ```bash
 # リポジトリのクローン
-git clone [https://github.com/username/repository-name.git](https://github.com/username/repository-name.git)
-cd repository-name
+git clone https://github.com/Hprograms/game_backlog.git
+cd game_backlog
 
 # 依存関係のインストール
 bundle install

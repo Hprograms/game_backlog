@@ -33,11 +33,15 @@ class RawgApiService
     return [] unless response.is_a?(Net::HTTPSuccess)
 
     JSON.parse(response.body).fetch('results', []).first(5).map do |game|
+      details = fetch_game_details(game['id'], api_key)
+      developer = Array(details['developers']).filter_map { |entry| entry['name'] }.join(', ')
+
       {
         name: game["name"],
         image: game["background_image"],
         metacritic: game["metacritic"],
-        playtime: game["playtime"],
+        developer: developer,
+        description: details['description_raw'].presence || ActionController::Base.helpers.strip_tags(details['description'].to_s),
         platforms: Array(game.dig('platforms')).filter_map { |entry| PLATFORM_NAMES[entry.dig('platform', 'name')] }.uniq,
         genres: Array(game['genres']).filter_map { |genre| GENRE_NAMES[genre['name']] }.uniq
       }
@@ -66,4 +70,21 @@ class RawgApiService
   rescue StandardError => e
     Rails.logger.error("RAWG image error: #{e.message}")
   end
+
+  def self.fetch_game_details(game_id, api_key)
+    return {} unless game_id.to_s.match?(/\A\d+\z/)
+
+    uri = URI("https://api.rawg.io/api/games/#{game_id}")
+    uri.query = URI.encode_www_form(key: api_key)
+    response = Net::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: 3, read_timeout: 5) do |http|
+      http.get(uri.request_uri)
+    end
+    return {} unless response.is_a?(Net::HTTPSuccess)
+
+    JSON.parse(response.body)
+  rescue StandardError => e
+    Rails.logger.error("RAWG game details error: #{e.message}")
+    {}
+  end
+  private_class_method :fetch_game_details
 end

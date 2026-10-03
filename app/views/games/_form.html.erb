@@ -44,13 +44,9 @@
         <%= f.label :title, "タイトル", class: "modern-label" %>
         <%= f.text_field :title, class: "form-control modern-input title-input", placeholder: "ゲームタイトルを検索", autocomplete: "off", required: true, data: { game_form_target: "title", action: "input->game-form#search keydown->game-form#navigateSuggestions" } %>
         <div class="suggestion-list" data-game-form-target="suggestions" role="listbox" hidden></div>
-        <div class="api-metadata" data-game-form-target="metadata" aria-live="polite" hidden>
-          <span>RAWG</span>
-          <span>メタスコア <strong data-game-form-target="metascoreLabel">--</strong></span>
-          <span>平均プレイ時間 <strong data-game-form-target="playtimeLabel">--</strong></span>
-        </div>
         <%= f.hidden_field :metascore, data: { game_form_target: "metascore" } %>
-        <%= f.hidden_field :average_playtime, data: { game_form_target: "averagePlaytime" } %>
+        <%= f.hidden_field :developer, data: { game_form_target: "developer" } %>
+        <%= f.hidden_field :description, data: { game_form_target: "description" } %>
       </div>
 
       <div class="row g-3 mb-3">

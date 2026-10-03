@@ -18,6 +18,7 @@ gem "stimulus-rails"
 gem "jbuilder"
 
 gem 'devise'
+gem 'dotenv-rails', groups: [:development, :test]
 gem 'minitest', '~> 5.25'
 gem 'letter_opener', group: :development
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]

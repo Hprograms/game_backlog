@@ -19,6 +19,7 @@ class GamesController < ApplicationController
   def create
     @game = current_user.games.build(game_params)
     if @game.save
+      attach_rawg_image
       redirect_to @game, notice: "ゲームを登録しました！"
     else
       render :new, status: :unprocessable_entity
@@ -30,6 +31,7 @@ class GamesController < ApplicationController
 
   def update
     if @game.update(game_params)
+      attach_rawg_image
       redirect_to @game, notice: "更新しました！"
     else
       render :edit, status: :unprocessable_entity
@@ -46,6 +48,11 @@ class GamesController < ApplicationController
     redirect_to edit_game_path(@game), notice: "画像を削除しました！"
   end
 
+  def search
+    render json: params[:query].present? ? RawgApiService.search(params[:query]) : []
+  end
+
+
   private
 
   def set_game
@@ -56,6 +63,12 @@ class GamesController < ApplicationController
   end
   
   def game_params
-    params.require(:game).permit(:title, :platform, :genre, :status, :memo, :rating, :purchased_at, :image, :play_time, :started_at, :finished_at)
+    params.require(:game).permit(:title, :platform, :genre, :status, :memo, :rating, :purchased_at, :image, :play_time, :played_at, :started_at, :finished_at, :metascore, :average_playtime)
+  end
+
+  def attach_rawg_image
+    return if params.dig(:game, :image).present?
+
+    RawgApiService.attach_image(@game, params[:rawg_image_url]) if params[:rawg_image_url].present?
   end
 end

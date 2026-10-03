@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_25_130739) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_03_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -57,6 +57,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_25_130739) do
     t.date "played_at"
     t.date "started_at"
     t.date "finished_at"
+    t.integer "metascore"
+    t.integer "average_playtime"
     t.index ["user_id"], name: "index_games_on_user_id"
   end
 

@@ -39,7 +39,10 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_select 'form[data-controller="game-form"]'
     assert_select '[data-game-form-target="suggestions"]'
     assert_select 'input[name="game[metascore]"]'
-    assert_select 'input[name="game[average_playtime]"]'
+    assert_select 'input[name="game[developer]"]'
+    assert_select 'input[name="game[description]"]'
+    assert_select '.api-metadata', count: 0
+    assert_select 'input[name="game[average_playtime]"]', count: 0
   end
 
   # 自分のゲームだけ表示される
@@ -78,25 +81,27 @@ test "ログイン済みでゲームを登録できる" do
   assert_redirected_to game_path(Game.last)
 end
 
-test "RAWGメタデータをゲームに保存できる" do
+test "RAWGの開発元とあらすじをゲームに保存できる" do
   sign_in @user
   post games_path, params: {
     game: {
       title: "メタデータ付きゲーム",
       status: "未着手",
       metascore: 93,
-      average_playtime: 105
+      developer: "開発スタジオ",
+      description: "ゲームのあらすじ"
     }
   }
 
   assert_redirected_to game_path(Game.last)
   assert_equal 93, Game.last.metascore
-  assert_equal 105, Game.last.average_playtime
+  assert_equal "開発スタジオ", Game.last.developer
+  assert_equal "ゲームのあらすじ", Game.last.description
 end
 
 test "RAWG検索結果をJSONで返す" do
   sign_in @user
-  result = [{ name: "検索ゲーム", image: "https://media.rawg.io/image.jpg", metacritic: 93, playtime: 105, platforms: ["Switch"], genres: ["RPG"] }]
+  result = [{ name: "検索ゲーム", image: "https://media.rawg.io/image.jpg", metacritic: 93, developer: "開発スタジオ", description: "ゲームのあらすじ", platforms: ["Switch"], genres: ["RPG"] }]
 
   RawgApiService.stub(:search, result) do
     get search_games_path, params: { query: "検索ゲーム" }
@@ -104,6 +109,7 @@ test "RAWG検索結果をJSONで返す" do
 
   assert_response :success
   assert_equal result.as_json, response.parsed_body
+  assert_not response.parsed_body.first.key?("playtime")
 end
 
 # タイトルなしでは登録できない

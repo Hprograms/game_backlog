@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["preview", "file", "rating", "star", "title", "suggestions", "metadata", "metascore", "averagePlaytime", "metascoreLabel", "playtimeLabel", "imageUrl", "platform", "genre"]
+  static targets = ["preview", "file", "rating", "star", "title", "suggestions", "developer", "description", "imageUrl", "platform", "genre"]
   static values = { searchUrl: String }
 
   connect() {
@@ -105,11 +105,8 @@ export default class extends Controller {
 
   selectSuggestion(game) {
     this.titleTarget.value = game.name || ""
-    this.metascoreTarget.value = game.metacritic ?? ""
-    this.averagePlaytimeTarget.value = game.playtime ?? ""
-    this.metascoreLabelTarget.textContent = game.metacritic ?? "--"
-    this.playtimeLabelTarget.textContent = game.playtime ? `${game.playtime}h` : "--"
-    this.metadataTarget.hidden = false
+    this.developerTarget.value = game.developer || ""
+    this.descriptionTarget.value = game.description || ""
     this.imageUrlTarget.value = game.image || ""
 
     if (game.image) {

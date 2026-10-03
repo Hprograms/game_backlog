@@ -63,7 +63,7 @@ class GamesController < ApplicationController
   end
   
   def game_params
-    params.require(:game).permit(:title, :platform, :genre, :status, :memo, :rating, :purchased_at, :image, :play_time, :played_at, :started_at, :finished_at, :metascore, :average_playtime)
+    params.require(:game).permit(:title, :platform, :genre, :status, :memo, :rating, :purchased_at, :image, :play_time, :played_at, :started_at, :finished_at, :metascore, :developer, :description)
   end
 
   def attach_rawg_image

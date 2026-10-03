@@ -45,6 +45,36 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_select 'input[name="game[average_playtime]"]', count: 0
   end
 
+  test "詳細画面に外部情報とプレイ記録が表示される" do
+    sign_in @user
+    @game.update!(
+      developer: "開発スタジオ",
+      description: "あらすじの1行目\nあらすじの2行目",
+      metascore: 91,
+      status: "クリア済",
+      rating: 4,
+      purchased_at: Date.new(2026, 1, 2),
+      started_at: Date.new(2026, 2, 3),
+      finished_at: Date.new(2026, 3, 4),
+      memo: "記録の1行目\n記録の2行目"
+    )
+
+    get game_path(@game)
+
+    assert_response :success
+    assert_select ".game-show-panel"
+    assert_select ".game-show-placeholder"
+    assert_select ".game-show-title", text: "ゼルダの伝説"
+    assert_select ".game-show-developer", text: "開発スタジオ"
+    assert_select ".game-show-tag--score", text: /91/
+    assert_select ".game-description br"
+    assert_select ".game-record-status.is-cleared", text: "クリア済"
+    assert_select ".game-rating .is-active", count: 4
+    assert_select ".game-memo br"
+    assert_select ".game-show-actions a[href='#{games_path}']"
+    assert_select ".game-show-actions a[href='#{edit_game_path(@game)}']"
+  end
+
   # 自分のゲームだけ表示される
   test "自分のゲームだけ表示される" do
     other_user = User.create!(

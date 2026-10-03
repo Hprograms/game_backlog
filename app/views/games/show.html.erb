@@ -1,25 +1,106 @@
-<div class="card bg-dark border-secondary">
-  <% if @game.image.attached? %>
-    <%= image_tag @game.image, class: "card-img-top", style: "object-fit: cover; height: 300px; width: 100%;" %>
-  <% else %>
-    <div style="background-color: #2a3a52; height: 300px; display: flex; align-items: center; justify-content: center; flex-direction: column; border-bottom: 1px solid #495057;">
-      <div style="font-size: 4rem; color: #6c757d; margin-bottom: 1rem;">📷</div>
-      <small style="color: #6c757d;">No Image</small>
+<article class="glass-panel game-show-panel">
+  <div class="row g-4 g-lg-5 game-show-layout">
+    <aside class="col-lg-4 game-show-visual">
+      <div class="game-show-poster">
+        <% if @game.image.attached? %>
+          <%= image_tag @game.image, class: "game-show-poster__image", alt: "#{@game.title}のパッケージ画像" %>
+        <% else %>
+          <div class="game-show-placeholder">
+            <span class="material-symbols-outlined" aria-hidden="true">sports_esports</span>
+            <span>画像は未登録です</span>
+          </div>
+        <% end %>
+      </div>
+
+      <nav class="game-show-actions" aria-label="ゲーム操作">
+        <%= link_to games_path, class: "game-show-action" do %>
+          <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+          <span>一覧</span>
+        <% end %>
+        <%= link_to edit_game_path(@game), class: "game-show-action" do %>
+          <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+          <span>編集</span>
+        <% end %>
+        <%= button_to game_path(@game), method: :delete, data: { turbo_confirm: "このゲームを削除しますか？" }, class: "game-show-action game-show-action--delete" do %>
+          <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+          <span>削除</span>
+        <% end %>
+      </nav>
+    </aside>
+
+    <div class="col-lg-8 game-show-content">
+      <header class="game-show-heading">
+        <h1 class="game-show-title"><%= @game.title %></h1>
+        <% if @game.developer.present? %>
+          <p class="game-show-developer"><%= @game.developer %></p>
+        <% end %>
+      </header>
+
+      <div class="game-show-tags" aria-label="ゲーム情報">
+        <% if @game.platform.present? %>
+          <span class="game-show-tag"><span class="material-symbols-outlined" aria-hidden="true">devices</span><%= @game.platform %></span>
+        <% end %>
+        <% if @game.genre.present? %>
+          <span class="game-show-tag"><span class="material-symbols-outlined" aria-hidden="true">category</span><%= @game.genre %></span>
+        <% end %>
+        <% if @game.metascore.present? %>
+          <span class="game-show-tag game-show-tag--score"><span class="material-symbols-outlined" aria-hidden="true">analytics</span>Metascore <strong><%= @game.metascore %></strong></span>
+        <% end %>
+      </div>
+
+      <% if @game.description.present? %>
+        <section class="game-description-section" aria-labelledby="game-description-title">
+          <h2 id="game-description-title" class="game-section-title">あらすじ</h2>
+          <div class="game-description"><%= simple_format(@game.description) %></div>
+        </section>
+      <% end %>
+
+      <section class="game-record" aria-labelledby="game-record-title">
+        <h2 id="game-record-title" class="game-section-title">マイレコード</h2>
+        <% status_style = case @game.status
+        when "プレイ中" then "is-playing"
+        when "クリア済" then "is-cleared"
+        else "is-backlog"
+        end %>
+
+        <div class="game-record-grid">
+          <div class="game-record-item">
+            <span class="game-record-label">ステータス</span>
+            <span class="game-record-status <%= status_style %>"><%= @game.status.presence || "未設定" %></span>
+          </div>
+
+          <div class="game-record-item">
+            <span class="game-record-label">自分の評価</span>
+            <div class="game-rating" role="img" aria-label="<%= @game.rating ? "#{@game.rating} / 5" : "未評価" %>">
+              <% 5.times do |index| %>
+                <span class="material-symbols-outlined <%= "is-active" if index < @game.rating.to_i %>" aria-hidden="true">star</span>
+              <% end %>
+              <% unless @game.rating.present? %><span class="game-rating-empty">未評価</span><% end %>
+            </div>
+          </div>
+
+          <div class="game-record-item">
+            <span class="game-record-label">購入日</span>
+            <span class="game-record-value"><%= @game.purchased_at&.strftime("%Y.%m.%d") || "未記録" %></span>
+          </div>
+
+          <div class="game-record-item">
+            <span class="game-record-label">プレイ期間</span>
+            <span class="game-record-value game-play-period">
+              <%= @game.started_at&.strftime("%Y.%m.%d") || "未記録" %>
+              <span aria-hidden="true">〜</span>
+              <%= @game.finished_at&.strftime("%Y.%m.%d") || "未記録" %>
+            </span>
+          </div>
+        </div>
+
+        <% if @game.memo.present? %>
+          <div class="game-record-memo">
+            <span class="game-record-label">メモ</span>
+            <div class="game-memo"><%= simple_format(@game.memo) %></div>
+          </div>
+        <% end %>
+      </section>
     </div>
-  <% end %>
-  
-  <div class="card-body">
-    <h1 class="card-title text-light"><%= @game.title %></h1>
-    <table class="table mt-3 table-dark">
-      <tr><th class="text-info">プラットフォーム</th><td class="text-light"><%= @game.platform %></td></tr>
-      <tr><th class="text-info">ジャンル</th><td class="text-light"><%= @game.genre %></td></tr>
-      <tr><th class="text-info">ステータス</th><td class="text-light"><%= @game.status %></td></tr>
-      <tr><th class="text-info">評価</th><td class="text-light"><%= @game.rating ? "⭐" * @game.rating + "☆" * (5 - @game.rating) : "未評価" %></td></tr>
-      <tr><th class="text-info">購入日</th><td class="text-light"><%= @game.purchased_at&.strftime('%Y年%m月%d日') || 'N/A' %></td></tr>
-      <tr><th class="text-info">メモ</th><td class="text-light"><%= simple_format(@game.memo) %></td></tr>
-    </table>
-    <%= link_to "編集", edit_game_path(@game), class: "btn btn-info me-2" %>
-    <%= link_to "削除", game_path(@game), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "btn btn-outline-danger me-2" %>
-    <%= link_to "一覧に戻る", games_path, class: "btn btn-outline-secondary" %>
   </div>
-</div>
+</article>

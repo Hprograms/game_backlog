@@ -1,0 +1,98 @@
+require "test_helper"
+require "minitest/mock"
+
+class IgdbApiServiceTest < ActiveSupport::TestCase
+  Response = Struct.new(:code, :body) do
+    def is_a?(type)
+      type == Net::HTTPSuccess || super
+    end
+  end
+
+  test "search authenticates with Twitch, queries IGDB, and translates the summary" do
+    previous_env = ENV.slice("IGDB_CLIENT_ID", "IGDB_CLIENT_SECRET", "DEEPL_API_KEY")
+    ENV["IGDB_CLIENT_ID"] = "client-id"
+    ENV["IGDB_CLIENT_SECRET"] = "client-secret"
+    ENV["DEEPL_API_KEY"] = "deepl-key"
+    Rails.cache.delete(IgdbApiService::TOKEN_CACHE_KEY)
+
+    responses = [
+      Response.new("200", { access_token: "bearer-token", expires_in: 3600 }.to_json),
+      Response.new("200", [{
+        name: "Example Game",
+        cover: { url: "//images.igdb.com/igdb/image/upload/t_thumb/co123.jpg" },
+        platforms: [{ name: "Nintendo Switch" }],
+        genres: [{ name: "Role-playing (RPG)" }],
+        involved_companies: [{ company: { name: "Example Studio" } }],
+        summary: "An English summary.",
+        total_rating: 89.6
+      }].to_json),
+      Response.new("200", { translations: [{ text: "日本語の概要。" }] }.to_json)
+    ]
+    requests = []
+    http = Object.new
+    http.define_singleton_method(:request) do |request|
+      requests << request
+      responses.shift
+    end
+
+    Net::HTTP.stub(:start, ->(_host, _port, **_options, &block) { block.call(http) }) do
+      @results = IgdbApiService.search("Example Game")
+    end
+
+    result = @results.fetch(0)
+    assert_equal "Example Game", result[:name]
+    assert_equal "https://images.igdb.com/igdb/image/upload/t_cover_big/co123.jpg", result[:image]
+    assert_equal ["Switch"], result[:platforms]
+    assert_equal ["RPG"], result[:genres]
+    assert_equal 90, result[:igdb_rating]
+    assert_equal "Example Studio", result[:developer]
+    assert_equal "日本語の概要。", result[:description]
+    assert_equal "Bearer bearer-token", requests[1]["Authorization"]
+    assert_includes requests[1].body, 'search "Example Game";'
+    assert_includes requests[1].body, "involved_companies.company.name"
+    assert_equal "DeepL-Auth-Key deepl-key", requests[2]["Authorization"]
+    assert_equal({ "text" => "An English summary.", "target_lang" => "JA" }, URI.decode_www_form(requests[2].body).to_h)
+  ensure
+    Rails.cache.delete(IgdbApiService::TOKEN_CACHE_KEY)
+    %w[IGDB_CLIENT_ID IGDB_CLIENT_SECRET DEEPL_API_KEY].each { |key| ENV.delete(key) }
+    previous_env.each { |key, value| ENV[key] = value }
+  end
+
+  test "access token is reused from Rails cache" do
+    previous_env = ENV.slice("IGDB_CLIENT_ID", "IGDB_CLIENT_SECRET")
+    ENV["IGDB_CLIENT_ID"] = "client-id"
+    ENV["IGDB_CLIENT_SECRET"] = "client-secret"
+    Rails.cache.delete(IgdbApiService::TOKEN_CACHE_KEY)
+    request_count = 0
+    cache = ActiveSupport::Cache::MemoryStore.new
+    http = Object.new
+    http.define_singleton_method(:request) do |_request|
+      request_count += 1
+      Response.new("200", { access_token: "cached-token", expires_in: 3600 }.to_json)
+    end
+
+    Rails.stub(:cache, cache) do
+      Net::HTTP.stub(:start, ->(_host, _port, **_options, &block) { block.call(http) }) do
+        assert_equal "cached-token", IgdbApiService.access_token
+        assert_equal "cached-token", IgdbApiService.access_token
+      end
+    end
+    assert_equal 1, request_count
+  ensure
+    Rails.cache.delete(IgdbApiService::TOKEN_CACHE_KEY)
+    %w[IGDB_CLIENT_ID IGDB_CLIENT_SECRET].each { |key| ENV.delete(key) }
+    previous_env.each { |key, value| ENV[key] = value }
+  end
+
+  test "translation failure falls back to original summary" do
+    previous_api_key = ENV["DEEPL_API_KEY"]
+    ENV["DEEPL_API_KEY"] = "deepl-key"
+    failure = ->(_host, _port, **_options, &_block) { raise IOError, "connection failed" }
+
+    Net::HTTP.stub(:start, failure) do
+      assert_equal "Original summary", IgdbApiService.send(:translate_summary, "Original summary")
+    end
+  ensure
+    previous_api_key.nil? ? ENV.delete("DEEPL_API_KEY") : ENV["DEEPL_API_KEY"] = previous_api_key
+  end
+end

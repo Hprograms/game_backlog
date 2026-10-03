@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["preview", "file", "rating", "star", "title", "suggestions", "developer", "description", "imageUrl", "platform", "genre"]
+  static targets = ["preview", "file", "rating", "star", "title", "suggestions", "igdbRating", "developer", "description", "imageUrl", "platform", "genre"]
   static values = { searchUrl: String }
 
   connect() {
@@ -105,6 +105,7 @@ export default class extends Controller {
 
   selectSuggestion(game) {
     this.titleTarget.value = game.name || ""
+    this.igdbRatingTarget.value = game.igdb_rating ?? ""
     this.developerTarget.value = game.developer || ""
     this.descriptionTarget.value = game.description || ""
     this.imageUrlTarget.value = game.image || ""

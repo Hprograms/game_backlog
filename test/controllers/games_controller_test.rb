@@ -31,17 +31,18 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "新規フォームにRAWGサジェストとメタデータ欄が表示される" do
+  test "新規フォームにIGDBサジェスト用の項目が表示される" do
     sign_in @user
     get new_game_path
 
     assert_response :success
     assert_select 'form[data-controller="game-form"]'
     assert_select '[data-game-form-target="suggestions"]'
-    assert_select 'input[name="game[metascore]"]'
+    assert_select 'input[name="game[igdb_rating]"]'
     assert_select 'input[name="game[developer]"]'
     assert_select 'input[name="game[description]"]'
     assert_select '.api-metadata', count: 0
+    assert_select 'input[name="game[metascore]"]', count: 0
     assert_select 'input[name="game[average_playtime]"]', count: 0
   end
 
@@ -50,7 +51,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     @game.update!(
       developer: "開発スタジオ",
       description: "あらすじの1行目\nあらすじの2行目",
-      metascore: 91,
+      igdb_rating: 91,
       status: "クリア済",
       rating: 4,
       purchased_at: Date.new(2026, 1, 2),
@@ -111,35 +112,35 @@ test "ログイン済みでゲームを登録できる" do
   assert_redirected_to game_path(Game.last)
 end
 
-test "RAWGの開発元とあらすじをゲームに保存できる" do
+test "IGDBの開発元とあらすじをゲームに保存できる" do
   sign_in @user
   post games_path, params: {
     game: {
       title: "メタデータ付きゲーム",
       status: "未着手",
-      metascore: 93,
+      igdb_rating: 93,
       developer: "開発スタジオ",
       description: "ゲームのあらすじ"
     }
   }
 
   assert_redirected_to game_path(Game.last)
-  assert_equal 93, Game.last.metascore
+  assert_equal 93, Game.last.igdb_rating
   assert_equal "開発スタジオ", Game.last.developer
   assert_equal "ゲームのあらすじ", Game.last.description
 end
 
-test "RAWG検索結果をJSONで返す" do
+test "IGDB検索結果をJSONで返す" do
   sign_in @user
-  result = [{ name: "検索ゲーム", image: "https://media.rawg.io/image.jpg", metacritic: 93, developer: "開発スタジオ", description: "ゲームのあらすじ", platforms: ["Switch"], genres: ["RPG"] }]
+  result = [{ name: "検索ゲーム", image: "https://images.igdb.com/image.jpg", igdb_rating: 93, developer: "開発スタジオ", description: "ゲームのあらすじ", platforms: ["Switch"], genres: ["RPG"] }]
 
-  RawgApiService.stub(:search, result) do
+  IgdbApiService.stub(:search, result) do
     get search_games_path, params: { query: "検索ゲーム" }
   end
 
   assert_response :success
   assert_equal result.as_json, response.parsed_body
-  assert_not response.parsed_body.first.key?("playtime")
+  assert_not response.parsed_body.first.key?("metacritic")
 end
 
 # タイトルなしでは登録できない

@@ -43,8 +43,8 @@
         <% if @game.genre.present? %>
           <span class="game-show-tag"><span class="material-symbols-outlined" aria-hidden="true">category</span><%= @game.genre %></span>
         <% end %>
-        <% if @game.metascore.present? %>
-          <span class="game-show-tag game-show-tag--score"><span class="material-symbols-outlined" aria-hidden="true">analytics</span>Metascore <strong><%= @game.metascore %></strong></span>
+        <% if @game.igdb_rating.present? %>
+          <span class="game-show-tag game-show-tag--score"><span class="material-symbols-outlined" aria-hidden="true">analytics</span>IGDB Rating <strong><%= @game.igdb_rating %></strong></span>
         <% end %>
       </div>
 

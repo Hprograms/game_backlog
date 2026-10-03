@@ -1,5 +1,4 @@
-<%= form_with model: game, local: true, html: { multipart: true }, class: "glass-panel position-relative", data: { controller: "game_form" } do |f| %>
-  
+<%= form_with model: game, local: true, html: { multipart: true }, class: "glass-panel position-relative", data: { controller: "game-form", game_form_search_url_value: search_games_path } do |f| %>
   <% if game.errors.any? %>
     <div class="alert alert-danger mb-3" style="background: rgba(239, 68, 68, 0.1); border-color: #ef4444; color: #fca5a5;">
       <strong>エラーが発生しました:</strong>
@@ -11,7 +10,7 @@
     </div>
   <% end %>
 
-  <div class="d-flex align-items-center mb-4 pb-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+  <div class="d-flex align-items-center mb-4 pb-3 form-heading">
     <span class="material-symbols-outlined me-3" style="font-size: 32px; color: var(--cyan-accent, #00e5ff);">
       <%= game.persisted? ? 'settings_suggest' : 'add_circle' %>
     </span>
@@ -21,64 +20,69 @@
   </div>
 
   <div class="row g-4 mb-2">
-    
     <div class="col-md-4">
-      <div class="poster-uploader" data-action="click->game_form#triggerUpload">
-        
-        <button type="button" class="btn-clear-image" data-action="click->game_form#clearImage" title="画像を削除">
+      <div class="poster-uploader" data-action="click->game-form#triggerUpload">
+        <button type="button" class="btn-clear-image" data-action="click->game-form#clearImage" title="画像をクリア" aria-label="画像をクリア">
           <span class="material-symbols-outlined" style="font-size: 16px;">close</span>
         </button>
-
         <% if game.persisted? && game.image.attached? %>
           <%= image_tag game.image, class: "poster-preview", data: { game_form_target: "preview" } %>
         <% else %>
           <img src="" class="poster-preview d-none" data-game-form-target="preview">
         <% end %>
-        
         <div class="text-center position-relative" style="z-index: 1;">
           <span class="material-symbols-outlined mb-2" style="font-size: 32px; color: #64748b;">image</span>
-          <div style="font-size: 0.75rem; color: #64748b;">クリックして変更</div>
+          <div class="poster-hint">画像をクリックして変更</div>
         </div>
       </div>
-      <%= f.file_field :image, class: "d-none", accept: "image/*", data: { game_form_target: "file", action: "change->game_form#previewImage" } %>
+      <%= f.file_field :image, class: "d-none", accept: "image/*", data: { game_form_target: "file", action: "change->game-form#previewImage" } %>
+      <%= hidden_field_tag :rawg_image_url, nil, data: { game_form_target: "imageUrl" } %>
     </div>
 
     <div class="col-md-8 d-flex flex-column justify-content-between">
-      
-      <div class="mb-3">
-        <%= f.text_field :title, class: "form-control modern-input fw-bold", style: "font-size: 1.4rem; padding-bottom: 0.5rem;", placeholder: "ゲームのタイトルを入力 *" %>
+      <div class="mb-3 title-search">
+        <%= f.label :title, "タイトル", class: "modern-label" %>
+        <%= f.text_field :title, class: "form-control modern-input title-input", placeholder: "ゲームタイトルを検索", autocomplete: "off", required: true, data: { game_form_target: "title", action: "input->game-form#search keydown->game-form#navigateSuggestions" } %>
+        <div class="suggestion-list" data-game-form-target="suggestions" role="listbox" hidden></div>
+        <div class="api-metadata" data-game-form-target="metadata" aria-live="polite" hidden>
+          <span>RAWG</span>
+          <span>メタスコア <strong data-game-form-target="metascoreLabel">--</strong></span>
+          <span>平均プレイ時間 <strong data-game-form-target="playtimeLabel">--</strong></span>
+        </div>
+        <%= f.hidden_field :metascore, data: { game_form_target: "metascore" } %>
+        <%= f.hidden_field :average_playtime, data: { game_form_target: "averagePlaytime" } %>
       </div>
 
       <div class="row g-3 mb-3">
         <div class="col-sm-6">
-          <label class="modern-label">プラットフォーム <span class="text-info">*</span></label>
-          <%= f.select :platform, ["Switch", "PS5", "PS4", "Xbox", "PC", "その他"], { include_blank: "選択してください" }, class: "form-select modern-input" %>
+          <%= f.label :platform, "プラットフォーム", class: "modern-label" %>
+          <%= f.select :platform, ["Switch", "PS5", "PS4", "Xbox", "PC", "その他"], { include_blank: "選択してください" }, class: "form-select modern-input", data: { game_form_target: "platform" } %>
         </div>
         <div class="col-sm-6">
-          <label class="modern-label">ジャンル <span class="text-info">*</span></label>
-          <%= f.select :genre, ["RPG", "アクション", "アドベンチャー", "シミュレーション", "スポーツ", "その他"], { include_blank: "選択してください" }, class: "form-select modern-input" %>
+          <%= f.label :genre, "ジャンル", class: "modern-label" %>
+          <%= f.select :genre, ["RPG", "アクション", "アドベンチャー", "シミュレーション", "スポーツ", "その他"], { include_blank: "選択してください" }, class: "form-select modern-input", data: { game_form_target: "genre" } %>
         </div>
       </div>
 
       <div class="row g-3 mb-3">
         <div class="col-sm-6">
-          <label class="modern-label">購入日</label>
+          <%= f.label :purchased_at, "購入日", class: "modern-label" %>
           <%= f.date_field :purchased_at, class: "form-control modern-input" %>
         </div>
         <div class="col-sm-6">
-          <label class="modern-label">プレイ時間</label>
+          <label class="modern-label" for="game_play_time">プレイ時間</label>
           <div class="d-flex align-items-end">
-            <%= f.number_field :play_time, class: "form-control modern-input me-2", placeholder: "0", min: 0 %>
-            <span style="color: #94a3b8; padding-bottom: 0.3rem; white-space: nowrap;">時間</span>
+            <%= f.number_field :play_time, class: "form-control modern-input me-2", placeholder: "0", min: 0, step: 1 %>
+            <span class="input-unit">時間</span>
           </div>
         </div>
       </div>
 
       <div>
         <label class="modern-label">プレイ期間</label>
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 play-period-fields">
           <%= f.date_field :started_at, class: "form-control modern-input" %>
-          <span style="color: #94a3b8; font-weight: bold;">〜</span>
+          <span class="date-separator">〜</span>
           <%= f.date_field :finished_at, class: "form-control modern-input" %>
         </div>
       </div>
@@ -86,7 +90,7 @@
     </div>
   </div>
 
-  <div class="row g-4 pt-3 mb-3" style="border-top: 1px dashed rgba(255,255,255,0.1);">
+  <div class="row g-4 pt-3 mb-3 form-extras">
     <div class="col-sm-6">
       <label class="modern-label">ステータス <span class="text-info">*</span></label>
       <div class="segment-control">
@@ -104,16 +108,17 @@
     <div class="col-sm-6 d-flex flex-column justify-content-center">
       <label class="modern-label">評価</label>
       <%= f.hidden_field :rating, data: { game_form_target: "rating" } %>
-      <div class="star-rating" data-action="mouseleave->game_form#resetStars">
+      <div class="star-rating" data-action="mouseleave->game-form#resetStars" aria-label="ユーザー評価">
         <% 5.times do |i| %>
-          <span class="material-symbols-outlined star-icon" data-value="<%= i + 1 %>" data-game-form-target="star" data-action="mouseenter->game_form#hoverStar click->game_form#clickStar">star</span>
+          <button type="button" class="material-symbols-outlined star-icon" data-value="<%= i + 1 %>" data-game-form-target="star" data-action="mouseenter->game-form#hoverStar click->game-form#clickStar" aria-label="<%= i + 1 %>つ星">star</button>
         <% end %>
       </div>
     </div>
   </div>
 
   <div class="mt-2">
-    <%= f.text_area :memo, class: "form-control memo-textarea", rows: 3, placeholder: "【総評・メモ】 ここに感想や攻略のメモ、次にやることなどを入力できます..." %>
+    <%= f.label :memo, "メモ", class: "modern-label" %>
+    <%= f.text_area :memo, class: "form-control memo-textarea", rows: 3, placeholder: "感想や攻略メモ" %>
   </div>
 
   <div class="d-flex justify-content-end align-items-center gap-3 mt-4">

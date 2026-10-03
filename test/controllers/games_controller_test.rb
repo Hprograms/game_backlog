@@ -1,4 +1,5 @@
 require "test_helper"
+require "minitest/mock"
 
 class GamesControllerTest < ActionDispatch::IntegrationTest
   def setup
@@ -28,6 +29,17 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     sign_in @user
     get games_path
     assert_response :success
+  end
+
+  test "新規フォームにRAWGサジェストとメタデータ欄が表示される" do
+    sign_in @user
+    get new_game_path
+
+    assert_response :success
+    assert_select 'form[data-controller="game-form"]'
+    assert_select '[data-game-form-target="suggestions"]'
+    assert_select 'input[name="game[metascore]"]'
+    assert_select 'input[name="game[average_playtime]"]'
   end
 
   # 自分のゲームだけ表示される
@@ -64,6 +76,34 @@ test "ログイン済みでゲームを登録できる" do
     }
   end
   assert_redirected_to game_path(Game.last)
+end
+
+test "RAWGメタデータをゲームに保存できる" do
+  sign_in @user
+  post games_path, params: {
+    game: {
+      title: "メタデータ付きゲーム",
+      status: "未着手",
+      metascore: 93,
+      average_playtime: 105
+    }
+  }
+
+  assert_redirected_to game_path(Game.last)
+  assert_equal 93, Game.last.metascore
+  assert_equal 105, Game.last.average_playtime
+end
+
+test "RAWG検索結果をJSONで返す" do
+  sign_in @user
+  result = [{ name: "検索ゲーム", image: "https://media.rawg.io/image.jpg", metacritic: 93, playtime: 105, platforms: ["Switch"], genres: ["RPG"] }]
+
+  RawgApiService.stub(:search, result) do
+    get search_games_path, params: { query: "検索ゲーム" }
+  end
+
+  assert_response :success
+  assert_equal result.as_json, response.parsed_body
 end
 
 # タイトルなしでは登録できない

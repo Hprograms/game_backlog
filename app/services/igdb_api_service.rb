@@ -5,6 +5,7 @@ require "stringio"
 class IgdbApiService
   TOKEN_CACHE_KEY = "igdb_api_access_token".freeze
   TOKEN_CACHE_TTL = 50.days
+  SEARCHABLE_GAME_CATEGORIES = [0, 2, 4, 8, 9, 10, 11].freeze
 
   PLATFORM_NAMES = {
     "Nintendo Switch" => "Switch",
@@ -36,9 +37,19 @@ class IgdbApiService
     request.body = apicalypse_query(query)
 
     response = perform_request(request.uri, request)
-    return [] unless response.is_a?(Net::HTTPSuccess)
+    unless response.is_a?(Net::HTTPSuccess)
+      Rails.logger.error("IGDB API Error [#{response.code}]: #{response.body}")
+      return []
+    end
 
-    JSON.parse(response.body).first(5).map { |game| format_game(game) }
+    games = JSON.parse(response.body)
+
+    filtered_games = games.reject do |game|
+      category = game["category"] || 0
+      !SEARCHABLE_GAME_CATEGORIES.include?(category)
+    end
+
+    filtered_games.first(5).map { |game| format_game(game) }
   rescue StandardError => e
     Rails.logger.error("IGDB API Error: #{e.message}")
     []
@@ -82,7 +93,7 @@ class IgdbApiService
 
   def self.apicalypse_query(query)
     escaped_query = query.to_s.gsub(/[\\"]/) { |character| "\\#{character}" }
-    %(search "#{escaped_query}"; fields name, cover.url, platforms.name, genres.name, involved_companies.company.name, summary, total_rating; limit 5;)
+    %(search "#{escaped_query}"; fields name, cover.url, platforms.name, genres.name, involved_companies.company.name, summary, total_rating, category; limit 50;)
   end
 
   def self.format_game(game)

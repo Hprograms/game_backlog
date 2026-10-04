@@ -1,6 +1,6 @@
 <article class="glass-panel game-show-panel">
-  <div class="row g-4 g-lg-5 game-show-layout">
-    <aside class="col-lg-4 game-show-visual">
+  <div class="game-show-layout">
+    <aside class="game-show-visual">
       <div class="game-show-poster">
         <% if @game.image.attached? %>
           <%= image_tag @game.image, class: "game-show-poster__image", alt: "#{@game.title}のパッケージ画像" %>
@@ -28,7 +28,7 @@
       </nav>
     </aside>
 
-    <div class="col-lg-8 game-show-content">
+    <div class="game-show-content">
       <header class="game-show-heading">
         <h1 class="game-show-title"><%= @game.title %></h1>
         <% if @game.developer.present? %>
@@ -44,7 +44,7 @@
           <span class="game-show-tag"><span class="material-symbols-outlined" aria-hidden="true">category</span><%= @game.genre %></span>
         <% end %>
         <% if @game.igdb_rating.present? %>
-          <span class="game-show-tag game-show-tag--score"><span class="material-symbols-outlined" aria-hidden="true">analytics</span>IGDB Rating <strong><%= @game.igdb_rating %></strong></span>
+          <span class="game-show-tag game-show-tag--score"><span class="material-symbols-outlined" aria-hidden="true">star</span>IGDB Rating <strong><%= @game.igdb_rating %></strong></span>
         <% end %>
       </div>
 
@@ -92,14 +92,14 @@
               <%= @game.finished_at&.strftime("%Y.%m.%d") || "未記録" %>
             </span>
           </div>
-        </div>
 
-        <% if @game.memo.present? %>
-          <div class="game-record-memo">
-            <span class="game-record-label">メモ</span>
-            <div class="game-memo"><%= simple_format(@game.memo) %></div>
-          </div>
-        <% end %>
+          <% if @game.memo.present? %>
+            <div class="game-record-item game-record-item--wide game-record-memo">
+              <span class="game-record-label">メモ</span>
+              <div class="game-memo"><%= simple_format(@game.memo) %></div>
+            </div>
+          <% end %>
+        </div>
       </section>
     </div>
   </div>

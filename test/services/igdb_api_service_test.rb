@@ -58,6 +58,48 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
     previous_env.each { |key, value| ENV[key] = value }
   end
 
+  test "search excludes noise categories while retaining expansions and remakes" do
+    previous_client_id = ENV["IGDB_CLIENT_ID"]
+    ENV["IGDB_CLIENT_ID"] = "client-id"
+    games = [
+      { name: "Small DLC", category: 1 },
+      { name: "Bundle", category: 3 },
+      { name: "Pack", category: 13 },
+      { name: "Base Game", category: 0 },
+      { name: "Large Expansion", category: 2 },
+      { name: "Standalone Expansion", category: 4 },
+      { name: "Remake", category: 8 },
+      { name: "Remaster", category: 9 },
+      { name: "Expanded Game", category: 10 },
+      { name: "Port", category: 11 }
+    ]
+    responses = [
+      Response.new("200", games.to_json),
+      Response.new("200", [
+        { name: "Expanded Game", category: 10 },
+        { name: "Port", category: 11 }
+      ].to_json)
+    ]
+
+    IgdbApiService.stub(:access_token, "token") do
+      IgdbApiService.stub(:perform_request, ->(*) { responses.shift }) do
+        @results = IgdbApiService.search("Example Game")
+        @retained_later_categories = IgdbApiService.search("Example Game").map { |game| game[:name] }
+      end
+    end
+
+    assert_equal [
+      "Base Game",
+      "Large Expansion",
+      "Standalone Expansion",
+      "Remake",
+      "Remaster"
+    ], @results.map { |game| game[:name] }
+    assert_equal ["Expanded Game", "Port"], @retained_later_categories
+  ensure
+    previous_client_id.nil? ? ENV.delete("IGDB_CLIENT_ID") : ENV["IGDB_CLIENT_ID"] = previous_client_id
+  end
+
   test "access token is reused from Rails cache" do
     previous_env = ENV.slice("IGDB_CLIENT_ID", "IGDB_CLIENT_SECRET")
     ENV["IGDB_CLIENT_ID"] = "client-id"

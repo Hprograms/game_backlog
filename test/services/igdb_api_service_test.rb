@@ -132,7 +132,7 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
     failure = ->(_host, _port, **_options, &_block) { raise IOError, "connection failed" }
 
     Net::HTTP.stub(:start, failure) do
-      assert_equal "Original summary", IgdbApiService.send(:translate_summary, "Original summary")
+      assert_equal "Original summary", IgdbApiService.translate_text("Original summary")
     end
   ensure
     previous_api_key.nil? ? ENV.delete("DEEPL_API_KEY") : ENV["DEEPL_API_KEY"] = previous_api_key

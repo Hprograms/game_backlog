@@ -3,7 +3,7 @@ require "json"
 require "stringio"
 
 class IgdbApiService
-  TOKEN_CACHE_KEY = "igdb_api_access_token".freeze
+  TOKEN_CACHE_KEY = "igdb_api_access_token_v2".freeze
   TOKEN_CACHE_TTL = 50.days
   SEARCHABLE_GAME_CATEGORIES = [0, 2, 4, 8, 9, 10, 11].freeze
 
@@ -69,9 +69,13 @@ class IgdbApiService
     credentials = igdb_credentials
     return if credentials.blank?
 
-    Rails.cache.fetch(TOKEN_CACHE_KEY, expires_in: TOKEN_CACHE_TTL) do
-      request_access_token(credentials[:client_id], credentials[:client_secret])
-    end&.dig(:access_token)
+    token_data = Rails.cache.read(TOKEN_CACHE_KEY)
+    unless token_data
+      token_data = request_access_token(credentials[:client_id], credentials[:client_secret])
+      ttl = [token_data[:expires_at] - Time.current, TOKEN_CACHE_TTL].min
+      Rails.cache.write(TOKEN_CACHE_KEY, token_data, expires_in: ttl)
+    end
+    token_data&.dig(:access_token)
   rescue StandardError => e
     Rails.logger.error("Twitch OAuth Error: #{e.message}")
     nil

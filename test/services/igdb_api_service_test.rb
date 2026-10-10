@@ -97,7 +97,14 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
     ENV["IGDB_CLIENT_SECRET"] = "client-secret"
     Rails.cache.delete(IgdbApiService::TOKEN_CACHE_KEY)
     request_count = 0
-    cache = ActiveSupport::Cache::MemoryStore.new
+    cache_entries = {}
+    cache_expirations = []
+    cache = Object.new
+    cache.define_singleton_method(:read) { |key| cache_entries[key] }
+    cache.define_singleton_method(:write) do |key, value, expires_in:|
+      cache_entries[key] = value
+      cache_expirations << expires_in
+    end
     http = Object.new
     http.define_singleton_method(:request) do |_request|
       request_count += 1
@@ -106,11 +113,12 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
 
     Rails.stub(:cache, cache) do
       Net::HTTP.stub(:start, ->(_host, _port, **_options, &block) { block.call(http) }) do
-        assert_equal "cached-token", IgdbApiService.access_token
-        assert_equal "cached-token", IgdbApiService.access_token
+        assert_equal "cached-token", IgdbApiService.send(:access_token)
+        assert_equal "cached-token", IgdbApiService.send(:access_token)
       end
     end
     assert_equal 1, request_count
+    assert_in_delta 3540, cache_expirations.fetch(0).to_f, 1
   ensure
     Rails.cache.delete(IgdbApiService::TOKEN_CACHE_KEY)
     %w[IGDB_CLIENT_ID IGDB_CLIENT_SECRET].each { |key| ENV.delete(key) }

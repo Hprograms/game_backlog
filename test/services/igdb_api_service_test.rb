@@ -113,8 +113,8 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
 
     Rails.stub(:cache, cache) do
       Net::HTTP.stub(:start, ->(_host, _port, **_options, &block) { block.call(http) }) do
-        assert_equal "cached-token", IgdbApiService.access_token
-        assert_equal "cached-token", IgdbApiService.access_token
+        assert_equal "cached-token", IgdbApiService.send(:access_token)
+        assert_equal "cached-token", IgdbApiService.send(:access_token)
       end
     end
     assert_equal 1, request_count

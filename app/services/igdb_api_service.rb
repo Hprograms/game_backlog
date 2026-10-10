@@ -80,12 +80,14 @@ class IgdbApiService
     Rails.logger.error("Twitch OAuth Error: #{e.message}")
     nil
   end
+  private_class_method :access_token
 
   def self.apicalypse_query(query)
     escaped_query = query.to_s.gsub(/[\\"]/) { |character| "\\#{character}" }
     categories = SEARCHABLE_GAME_CATEGORIES.join(",")
     %(search "#{escaped_query}"; fields name, cover.url, platforms.name, genres.name, involved_companies.company.name, summary, total_rating, game_type.*; where game_type = (#{categories}) & version_parent = null; limit 15;)
   end
+  private_class_method :apicalypse_query
 
   def self.translate_text(text)
     api_key = ENV["DEEPL_API_KEY"]
@@ -121,6 +123,7 @@ class IgdbApiService
       description: summary
     }
   end
+  private_class_method :format_game
 
   def self.request_access_token(client_id, client_secret)
     uri = URI("https://id.twitch.tv/oauth2/token")

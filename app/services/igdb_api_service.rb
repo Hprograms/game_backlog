@@ -66,12 +66,11 @@ class IgdbApiService
   end
 
   def self.access_token
-    client_id = ENV["IGDB_CLIENT_ID"]
-    client_secret = ENV["IGDB_CLIENT_SECRET"]
-    return if client_id.blank? || client_secret.blank?
+    credentials = igdb_credentials
+    return if credentials.blank?
 
     Rails.cache.fetch(TOKEN_CACHE_KEY, expires_in: TOKEN_CACHE_TTL) do
-      request_access_token(client_id, client_secret)
+      request_access_token(credentials[:client_id], credentials[:client_secret])
     end&.dig(:access_token)
   rescue StandardError => e
     Rails.logger.error("Twitch OAuth Error: #{e.message}")
@@ -141,4 +140,13 @@ class IgdbApiService
     end
   end
   private_class_method :perform_request
+
+  def self.igdb_credentials
+    client_id = ENV["IGDB_CLIENT_ID"]
+    client_secret = ENV["IGDB_CLIENT_SECRET"]
+    return if client_id.blank? || client_secret.blank?
+
+    { client_id: client_id, client_secret: client_secret }
+  end
+  private_class_method :igdb_credentials
 end

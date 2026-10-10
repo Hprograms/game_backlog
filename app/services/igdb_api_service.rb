@@ -121,7 +121,7 @@ class IgdbApiService
       genres: Array(game["genres"]).filter_map { |entry| GENRE_NAMES[entry["name"]] }.uniq,
       igdb_rating: game["total_rating"]&.round,
       developer: developer,
-      description: translate_text(summary)
+      description: summary
     }
   end
 

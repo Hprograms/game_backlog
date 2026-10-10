@@ -83,7 +83,8 @@ class IgdbApiService
 
   def self.apicalypse_query(query)
     escaped_query = query.to_s.gsub(/[\\"]/) { |character| "\\#{character}" }
-    %(search "#{escaped_query}"; fields name, cover.url, platforms.name, genres.name, involved_companies.company.name, summary, total_rating, game_type.*; where game_type = (0,2,4,8,9,10,11) & version_parent = null; limit 15;)
+    categories = SEARCHABLE_GAME_CATEGORIES.join(",")
+    %(search "#{escaped_query}"; fields name, cover.url, platforms.name, genres.name, involved_companies.company.name, summary, total_rating, game_type.*; where game_type = (#{categories}) & version_parent = null; limit 15;)
   end
 
   def self.translate_text(text)

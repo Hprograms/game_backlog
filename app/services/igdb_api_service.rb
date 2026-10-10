@@ -70,16 +70,9 @@ class IgdbApiService
     client_secret = ENV["IGDB_CLIENT_SECRET"]
     return if client_id.blank? || client_secret.blank?
 
-    token_data = Rails.cache.fetch(TOKEN_CACHE_KEY, expires_in: TOKEN_CACHE_TTL) do
+    Rails.cache.fetch(TOKEN_CACHE_KEY, expires_in: TOKEN_CACHE_TTL) do
       request_access_token(client_id, client_secret)
-    end
-    if token_data.blank? || token_data[:expires_at] <= Time.current
-      Rails.cache.delete(TOKEN_CACHE_KEY)
-      token_data = Rails.cache.fetch(TOKEN_CACHE_KEY, expires_in: TOKEN_CACHE_TTL) do
-        request_access_token(client_id, client_secret)
-      end
-    end
-    token_data&.dig(:access_token)
+    end&.dig(:access_token)
   rescue StandardError => e
     Rails.logger.error("Twitch OAuth Error: #{e.message}")
     nil

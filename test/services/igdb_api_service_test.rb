@@ -8,35 +8,28 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
     end
   end
 
-  test "search authenticates with Twitch, queries IGDB, and translates the summary" do
-    previous_env = ENV.slice("IGDB_CLIENT_ID", "IGDB_CLIENT_SECRET", "DEEPL_API_KEY")
+  test "search queries IGDB once and returns the original summary without translating" do
+    previous_env = ENV.slice("IGDB_CLIENT_ID", "DEEPL_API_KEY")
     ENV["IGDB_CLIENT_ID"] = "client-id"
-    ENV["IGDB_CLIENT_SECRET"] = "client-secret"
     ENV["DEEPL_API_KEY"] = "deepl-key"
-    Rails.cache.delete(IgdbApiService::TOKEN_CACHE_KEY)
 
-    responses = [
-      Response.new("200", { access_token: "bearer-token", expires_in: 3600 }.to_json),
-      Response.new("200", [{
-        name: "Example Game",
-        cover: { url: "//images.igdb.com/igdb/image/upload/t_thumb/co123.jpg" },
-        platforms: [{ name: "Nintendo Switch" }],
-        genres: [{ name: "Role-playing (RPG)" }],
-        involved_companies: [{ company: { name: "Example Studio" } }],
-        summary: "An English summary.",
-        total_rating: 89.6
-      }].to_json),
-      Response.new("200", { translations: [{ text: "日本語の概要。" }] }.to_json)
-    ]
+    response = Response.new("200", [{
+      name: "Example Game",
+      cover: { url: "//images.igdb.com/igdb/image/upload/t_thumb/co123.jpg" },
+      platforms: [{ name: "Nintendo Switch" }],
+      genres: [{ name: "Role-playing (RPG)" }],
+      involved_companies: [{ company: { name: "Example Studio" } }],
+      summary: "An English summary.",
+      total_rating: 89.6
+    }].to_json)
     requests = []
-    http = Object.new
-    http.define_singleton_method(:request) do |request|
-      requests << request
-      responses.shift
-    end
-
-    Net::HTTP.stub(:start, ->(_host, _port, **_options, &block) { block.call(http) }) do
-      @results = IgdbApiService.search("Example Game")
+    IgdbApiService.stub(:access_token, "bearer-token") do
+      IgdbApiService.stub(:perform_request, ->(_uri, request) {
+        requests << request
+        response
+      }) do
+        @results = IgdbApiService.search("Example Game")
+      end
     end
 
     result = @results.fetch(0)
@@ -46,15 +39,13 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
     assert_equal ["RPG"], result[:genres]
     assert_equal 90, result[:igdb_rating]
     assert_equal "Example Studio", result[:developer]
-    assert_equal "日本語の概要。", result[:description]
-    assert_equal "Bearer bearer-token", requests[1]["Authorization"]
-    assert_includes requests[1].body, 'search "Example Game";'
-    assert_includes requests[1].body, "involved_companies.company.name"
-    assert_equal "DeepL-Auth-Key deepl-key", requests[2]["Authorization"]
-    assert_equal({ "text" => "An English summary.", "target_lang" => "JA" }, URI.decode_www_form(requests[2].body).to_h)
+    assert_equal "An English summary.", result[:description]
+    assert_equal "Bearer bearer-token", requests.first["Authorization"]
+    assert_includes requests.first.body, 'search "Example Game";'
+    assert_includes requests.first.body, "involved_companies.company.name"
+    assert_equal 1, requests.length
   ensure
-    Rails.cache.delete(IgdbApiService::TOKEN_CACHE_KEY)
-    %w[IGDB_CLIENT_ID IGDB_CLIENT_SECRET DEEPL_API_KEY].each { |key| ENV.delete(key) }
+    %w[IGDB_CLIENT_ID DEEPL_API_KEY].each { |key| ENV.delete(key) }
     previous_env.each { |key, value| ENV[key] = value }
   end
 

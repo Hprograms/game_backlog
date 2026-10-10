@@ -90,6 +90,24 @@ class IgdbApiService
     %(search "#{escaped_query}"; fields name, cover.url, platforms.name, genres.name, involved_companies.company.name, summary, total_rating, game_type.*; where game_type = (0,2,4,8,9,10,11) & version_parent = null; limit 15;)
   end
 
+  def self.translate_text(text)
+    api_key = ENV["DEEPL_API_KEY"]
+    return text if text.blank? || api_key.blank?
+
+    uri = URI("https://api-free.deepl.com/v2/translate")
+    request = Net::HTTP::Post.new(uri)
+    request["Authorization"] = "DeepL-Auth-Key #{api_key}"
+    request["Content-Type"] = "application/x-www-form-urlencoded"
+    request.set_form_data(text: text, target_lang: "JA")
+    response = perform_request(uri, request)
+    return text unless response.is_a?(Net::HTTPSuccess)
+
+    JSON.parse(response.body).dig("translations", 0, "text").presence || text
+  rescue StandardError => e
+    Rails.logger.error("DeepL API Error: #{e.message}")
+    text
+  end
+
   def self.format_game(game)
     cover_url = game.dig("cover", "url")
     cover_url = cover_url&.sub(%r{\A//}, "https://")&.sub("t_thumb", "t_cover_big")
@@ -103,7 +121,7 @@ class IgdbApiService
       genres: Array(game["genres"]).filter_map { |entry| GENRE_NAMES[entry["name"]] }.uniq,
       igdb_rating: game["total_rating"]&.round,
       developer: developer,
-      description: translate_summary(summary)
+      description: summary
     }
   end
 
@@ -123,25 +141,6 @@ class IgdbApiService
     { access_token: body.fetch("access_token"), expires_at: Time.current + [expires_in - 60, 1].max.seconds }
   end
   private_class_method :request_access_token
-
-  def self.translate_summary(summary)
-    api_key = ENV["DEEPL_API_KEY"]
-    return summary if summary.blank? || api_key.blank?
-
-    uri = URI("https://api-free.deepl.com/v2/translate")
-    request = Net::HTTP::Post.new(uri)
-    request["Authorization"] = "DeepL-Auth-Key #{api_key}"
-    request["Content-Type"] = "application/x-www-form-urlencoded"
-    request.set_form_data(text: summary, target_lang: "JA")
-    response = perform_request(uri, request)
-    return summary unless response.is_a?(Net::HTTPSuccess)
-
-    JSON.parse(response.body).dig("translations", 0, "text").presence || summary
-  rescue StandardError => e
-    Rails.logger.error("DeepL API Error: #{e.message}")
-    summary
-  end
-  private_class_method :translate_summary
 
   def self.perform_request(uri, request)
     Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 5, read_timeout: 10) do |http|

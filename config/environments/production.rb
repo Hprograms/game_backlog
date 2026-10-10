@@ -58,13 +58,14 @@ Rails.application.configure do
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.default_url_options = { host: ENV["APP_HOST"] }
+  
   ActionMailer::Base.smtp_settings = {
-    port:           2525,
-    address:        'smtp.mailgun.org',
-    user_name:      ENV['MAILGUN_SMTP_LOGIN'],
-    password:       ENV['MAILGUN_SMTP_PASSWORD'],
-    domain:         ENV['APP_HOST'],
+    address:        'smtp.resend.com',
+    port:           465,
+    user_name:      'resend',
+    password:       ENV['RESEND_API_KEY'],
     authentication: :plain,
+    tls:            true
   }
 
   # Specify outgoing SMTP server. Remember to add smtp/* credentials via rails credentials:edit.

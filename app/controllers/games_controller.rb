@@ -3,7 +3,7 @@ class GamesController < ApplicationController
   before_action :set_game, only: [:show, :edit, :update, :destroy, :destroy_image]
 
   def index
-    @games = current_user.games.order(created_at: :desc)
+    @games = current_user.games.with_attached_image.order(created_at: :desc)
     @games = @games.where(status: params[:status]) if params[:status].present?
     @total_count = current_user.games.count
     @clear_rate = @total_count > 0 ? (current_user.games.where(status: "クリア済").count * 100 / @total_count) : 0

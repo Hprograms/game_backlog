@@ -130,6 +130,57 @@ test "IGDBの開発元とあらすじをゲームに保存できる" do
   assert_equal "ゲームのあらすじ", Game.last.description
 end
 
+test "ゲーム登録時に英語のあらすじを翻訳して保存する" do
+  sign_in @user
+  translated_texts = []
+  translator = ->(text) { translated_texts << text; "日本語のあらすじ。" }
+
+  IgdbApiService.stub(:translate_text, translator) do
+    post games_path, params: {
+      game: {
+        title: "英語概要のゲーム",
+        status: "未着手",
+        description: "An English summary."
+      }
+    }
+  end
+
+  assert_redirected_to game_path(Game.last)
+  assert_equal "日本語のあらすじ。", Game.last.description
+  assert_equal ["An English summary."], translated_texts
+end
+
+test "日本語または空のあらすじは翻訳せずゲームを保存する" do
+  sign_in @user
+  translated_texts = []
+  translator = ->(text) { translated_texts << text; text }
+
+  IgdbApiService.stub(:translate_text, translator) do
+    post games_path, params: {
+      game: {
+        title: "日本語概要のゲーム",
+        status: "未着手",
+        description: "すでに日本語のあらすじです。"
+      }
+    }
+
+    assert_redirected_to game_path(Game.last)
+    assert_equal "すでに日本語のあらすじです。", Game.last.description
+
+    post games_path, params: {
+      game: {
+        title: "概要なしのゲーム",
+        status: "未着手",
+        description: ""
+      }
+    }
+
+    assert_redirected_to game_path(Game.last)
+    assert_equal "", Game.last.description
+  end
+  assert_empty translated_texts
+end
+
 test "IGDB検索結果をJSONで返す" do
   sign_in @user
   result = [{ name: "検索ゲーム", image: "https://images.igdb.com/image.jpg", igdb_rating: 93, developer: "開発スタジオ", description: "ゲームのあらすじ", platforms: ["Switch"], genres: ["RPG"] }]

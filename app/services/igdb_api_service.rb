@@ -3,7 +3,7 @@ require "json"
 require "stringio"
 
 class IgdbApiService
-  TOKEN_CACHE_KEY = "igdb_api_access_token".freeze
+  TOKEN_CACHE_KEY = "igdb_api_access_token_v2".freeze
   TOKEN_CACHE_TTL = 50.days
   SEARCHABLE_GAME_CATEGORIES = [0, 2, 4, 8, 9, 10, 11].freeze
 
@@ -36,14 +36,11 @@ class IgdbApiService
     request["Content-Type"] = "text/plain"
     request.body = apicalypse_query(query)
 
-    response = perform_request(request.uri, request)
-    unless response.is_a?(Net::HTTPSuccess)
-      Rails.logger.error("IGDB API Error [#{response.code}]: #{response.body}")
-      return []
-    end
+    games = perform_json_request(request.uri, request)
+    return [] unless games
 
     # API側で完璧にフィルタリングされるため、Ruby側のreject処理は全削除してOK
-    JSON.parse(response.body).first(5).map { |game| format_game(game) }
+    games.first(5).map { |game| format_game(game) }
   rescue StandardError => e
     Rails.logger.error("IGDB API Error: #{e.message}")
     []
@@ -66,29 +63,30 @@ class IgdbApiService
   end
 
   def self.access_token
-    client_id = ENV["IGDB_CLIENT_ID"]
-    client_secret = ENV["IGDB_CLIENT_SECRET"]
-    return if client_id.blank? || client_secret.blank?
+    credentials = igdb_credentials
+    return if credentials.blank?
 
-    token_data = Rails.cache.fetch(TOKEN_CACHE_KEY, expires_in: TOKEN_CACHE_TTL) do
-      request_access_token(client_id, client_secret)
-    end
-    if token_data.blank? || token_data[:expires_at] <= Time.current
-      Rails.cache.delete(TOKEN_CACHE_KEY)
-      token_data = Rails.cache.fetch(TOKEN_CACHE_KEY, expires_in: TOKEN_CACHE_TTL) do
-        request_access_token(client_id, client_secret)
-      end
+    token_data = Rails.cache.read(TOKEN_CACHE_KEY)
+    unless token_data
+      token_data = request_access_token(credentials[:client_id], credentials[:client_secret])
+      return unless token_data
+
+      ttl = [token_data[:expires_at] - Time.current, TOKEN_CACHE_TTL].min
+      Rails.cache.write(TOKEN_CACHE_KEY, token_data, expires_in: ttl)
     end
     token_data&.dig(:access_token)
   rescue StandardError => e
     Rails.logger.error("Twitch OAuth Error: #{e.message}")
     nil
   end
+  private_class_method :access_token
 
   def self.apicalypse_query(query)
     escaped_query = query.to_s.gsub(/[\\"]/) { |character| "\\#{character}" }
-    %(search "#{escaped_query}"; fields name, cover.url, platforms.name, genres.name, involved_companies.company.name, summary, total_rating, game_type.*; where game_type = (0,2,4,8,9,10,11) & version_parent = null; limit 15;)
+    categories = SEARCHABLE_GAME_CATEGORIES.join(",")
+    %(search "#{escaped_query}"; fields name, cover.url, platforms.name, genres.name, involved_companies.company.name, summary, total_rating, game_type.*; where game_type = (#{categories}) & version_parent = null; limit 15;)
   end
+  private_class_method :apicalypse_query
 
   def self.translate_text(text)
     api_key = ENV["DEEPL_API_KEY"]
@@ -99,10 +97,8 @@ class IgdbApiService
     request["Authorization"] = "DeepL-Auth-Key #{api_key}"
     request["Content-Type"] = "application/x-www-form-urlencoded"
     request.set_form_data(text: text, target_lang: "JA")
-    response = perform_request(uri, request)
-    return text unless response.is_a?(Net::HTTPSuccess)
-
-    JSON.parse(response.body).dig("translations", 0, "text").presence || text
+    response = perform_json_request(uri, request)
+    response&.dig("translations", 0, "text").presence || text
   rescue StandardError => e
     Rails.logger.error("DeepL API Error: #{e.message}")
     text
@@ -124,6 +120,7 @@ class IgdbApiService
       description: summary
     }
   end
+  private_class_method :format_game
 
   def self.request_access_token(client_id, client_secret)
     uri = URI("https://id.twitch.tv/oauth2/token")
@@ -133,10 +130,9 @@ class IgdbApiService
       client_id: client_id,
       client_secret: client_secret
     )
-    response = perform_request(uri, request)
-    raise "Twitch OAuth returned HTTP #{response.code}" unless response.is_a?(Net::HTTPSuccess)
+    body = perform_json_request(uri, request)
+    return unless body
 
-    body = JSON.parse(response.body)
     expires_in = body.fetch("expires_in").to_i
     { access_token: body.fetch("access_token"), expires_at: Time.current + [expires_in - 60, 1].max.seconds }
   end
@@ -148,4 +144,22 @@ class IgdbApiService
     end
   end
   private_class_method :perform_request
+
+  def self.perform_json_request(uri, request)
+    response = perform_request(uri, request)
+    return JSON.parse(response.body) if response.is_a?(Net::HTTPSuccess)
+
+    Rails.logger.error("External API Error [#{response.code}]: #{response.body}")
+    nil
+  end
+  private_class_method :perform_json_request
+
+  def self.igdb_credentials
+    client_id = ENV["IGDB_CLIENT_ID"]
+    client_secret = ENV["IGDB_CLIENT_SECRET"]
+    return if client_id.blank? || client_secret.blank?
+
+    { client_id: client_id, client_secret: client_secret }
+  end
+  private_class_method :igdb_credentials
 end

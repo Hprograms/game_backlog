@@ -18,6 +18,11 @@ class GamesController < ApplicationController
 
   def create
     @game = current_user.games.build(game_params)
+    if @game.description.present? && @game.description !~ /[\p{Hiragana}\p{Katakana}\p{Han}]/
+      original_description = @game.description
+      @game.description = IgdbApiService.translate_text(original_description).presence || original_description
+    end
+
     if @game.save
       attach_igdb_image
       redirect_to @game, notice: "ゲームを登録しました！"

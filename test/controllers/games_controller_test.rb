@@ -3,11 +3,13 @@ require "minitest/mock"
 
 class GamesControllerTest < ActionDispatch::IntegrationTest
   def setup
+    @clerk_user = build_clerk_user("user_clerk_games_test", "test@example.com")
     @user = User.create!(
       email: "test@example.com",
       password: "password",
       activated: true,
-      activated_at: Time.zone.now
+      activated_at: Time.zone.now,
+      clerk_user_id: @clerk_user.id
     )
     @game = Game.create!(
       title: "ゼルダの伝説",
@@ -26,14 +28,16 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
 
   # ログインしている場合は一覧が表示される
   test "ログイン済みでindexにアクセスできる" do
-    sign_in @user
-    get games_path
+    with_clerk_session do
+      get games_path
+    end
     assert_response :success
   end
 
   test "新規フォームにIGDBサジェスト用の項目が表示される" do
-    sign_in @user
-    get new_game_path
+    with_clerk_session do
+      get new_game_path
+    end
 
     assert_response :success
     assert_select 'form[data-controller="game-form"]'
@@ -41,13 +45,12 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_select 'input[name="game[igdb_rating]"]'
     assert_select 'input[name="game[developer]"]'
     assert_select 'input[name="game[description]"]'
-    assert_select '.api-metadata', count: 0
+    assert_select ".api-metadata", count: 0
     assert_select 'input[name="game[metascore]"]', count: 0
     assert_select 'input[name="game[average_playtime]"]', count: 0
   end
 
   test "詳細画面に外部情報とプレイ記録が表示される" do
-    sign_in @user
     @game.update!(
       developer: "開発スタジオ",
       description: "あらすじの1行目\nあらすじの2行目",
@@ -60,7 +63,9 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
       memo: "記録の1行目\n記録の2行目"
     )
 
-    get game_path(@game)
+    with_clerk_session do
+      get game_path(@game)
+    end
 
     assert_response :success
     assert_select ".game-show-panel"
@@ -90,39 +95,42 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
       user: other_user
     )
 
-    sign_in @user
-    get games_path
+    with_clerk_session do
+      get games_path
+    end
     assert_response :success
     assert_equal 1, @user.games.count
   end
 
-  # 正常にゲームを登録できる
+# 正常にゲームを登録できる
 test "ログイン済みでゲームを登録できる" do
-  sign_in @user
   assert_difference("Game.count", 1) do
-    post games_path, params: {
-      game: {
-        title: "モンスターハンター",
-        platform: "Switch",
-        genre: "アクション",
-        status: "未着手"
+    with_clerk_session do
+      post games_path, params: {
+        game: {
+          title: "モンスターハンター",
+          platform: "Switch",
+          genre: "アクション",
+          status: "未着手"
+        }
       }
-    }
+    end
   end
   assert_redirected_to game_path(Game.last)
 end
 
 test "IGDBの開発元とあらすじをゲームに保存できる" do
-  sign_in @user
-  post games_path, params: {
-    game: {
-      title: "メタデータ付きゲーム",
-      status: "未着手",
-      igdb_rating: 93,
-      developer: "開発スタジオ",
-      description: "ゲームのあらすじ"
+  with_clerk_session do
+    post games_path, params: {
+      game: {
+        title: "メタデータ付きゲーム",
+        status: "未着手",
+        igdb_rating: 93,
+        developer: "開発スタジオ",
+        description: "ゲームのあらすじ"
+      }
     }
-  }
+  end
 
   assert_redirected_to game_path(Game.last)
   assert_equal 93, Game.last.igdb_rating
@@ -131,38 +139,40 @@ test "IGDBの開発元とあらすじをゲームに保存できる" do
 end
 
 test "ゲーム登録時に英語のあらすじを翻訳して保存する" do
-  sign_in @user
   translated_texts = []
   translator = ->(text) { translated_texts << text; "日本語のあらすじ。" }
 
-  IgdbApiService.stub(:translate_text, translator) do
-    post games_path, params: {
-      game: {
-        title: "英語概要のゲーム",
-        status: "未着手",
-        description: "An English summary."
+  with_clerk_session do
+    IgdbApiService.stub(:translate_text, translator) do
+      post games_path, params: {
+        game: {
+          title: "英語概要のゲーム",
+          status: "未着手",
+          description: "An English summary."
+        }
       }
-    }
+    end
   end
 
   assert_redirected_to game_path(Game.last)
   assert_equal "日本語のあらすじ。", Game.last.description
-  assert_equal ["An English summary."], translated_texts
+  assert_equal [ "An English summary." ], translated_texts
 end
 
 test "日本語または空のあらすじは翻訳せずゲームを保存する" do
-  sign_in @user
   translated_texts = []
   translator = ->(text) { translated_texts << text; text }
 
-  IgdbApiService.stub(:translate_text, translator) do
-    post games_path, params: {
-      game: {
-        title: "日本語概要のゲーム",
-        status: "未着手",
-        description: "すでに日本語のあらすじです。"
+  with_clerk_session do
+    IgdbApiService.stub(:translate_text, translator) do
+      post games_path, params: {
+        game: {
+          title: "日本語概要のゲーム",
+          status: "未着手",
+          description: "すでに日本語のあらすじです。"
+        }
       }
-    }
+    end
 
     assert_redirected_to game_path(Game.last)
     assert_equal "すでに日本語のあらすじです。", Game.last.description
@@ -182,11 +192,12 @@ test "日本語または空のあらすじは翻訳せずゲームを保存す�
 end
 
 test "IGDB検索結果をJSONで返す" do
-  sign_in @user
-  result = [{ name: "検索ゲーム", image: "https://images.igdb.com/image.jpg", igdb_rating: 93, developer: "開発スタジオ", description: "ゲームのあらすじ", platforms: ["Switch"], genres: ["RPG"] }]
+  result = [ { name: "検索ゲーム", image: "https://images.igdb.com/image.jpg", igdb_rating: 93, developer: "開発スタジオ", description: "ゲームのあらすじ", platforms: [ "Switch" ], genres: [ "RPG" ] } ]
 
-  IgdbApiService.stub(:search, result) do
-    get search_games_path, params: { query: "検索ゲーム" }
+  with_clerk_session do
+    IgdbApiService.stub(:search, result) do
+      get search_games_path, params: { query: "検索ゲーム" }
+    end
   end
 
   assert_response :success
@@ -196,15 +207,16 @@ end
 
 # タイトルなしでは登録できない
 test "タイトルなしでは登録できない" do
-  sign_in @user
   assert_no_difference("Game.count") do
-    post games_path, params: {
-      game: {
-        title: "",
-        platform: "Switch",
-        status: "未着手"
+    with_clerk_session do
+      post games_path, params: {
+        game: {
+          title: "",
+          platform: "Switch",
+          status: "未着手"
+        }
       }
-    }
+    end
   end
   assert_response :unprocessable_entity
 end
@@ -222,11 +234,12 @@ end
     assert_redirected_to new_user_session_path
   end
 
-    # 自分のゲームを削除できる
+  # 自分のゲームを削除できる
   test "自分のゲームを削除できる" do
-    sign_in @user
-    assert_difference("Game.count", -1) do
-      delete game_path(@game)
+      assert_difference("Game.count", -1) do
+        with_clerk_session do
+          delete game_path(@game)
+        end
     end
     assert_redirected_to games_path
   end
@@ -236,55 +249,84 @@ end
     other_user = User.create!(email: "other@example.com", password: "password")
     other_game = Game.create!(title: "他人のゲーム", status: "未着手", user: other_user)
 
-    sign_in @user
     assert_no_difference("Game.count") do
-      delete game_path(other_game)
+      with_clerk_session do
+        delete game_path(other_game)
+      end
     end
   end
 
   # 自分のゲームを更新できる
   test "自分のゲームを更新できる" do
-    sign_in @user
-    patch game_path(@game), params: {
-      game: { title: "更新後のタイトル", status: "プレイ中" }
-    }
+    with_clerk_session do
+      patch game_path(@game), params: {
+        game: { title: "更新後のタイトル", status: "プレイ中" }
+      }
+    end
     assert_redirected_to game_path(@game)
     assert_equal "更新後のタイトル", @game.reload.title
   end
 
- 
+
   # 他人のゲームは更新できない
   test "他人のゲームは更新できない" do
     other_user = User.create!(email: "other@example.com", password: "password")
     other_game = Game.create!(title: "他人のゲーム", status: "未着手", user: other_user)
 
-    sign_in @user
-    patch game_path(other_game), params: {
-      game: { title: "書き換え" }
-    }
+    with_clerk_session do
+      patch game_path(other_game), params: {
+        game: { title: "書き換え" }
+      }
+    end
     assert_redirected_to games_path
     assert_not_equal "書き換え", other_game.reload.title
   end
 
   test "積みゲー総数とクリア率が正しく計算される" do
-    sign_in @user
     Game.create!(title: "クリア済みゲーム", status: "クリア済", user: @user)
     Game.create!(title: "プレイ中ゲーム", status: "プレイ中", user: @user)
 
-    get games_path
+    with_clerk_session do
+      get games_path
+    end
     assert_response :success
     assert_equal 3, assigns(:total_count)
     assert_equal 33, assigns(:clear_rate)
   end
 
   test "ステータスで絞り込みができる" do
-    sign_in @user
     Game.create!(title: "プレイ中ゲーム", status: "プレイ中", user: @user)
     Game.create!(title: "クリア済ゲーム", status: "クリア済", user: @user)
 
-    get games_path, params: { status: "プレイ中" }
+    with_clerk_session do
+      get games_path, params: { status: "プレイ中" }
+    end
     assert_response :success
     assert_equal 1, assigns(:games).count
     assert_equal "プレイ中", assigns(:games).first.status
   end
-end 
+
+  private
+
+  def build_clerk_user(id, email)
+    email_address_id = "email_#{id}"
+    Struct.new(:id, :primary_email_address_id, :email_addresses).new(
+      id,
+      email_address_id,
+      [ Struct.new(:id, :email_address).new(email_address_id, email) ]
+    )
+  end
+
+  def with_clerk_session
+    proxy = Struct.new(:user?, :user).new(true, @clerk_user)
+    resolver = Object.new
+    resolver.define_singleton_method(:resolve) do |env|
+      env["clerk"] = proxy
+      [ nil, {}, [] ]
+    end
+
+    Clerk::AuthenticateRequest.stub(:new, ->(_context) { resolver }) do
+      yield
+    end
+  end
+end

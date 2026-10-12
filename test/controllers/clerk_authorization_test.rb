@@ -5,7 +5,6 @@ class ClerkAuthorizationTest < ActionDispatch::IntegrationTest
     @clerk_user = create_clerk_user("user_clerk_owner", "owner@example.com")
     @user = User.create!(
       email: "owner@example.com",
-      password: "unused-password",
       clerk_user_id: @clerk_user.id
     )
     @game = Game.create!(title: "Owner game", status: "未着手", user: @user)
@@ -21,14 +20,6 @@ class ClerkAuthorizationTest < ActionDispatch::IntegrationTest
     get search_games_path, params: { query: "game" }, as: :json
 
     assert_response :unauthorized
-  end
-
-  test "Deviseのログインセッションだけでは保護された画面にアクセスできない" do
-    sign_in @user
-
-    get games_path
-
-    assert_redirected_to new_user_session_path
   end
 
   test "Clerkセッションがあればアプリ内ユーザーのゲーム一覧を表示する" do
@@ -65,12 +56,6 @@ class ClerkAuthorizationTest < ActionDispatch::IntegrationTest
     end
 
     assert_equal @user, Game.find_by!(title: "New owner game").user
-  end
-
-  test "未認証では旧アカウント有効化エンドポイントも利用できない" do
-    get edit_account_activation_path("activation-token", email: @user.email)
-
-    assert_redirected_to new_user_session_path
   end
 
   private

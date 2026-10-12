@@ -1,23 +1,22 @@
 class GamesController < ApplicationController
-  before_action :authenticate_user!
-  before_action :set_game, only: [:show, :edit, :update, :destroy, :destroy_image]
+  before_action :set_game, only: [ :show, :edit, :update, :destroy, :destroy_image ]
 
   def index
-    @games = current_user.games.with_attached_image.order(created_at: :desc)
+    @games = current_app_user.games.with_attached_image.order(created_at: :desc)
     @games = @games.where(status: params[:status]) if params[:status].present?
-    @total_count = current_user.games.count
-    @clear_rate = @total_count > 0 ? (current_user.games.where(status: "クリア済").count * 100 / @total_count) : 0
+    @total_count = current_app_user.games.count
+    @clear_rate = @total_count > 0 ? (current_app_user.games.where(status: "クリア済").count * 100 / @total_count) : 0
   end
 
   def show
   end
 
   def new
-    @game = current_user.games.build
+    @game = current_app_user.games.build
   end
 
   def create
-    @game = current_user.games.build(game_params)
+    @game = current_app_user.games.build(game_params)
     if @game.description.present? && @game.description !~ /[\p{Hiragana}\p{Katakana}\p{Han}]/
       original_description = @game.description
       @game.description = IgdbApiService.translate_text(original_description).presence || original_description
@@ -61,12 +60,12 @@ class GamesController < ApplicationController
   private
 
   def set_game
-      @game = current_user.games.find_by(id: params[:id])
+      @game = current_app_user.games.find_by(id: params[:id])
       if @game.nil?
         redirect_to games_path, alert: "ゲームが見つかりません"
       end
   end
-  
+
   def game_params
     params.require(:game).permit(:title, :platform, :genre, :status, :memo, :rating, :purchased_at, :image, :play_time, :played_at, :started_at, :finished_at, :igdb_rating, :developer, :description)
   end

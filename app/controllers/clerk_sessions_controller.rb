@@ -1,5 +1,5 @@
 class ClerkSessionsController < ApplicationController
-  skip_before_action :check_activated
+  skip_before_action :authenticate_clerk_user!
   before_action :ensure_clerk_publishable_key!
   before_action :redirect_if_clerk_authenticated
 

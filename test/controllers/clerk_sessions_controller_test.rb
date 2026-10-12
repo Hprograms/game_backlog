@@ -64,7 +64,7 @@ class ClerkSessionsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to games_path
   end
 
-  test "Deviseのログイン・登録・ログアウト送信ルートは無効" do
+  test "旧認証のログイン・登録・ログアウト・有効化ルートは無効" do
     assert_raises(ActionController::RoutingError) do
       Rails.application.routes.recognize_path("/users/sign_in", method: :post)
     end
@@ -73,6 +73,9 @@ class ClerkSessionsControllerTest < ActionDispatch::IntegrationTest
     end
     assert_raises(ActionController::RoutingError) do
       Rails.application.routes.recognize_path("/users/sign_out", method: :delete)
+    end
+    assert_raises(ActionController::RoutingError) do
+      Rails.application.routes.recognize_path("/account_activations/1/edit", method: :get)
     end
   end
 

@@ -6,9 +6,6 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     @clerk_user = build_clerk_user("user_clerk_games_test", "test@example.com")
     @user = User.create!(
       email: "test@example.com",
-      password: "password",
-      activated: true,
-      activated_at: Time.zone.now,
       clerk_user_id: @clerk_user.id
     )
     @game = Game.create!(
@@ -84,8 +81,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
   # 自分のゲームだけ表示される
   test "自分のゲームだけ表示される" do
     other_user = User.create!(
-      email: "other@example.com",
-      password: "password"
+      email: "other@example.com"
     )
     Game.create!(
       title: "他人のゲーム",
@@ -246,7 +242,7 @@ end
 
   # 他人のゲームは削除できない
   test "他人のゲームは削除できない" do
-    other_user = User.create!(email: "other@example.com", password: "password")
+    other_user = User.create!(email: "other@example.com")
     other_game = Game.create!(title: "他人のゲーム", status: "未着手", user: other_user)
 
     assert_no_difference("Game.count") do
@@ -270,7 +266,7 @@ end
 
   # 他人のゲームは更新できない
   test "他人のゲームは更新できない" do
-    other_user = User.create!(email: "other@example.com", password: "password")
+    other_user = User.create!(email: "other@example.com")
     other_game = Game.create!(title: "他人のゲーム", status: "未着手", user: other_user)
 
     with_clerk_session do

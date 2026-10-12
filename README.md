@@ -39,7 +39,6 @@
 * **デプロイ:** Render
 * **外部API:**
   * IGDB API (ゲームメタデータ・画像取得)
-  * Resend API (メール配信)
   * DeepL API（ゲームのあらすじ翻訳）
   * Clerk (認証・セッション管理)
 * **AI:**
@@ -54,7 +53,6 @@
 ### 2. 外部API活用
 * **ゲーム検索・サジェスト表示:** `IGDB`を使ってゲーム検索、詳細情報取得を実現しました。
 * **あらすじ翻訳:** `DeepL`を使って`IGDB`から取得したゲームのあらすじを日本語へ自動翻訳するようにしました。
-* **アカウント有効化メール:**  `Resend` の公式HTTP APIで、セキュアで高速なメール配信を実現しました。コストの制約上、SMTPの主流ポート番号が使えないため、APIでメール配信を実装しました。
 
 ### 3. 外部API連携をカプセル化したファットコントローラ防止
 Twitchが提供するIGDB APIを活用する際、OAuth2.0によるトークン取得・キャッシュ・API呼び出しのロジックを `IgdbApiService` クラスとしてカプセル化しました。コントローラをクリーンに保ちつつ、ユーザーが手動で画像を探す手間を省くUXを提供しています。
@@ -74,8 +72,27 @@ $ bundle install
 # データベースのセットアップ
 $ rails db:create db:migrate db:seed
 
-# 環境変数の設定 (IGDB API, Resend API, DeepL APIのキーを設定)
+# 環境変数の設定 (Clerk、IGDB API、DeepL APIのキーを設定)
 # .env ファイルを作成し、必要なキーを記述してください
 
 # サーバーの起動
-$ rails s 
+$ rails s
+```
+
+### 既存ユーザーをClerkへ紐付ける
+
+旧認証からの移行では既存のUserとゲームデータを保持します。メールアドレスだけでの自動連携は行わないため、既存ユーザーは本番デプロイ後、Clerkで最初にログインする前に一度だけClerk IDを登録してください。
+
+1. Clerk Dashboardで対象ユーザーのID（`user_...`）とメールアドレスを確認します。Clerkのメールアドレスが既存Userと同一であることを確認してください。
+2. 本番環境に新しいコードをデプロイし、データベースマイグレーションを適用します。
+3. 本番環境で次のコマンドを実行し、メールアドレスとClerk IDを置き換えます。
+
+```bash
+bin/rails runner -e production '
+user = User.find_by!(email: "既存Userに保存されたメールアドレス")
+raise "User is already linked to Clerk" if user.clerk_user_id.present?
+user.update!(clerk_user_id: "user_ClerkのユーザーID")
+'
+```
+
+この紐付けは一度だけ実行してください。メールアドレスが一致しない場合や、既に別のClerk IDへ紐付いている場合は処理を進めず、対象ユーザーを確認してください。

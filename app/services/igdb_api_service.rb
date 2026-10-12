@@ -84,7 +84,7 @@ class IgdbApiService
   def self.apicalypse_query(query)
     escaped_query = query.to_s.gsub(/[\\"]/) { |character| "\\#{character}" }
     categories = SEARCHABLE_GAME_CATEGORIES.join(",")
-    %(search "#{escaped_query}"; fields name, cover.url, platforms.name, genres.name, involved_companies.company.name, summary, total_rating, game_type.*; where game_type = (#{categories}) & version_parent = null; limit 15;)
+    %(search "#{escaped_query}"; fields name, cover.url, platforms.name, genres.name, involved_companies.company.name, storyline, total_rating, game_type.*; where game_type = (#{categories}) & version_parent = null; limit 15;)
   end
   private_class_method :apicalypse_query
 
@@ -107,7 +107,7 @@ class IgdbApiService
   def self.format_game(game)
     cover_url = game.dig("cover", "url")
     cover_url = cover_url&.sub(%r{\A//}, "https://")&.sub("t_thumb", "t_cover_big")
-    summary = game["summary"].to_s
+    description = game["storyline"].presence || "ストーリーの詳細は不明だ。君自身の目で確かめよう。"
     developer = Array(game["involved_companies"]).filter_map { |entry| entry.dig("company", "name") }.first
 
     {
@@ -117,7 +117,7 @@ class IgdbApiService
       genres: Array(game["genres"]).filter_map { |entry| GENRE_NAMES[entry["name"]] }.uniq,
       igdb_rating: game["total_rating"]&.round,
       developer: developer,
-      description: summary
+      description: description
     }
   end
   private_class_method :format_game

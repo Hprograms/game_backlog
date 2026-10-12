@@ -8,7 +8,7 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
     end
   end
 
-  test "search queries IGDB once and returns the original summary without translating" do
+  test "search requests and returns the IGDB storyline without translating" do
     previous_env = ENV.slice("IGDB_CLIENT_ID", "DEEPL_API_KEY")
     ENV["IGDB_CLIENT_ID"] = "client-id"
     ENV["DEEPL_API_KEY"] = "deepl-key"
@@ -19,7 +19,7 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
       platforms: [{ name: "Nintendo Switch" }],
       genres: [{ name: "Role-playing (RPG)" }],
       involved_companies: [{ company: { name: "Example Studio" } }],
-      summary: "An English summary.",
+      storyline: "An English storyline.",
       total_rating: 89.6
     }].to_json)
     requests = []
@@ -39,9 +39,10 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
     assert_equal ["RPG"], result[:genres]
     assert_equal 90, result[:igdb_rating]
     assert_equal "Example Studio", result[:developer]
-    assert_equal "An English summary.", result[:description]
+    assert_equal "An English storyline.", result[:description]
     assert_equal "Bearer bearer-token", requests.first["Authorization"]
     assert_includes requests.first.body, 'search "Example Game";'
+    assert_includes requests.first.body, "storyline"
     assert_includes requests.first.body, "involved_companies.company.name"
     assert_equal 1, requests.length
   ensure
@@ -89,6 +90,16 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
     assert_equal ["Expanded Game", "Port"], @retained_later_categories
   ensure
     previous_client_id.nil? ? ENV.delete("IGDB_CLIENT_ID") : ENV["IGDB_CLIENT_ID"] = previous_client_id
+  end
+
+  test "format_game uses the fallback description when storyline is missing or blank" do
+    fallback = "ストーリーの詳細は不明だ。君自身の目で確かめよう。"
+
+    [nil, ""].each do |storyline|
+      result = IgdbApiService.send(:format_game, { "name" => "Example Game", "storyline" => storyline })
+
+      assert_equal fallback, result[:description]
+    end
   end
 
   test "access token is reused from Rails cache" do

@@ -20,8 +20,10 @@ class User < ApplicationRecord
       existing_user = find_by(clerk_user_id: clerk_user_id)
       next existing_user if existing_user
 
-      if where(email: email).exists?
-        raise ClerkIdentityConflict, "Email is already associated with a different application user"
+      user_by_email = find_by(email: email)
+      if user_by_email
+        user_by_email.update!(clerk_user_id: clerk_user_id)
+        next user_by_email
       end
 
       create!(

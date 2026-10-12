@@ -19,19 +19,17 @@ class UserTest < ActiveSupport::TestCase
     assert_equal user, User.find_or_create_for_clerk!(clerk_user)
   end
 
-  test "Clerk IDが未登録の既存メールユーザーには自動で紐づけない" do
-    existing_user = User.create!(email: "existing@example.com")
+  test "既存のメールアドレスと自動紐付けされる" do
+    existing_user = User.create!(email: "existing@example.com", password: "password")
     clerk_user = clerk_user_record(
       id: "user_clerk_456",
       primary_email_address_id: "email_456",
       email_addresses: [ clerk_email_record(id: "email_456", email_address: existing_user.email) ]
     )
 
-    assert_raises(User::ClerkIdentityConflict) do
-      User.find_or_create_for_clerk!(clerk_user)
-    end
-
-    assert_nil existing_user.reload.clerk_user_id
+    user = User.find_or_create_for_clerk!(clerk_user)
+    assert_equal "user_clerk_456", existing_user.reload.clerk_user_id
+    assert_equal user, existing_user
   end
 
   test "Clerkユーザーにprimary emailがない場合は対応づけない" do

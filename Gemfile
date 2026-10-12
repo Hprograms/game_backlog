@@ -16,6 +16,8 @@ gem "turbo-rails"
 gem "stimulus-rails"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
+# Complete identity and user management for Rails [https://github.com/clerk/clerk-sdk-ruby]
+gem "clerk-sdk-ruby"
 
 gem 'devise'
 gem 'dotenv-rails', groups: [:development, :test]

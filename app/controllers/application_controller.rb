@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::Base
   allow_browser versions: :modern
-  before_action :check_activated
+  before_action :authenticate_clerk_user!
 
   include Clerk::Authenticatable
 
@@ -24,14 +24,14 @@ class ApplicationController < ActionController::Base
 
   private
 
-  def check_activated
-    if user_signed_in? && !current_user.activated?
-      sign_out current_user
-      redirect_to root_path, alert: "アカウントの有効化が必要です。登録時に送信されたメールのリンクから有効化してください"
-    end
-  end
+  def authenticate_clerk_user!
+    return if clerk_authenticated?
 
-  def after_sign_in_path_for(resource)
-    games_path
+    respond_to do |format|
+      format.html do
+        redirect_to new_user_session_path, alert: "このページを表示するにはログインしてください"
+      end
+      format.any { head :unauthorized }
+    end
   end
 end

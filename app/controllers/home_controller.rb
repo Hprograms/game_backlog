@@ -1,5 +1,5 @@
 class HomeController < ApplicationController
-  skip_before_action :authenticate_user!, raise: false
+  skip_before_action :authenticate_clerk_user!
 
   def index
     if clerk_authenticated?

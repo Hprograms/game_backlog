@@ -68,3 +68,5 @@ group :test do
 end
 
 gem "resend", "~> 1.17"
+
+gem "aws-sdk-s3", "~> 1.233"

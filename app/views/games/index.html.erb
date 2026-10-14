@@ -1,31 +1,39 @@
 <div class="card gaming-hud-panel">
   <div class="card-body p-4">
     <div class="row text-center">
-      <div class="col-4 stat-col border-end border-secondary border-opacity-25">
-        <div class="mb-2 text-info">
+      <div class="col-6 col-md-3 stat-col border-end border-secondary border-opacity-25 mb-3 mb-md-0">
+        <div class="mb-2 text-primary">
           <span class="material-symbols-outlined hud-icon">sports_esports</span>
         </div>
         <div class="stat-value text-white"><%= @total_count %></div>
-        <div class="stat-label mt-1">Total Games</div>
+        <div class="stat-label mt-1">全ゲーム</div>
       </div>
       
-      <div class="col-4 stat-col border-end border-secondary border-opacity-25">
+      <div class="col-6 col-md-3 stat-col border-md-end border-secondary border-opacity-25 mb-3 mb-md-0">
+        <div class="mb-2 text-secondary">
+          <span class="material-symbols-outlined hud-icon">layers</span>
+        </div>
+        <div class="stat-value text-white"><%= @unplayed_count %></div>
+        <div class="stat-label mt-1">未着手</div>
+      </div>
+
+      <div class="col-6 col-md-3 stat-col border-end border-secondary border-opacity-25">
+        <div class="mb-2 text-info">
+          <span class="material-symbols-outlined hud-icon">play_circle</span>
+        </div>
+        <div class="stat-value text-white"><%= @playing_count %></div>
+        <div class="stat-label mt-1">プレイ中</div>
+      </div>
+
+      <div class="col-6 col-md-3 stat-col">
         <div class="mb-2 text-success">
-          <span class="material-symbols-outlined hud-icon">check_circle</span>
-        </div>
-        <div class="stat-value text-white"><%= @games.where(status: "クリア済").count %></div>
-        <div class="stat-label mt-1 mb-2">Cleared (<%= @clear_rate %>%)</div>
-        <div class="progress hud-progress">
-          <div class="progress-bar glow-bar" style="width: <%= @clear_rate %>%"></div>
-        </div>
-      </div>
-      
-      <div class="col-4 stat-col">
-        <div class="mb-2 text-warning">
           <span class="material-symbols-outlined hud-icon">emoji_events</span>
         </div>
-        <div class="stat-value text-white"><%= @games.where(status: "プレイ中").count %></div>
-        <div class="stat-label mt-1">Playing</div>
+        <div class="stat-value text-white"><%= @cleared_count %></div>
+        <div class="stat-label mt-1 mb-2">クリア済 (<%= @clear_rate %>%)</div>
+        <div class="progress hud-progress">
+          <div class="progress-bar bg-success glow-bar" style="width: <%= @clear_rate %>%"></div>
+        </div>
       </div>
     </div>
   </div>

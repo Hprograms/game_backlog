@@ -8,6 +8,21 @@ html, body {
   background-image: none !important;
 }
 
+/* --- Header & Layout Styles --- */
+.brand-title {
+  letter-spacing: 0.05em;
+}
+
+.brand-icon {
+  font-size: 1.5rem;
+  color: #0dcaf0; 
+}
+
+.main-container {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
 /* --- HUD Panel (Bento Grid風) --- */
 .gaming-hud-panel {
   background-color: rgba(30, 41, 59, 0.85);

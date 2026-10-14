@@ -20,7 +20,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "既存のメールアドレスと自動紐付けされる" do
-    existing_user = User.create!(email: "existing@example.com", password: "password")
+    existing_user = User.create!(email: "existing@example.com")
     clerk_user = clerk_user_record(
       id: "user_clerk_456",
       primary_email_address_id: "email_456",

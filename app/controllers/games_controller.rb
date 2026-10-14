@@ -4,8 +4,17 @@ class GamesController < ApplicationController
   def index
     @games = current_app_user.games.with_attached_image.order(created_at: :desc)
     @games = @games.where(status: params[:status]) if params[:status].present?
+
+    # 全ゲーム数
     @total_count = current_app_user.games.count
-    @clear_rate = @total_count > 0 ? (current_app_user.games.where(status: "クリア済").count * 100 / @total_count) : 0
+
+    # 各ステータスごとのゲーム数を計算
+    @cleared_count = current_app_user.games.where(status: "クリア済").count
+    @playing_count = current_app_user.games.where(status: "プレイ中").count
+    @unplayed_count = current_app_user.games.where(status: "未着手").count
+
+    # クリア率の計算
+    @clear_rate = @total_count > 0 ? (@cleared_count * 100 / @total_count) : 0
   end
 
   def show

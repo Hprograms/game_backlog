@@ -12,6 +12,7 @@ class User < ApplicationRecord
       new_level += 1 while total_exp >= total_exp_required_for_level(new_level + 1)
 
       update!(exp: total_exp, level: new_level)
+      unlock_trophies!
     end
   end
 

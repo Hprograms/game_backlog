@@ -5,6 +5,9 @@ class UserTest < ActiveSupport::TestCase
 
   def setup
     @user = User.new(email: "test@example.com")
+    %w[level_10 level_30 level_50 level_100].each do |code|
+      Trophy.find_or_create_by!(code: code)
+    end
   end
 
   test "ClerkユーザーをClerk IDでアプリユーザーに対応づける" do
@@ -53,6 +56,7 @@ class UserTest < ActiveSupport::TestCase
 
     assert_equal 19_602, user.exp
     assert_equal 100, user.level
+    assert user.user_trophies.joins(:trophy).exists?(trophies: { code: "level_100" })
   end
 
   test "Lv99からLv100には累計296EXPが必要" do
@@ -66,7 +70,7 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 19_602, user.exp
   end
 
-  test "条件を満たした全トロフィーを獲得し、再実行しても重複しない" do
+  test "条件を満たした全トロフィーを獲得し、トロフィー獲得判定メソッドを再実行しても獲得トロフィー重複しない" do
     user = User.create!(email: "trophy-test@example.com", level: 100)
     trophy_codes = %w[
       level_10 level_30 level_50 level_100
@@ -75,7 +79,9 @@ class UserTest < ActiveSupport::TestCase
       genre_rpg_5 genre_action_5
     ]
     trophy_codes.each do |code|
-      Trophy.create!(code: code, name: code, description: code, icon_name: code)
+      Trophy.find_or_create_by!(code: code) do |trophy|
+        trophy.assign_attributes(name: code, description: code, icon_name: code)
+      end
     end
 
     50.times do |index|

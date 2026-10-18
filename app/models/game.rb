@@ -9,7 +9,17 @@ class Game < ApplicationRecord
 
   after_save :award_exp_for_clear, if: -> { saved_change_to_status? && status == "クリア済" }
   after_save :award_missing_play_time_exp, if: -> { saved_change_to_play_time? && status == "クリア済" }
+  after_save :unlock_trophies, if: -> { status == "クリア済" && (saved_change_to_status? || saved_change_to_play_time?) }
+
   private
+
+  def unlock_trophies
+    return if @trophies_unlocked_during_save
+
+    user.unlock_trophies!
+  ensure
+    @trophies_unlocked_during_save = false
+  end
 
   def award_exp_for_clear
     bonus_awarded = play_time.present?
@@ -20,6 +30,7 @@ class Game < ApplicationRecord
     return unless updated == 1
 
     user.add_exp!(100 + (play_time || 0) * 10)
+    @trophies_unlocked_during_save = true
   end
 
   def award_missing_play_time_exp
@@ -33,5 +44,6 @@ class Game < ApplicationRecord
     return unless updated == 1
 
     user.add_exp!(play_time * 10)
+    @trophies_unlocked_during_save = true
   end
 end

@@ -1,6 +1,8 @@
 require "test_helper"
 
 class UserTest < ActiveSupport::TestCase
+  self.fixture_table_names = []
+
   def setup
     @user = User.new(email: "test@example.com")
   end
@@ -42,6 +44,26 @@ class UserTest < ActiveSupport::TestCase
     assert_raises(ArgumentError) do
       User.find_or_create_for_clerk!(clerk_user)
     end
+  end
+
+  test "総EXPに基づいて複数レベルを上げる" do
+    user = User.create!(email: "level-test@example.com")
+
+    user.add_exp!(19_602)
+
+    assert_equal 19_602, user.exp
+    assert_equal 100, user.level
+  end
+
+  test "Lv99からLv100には累計296EXPが必要" do
+    user = User.create!(email: "level-99-test@example.com", level: 99, exp: 19_306)
+
+    user.add_exp!(295)
+    assert_equal 99, user.reload.level
+
+    user.add_exp!(1)
+    assert_equal 100, user.reload.level
+    assert_equal 19_602, user.exp
   end
 
   private

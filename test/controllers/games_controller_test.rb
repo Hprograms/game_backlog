@@ -2,6 +2,8 @@ require "test_helper"
 require "minitest/mock"
 
 class GamesControllerTest < ActionDispatch::IntegrationTest
+  self.fixture_table_names = []
+
   def setup
     @clerk_user = build_clerk_user("user_clerk_games_test", "test@example.com")
     @user = User.create!(
@@ -29,6 +31,23 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
       get games_path
     end
     assert_response :success
+    assert_select ".level-progress-current", text: "Lv. 1"
+    assert_select ".level-progress-remaining", text: /次のレベルまであと 100 EXP/
+    assert_select '.level-progress-track[role="progressbar"][aria-valuenow="0"]'
+  end
+
+  test "indexに現在のレベル内EXPとプログレスを表示する" do
+    @user.update!(level: 2, exp: 151)
+
+    with_clerk_session do
+      get games_path
+    end
+
+    assert_response :success
+    assert_select ".level-progress-current", text: "Lv. 2"
+    assert_select ".level-progress-remaining", text: /次のレベルまであと 51 EXP/
+    assert_select '.level-progress-track[aria-valuenow="50"]'
+    assert_select '.level-progress-fill[style="width: 50%"]'
   end
 
   test "新規フォームにIGDBサジェスト用の項目が表示される" do

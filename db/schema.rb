@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_18_030000) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_18_061212) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -214,6 +214,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_18_030000) do
     t.string "icon_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "code"
+    t.index ["code"], name: "index_trophies_on_code", unique: true
   end
 
   create_table "user_trophies", force: :cascade do |t|
@@ -223,6 +225,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_18_030000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["trophy_id"], name: "index_user_trophies_on_trophy_id"
+    t.index ["user_id", "trophy_id"], name: "index_user_trophies_on_user_id_and_trophy_id", unique: true
     t.index ["user_id"], name: "index_user_trophies_on_user_id"
   end
 

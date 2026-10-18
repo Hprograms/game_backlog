@@ -20,13 +20,13 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
   end
 
   # ログインしていない場合はリダイレクトされる
-  test "ログインなしでindexにアクセスするとリダイレクトされる" do
+  test "ログインなしで一覧画面にアクセスするとリダイレクトされる" do
     get games_path
     assert_redirected_to new_user_session_path
   end
 
   # ログインしている場合は一覧が表示される
-  test "ログイン済みでindexにアクセスできる" do
+  test "ログイン済みで一覧画面にアクセスできる" do
     with_clerk_session do
       get games_path
     end
@@ -36,7 +36,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_select '.level-progress-track[role="progressbar"][aria-valuenow="0"]'
   end
 
-  test "indexに現在のレベル内EXPとプログレスを表示する" do
+  test "一覧画面に現在のレベル内EXPと進捗を表示する" do
     @user.update!(level: 2, exp: 151)
 
     with_clerk_session do
@@ -206,7 +206,7 @@ test "日本語または空のあらすじは翻訳せずゲームを保存す�
   assert_empty translated_texts
 end
 
-test "IGDB検索結果をJSONで返す" do
+test "IGDB検索結果をJSON形式で返す" do
   result = [ { name: "検索ゲーム", image: "https://images.igdb.com/image.jpg", igdb_rating: 93, developer: "開発スタジオ", description: "ゲームのあらすじ", platforms: [ "Switch" ], genres: [ "RPG" ] } ]
 
   with_clerk_session do

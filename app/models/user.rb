@@ -3,6 +3,16 @@ class User < ApplicationRecord
 
   has_many :games, dependent: :destroy
 
+  def add_exp!(amount)
+    with_lock do
+      total_exp = exp + amount
+      new_level = level
+      new_level += 1 while total_exp >= total_exp_required_for_level(new_level + 1)
+
+      update!(exp: total_exp, level: new_level)
+    end
+  end
+
   def self.find_or_create_for_clerk!(clerk_user)
     clerk_user_id = clerk_user&.id
     raise ArgumentError, "Clerk user must have an ID" if clerk_user_id.blank?
@@ -34,5 +44,12 @@ class User < ApplicationRecord
   rescue ActiveRecord::RecordNotUnique
     find_by(clerk_user_id: clerk_user_id) ||
       raise(ClerkIdentityConflict, "Clerk identity conflicts with an existing application user")
+  end
+
+  private
+
+  def total_exp_required_for_level(target_level)
+    completed_levels = target_level - 1
+    completed_levels * 100 + completed_levels * (completed_levels - 1)
   end
 end

@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  trophy: one
+  unlocked_at: 2026-10-18 10:55:43
+
+two:
+  user: two
+  trophy: two
+  unlocked_at: 2026-10-18 10:55:43

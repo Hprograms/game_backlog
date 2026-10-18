@@ -34,7 +34,7 @@ class UserTest < ActiveSupport::TestCase
     assert_equal user, existing_user
   end
 
-  test "Clerkユーザーにprimary emailがない場合は対応づけない" do
+  test "Clerkユーザーに主要メールアドレスがない場合は対応づけない" do
     clerk_user = clerk_user_record(
       id: "user_clerk_789",
       primary_email_address_id: nil,

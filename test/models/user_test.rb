@@ -5,6 +5,9 @@ class UserTest < ActiveSupport::TestCase
 
   def setup
     @user = User.new(email: "test@example.com")
+    %w[level_10 level_30 level_50 level_100].each do |code|
+      Trophy.find_or_create_by!(code: code)
+    end
   end
 
   test "ClerkユーザーをClerk IDでアプリユーザーに対応づける" do
@@ -53,6 +56,7 @@ class UserTest < ActiveSupport::TestCase
 
     assert_equal 19_602, user.exp
     assert_equal 100, user.level
+    assert user.user_trophies.joins(:trophy).exists?(trophies: { code: "level_100" })
   end
 
   test "Lv99からLv100には累計296EXPが必要" do
@@ -64,6 +68,50 @@ class UserTest < ActiveSupport::TestCase
     user.add_exp!(1)
     assert_equal 100, user.reload.level
     assert_equal 19_602, user.exp
+  end
+
+  test "条件を満たした全トロフィーを獲得し、トロフィー獲得判定メソッドを再実行しても獲得トロフィー重複しない" do
+    user = User.create!(email: "trophy-test@example.com", level: 100)
+    trophy_codes = %w[
+      level_10 level_30 level_50 level_100
+      clear_1 clear_10 clear_30 clear_50
+      play_time_100 total_play_time_500
+      genre_rpg_5 genre_action_5
+    ]
+    trophy_codes.each do |code|
+      Trophy.find_or_create_by!(code: code) do |trophy|
+        trophy.assign_attributes(name: code, description: code, icon_name: code)
+      end
+    end
+
+    50.times do |index|
+      user.games.create!(
+        title: "Game #{index}",
+        genre: index < 5 ? "RPG" : (index < 10 ? "アクション" : "その他"),
+        status: "未着手",
+        play_time: index.zero? ? 100 : 10
+      )
+    end
+    user.games.update_all(status: "クリア済")
+
+    user.unlock_trophies!
+    assert_equal 12, user.user_trophies.count
+    assert user.user_trophies.all? { |user_trophy| user_trophy.unlocked_at.present? }
+
+    user.unlock_trophies!
+    assert_equal 12, user.user_trophies.count
+  end
+
+  test "クリアしていないゲームはクリア数とプレイ時間・ジャンル判定に含めない" do
+    user = User.create!(email: "uncleared-trophy-test@example.com", level: 1)
+    %w[clear_1 play_time_100 total_play_time_500 genre_rpg_5].each do |code|
+      Trophy.create!(code: code, name: code, description: code, icon_name: code)
+    end
+    user.games.create!(title: "Uncleared RPG", genre: "RPG", status: "プレイ中", play_time: 500)
+
+    user.unlock_trophies!
+
+    assert_empty user.user_trophies
   end
 
   private

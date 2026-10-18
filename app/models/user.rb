@@ -2,6 +2,8 @@ class User < ApplicationRecord
   class ClerkIdentityConflict < StandardError; end
 
   has_many :games, dependent: :destroy
+  has_many :user_trophies, dependent: :destroy
+  has_many :trophies, through: :user_trophies
 
   def add_exp!(amount)
     with_lock do
@@ -10,6 +12,40 @@ class User < ApplicationRecord
       new_level += 1 while total_exp >= total_exp_required_for_level(new_level + 1)
 
       update!(exp: total_exp, level: new_level)
+      unlock_trophies!
+    end
+  end
+
+  def unlock_trophies!
+    owned_trophy_ids = user_trophies.pluck(:trophy_id)
+    cleared_games = games.where(status: "クリア済")
+    cleared_counts_by_genre = cleared_games.group(:genre).count
+    cleared_count = cleared_counts_by_genre.values.sum
+    total_play_time = cleared_games.sum(:play_time)
+    has_100_hour_clear = cleared_games.where("play_time >= ?", 100).exists?
+
+    eligible_codes = []
+    eligible_codes << "level_10" if level >= 10
+    eligible_codes << "level_30" if level >= 30
+    eligible_codes << "level_50" if level >= 50
+    eligible_codes << "level_100" if level >= 100
+    eligible_codes << "clear_1" if cleared_count >= 1
+    eligible_codes << "clear_10" if cleared_count >= 10
+    eligible_codes << "clear_30" if cleared_count >= 30
+    eligible_codes << "clear_50" if cleared_count >= 50
+    eligible_codes << "play_time_100" if has_100_hour_clear
+    eligible_codes << "total_play_time_500" if total_play_time >= 500
+    eligible_codes << "genre_rpg_5" if cleared_counts_by_genre.fetch("RPG", 0) >= 5
+    eligible_codes << "genre_action_5" if cleared_counts_by_genre.fetch("アクション", 0) >= 5
+
+    trophies_by_code = Trophy.where(code: eligible_codes).index_by(&:code)
+
+    eligible_codes.each do |code|
+      trophy = trophies_by_code[code]
+      raise ActiveRecord::RecordNotFound, "Trophy with code '#{code}' not found" unless trophy
+      next if owned_trophy_ids.include?(trophy.id)
+
+      user_trophies.create!(trophy: trophy, unlocked_at: Time.current)
     end
   end
 

@@ -5,6 +5,7 @@ class GameTest < ActiveSupport::TestCase
 
   setup do
     @user = User.create!(email: "game-test@example.com")
+    Trophy.find_or_create_by!(code: "clear_1")
     @game = @user.games.create!(title: "Test Game", status: "プレイ中", play_time: 30)
   end
 
@@ -14,6 +15,16 @@ class GameTest < ActiveSupport::TestCase
     assert_equal 400, @user.reload.exp
     assert_equal 4, @user.level
     assert @game.reload.exp_awarded_for_clear
+    assert @user.user_trophies.joins(:trophy).exists?(trophies: { code: "clear_1" })
+  end
+
+  test "クリア済ゲームのプレイ時間更新でトロフィーを判定する" do
+    Trophy.find_or_create_by!(code: "play_time_100")
+
+    @game.update!(status: "クリア済")
+    @game.update!(play_time: 100)
+
+    assert @user.user_trophies.joins(:trophy).exists?(trophies: { code: "play_time_100" })
   end
 
   test "プレイ時間がnilのときに基本EXPだけが付与される" do

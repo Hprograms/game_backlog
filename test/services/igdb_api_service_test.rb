@@ -8,7 +8,7 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
     end
   end
 
-  test "search requests and returns the IGDB storyline without translating" do
+  test "IGDB検索であらすじを翻訳せずに取得する" do
     previous_env = ENV.slice("IGDB_CLIENT_ID", "DEEPL_API_KEY")
     ENV["IGDB_CLIENT_ID"] = "client-id"
     ENV["DEEPL_API_KEY"] = "deepl-key"
@@ -50,7 +50,7 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
     previous_env.each { |key, value| ENV[key] = value }
   end
 
-  test "search excludes noise categories while retaining expansions and remakes" do
+  test "ノイズカテゴリを除外しつつ拡張版とリメイクを保持する" do
     previous_client_id = ENV["IGDB_CLIENT_ID"]
     ENV["IGDB_CLIENT_ID"] = "client-id"
     games = [
@@ -92,7 +92,7 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
     previous_client_id.nil? ? ENV.delete("IGDB_CLIENT_ID") : ENV["IGDB_CLIENT_ID"] = previous_client_id
   end
 
-  test "format_game uses the fallback description when storyline is missing or blank" do
+  test "あらすじがない場合や空文字の場合はフォールバックの説明文を使う" do
     fallback = "ストーリーの詳細は不明だ。君自身の目で確かめよう。"
 
     [nil, ""].each do |storyline|
@@ -102,7 +102,7 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
     end
   end
 
-  test "access token is reused from Rails cache" do
+  test "アクセストークンはRailsキャッシュから再利用される" do
     previous_env = ENV.slice("IGDB_CLIENT_ID", "IGDB_CLIENT_SECRET")
     ENV["IGDB_CLIENT_ID"] = "client-id"
     ENV["IGDB_CLIENT_SECRET"] = "client-secret"
@@ -136,7 +136,7 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
     previous_env.each { |key, value| ENV[key] = value }
   end
 
-  test "translation failure falls back to original summary" do
+  test "翻訳に失敗した場合は元の要約を返す" do
     previous_api_key = ENV["DEEPL_API_KEY"]
     ENV["DEEPL_API_KEY"] = "deepl-key"
     failure = ->(_host, _port, **_options, &_block) { raise IOError, "connection failed" }

@@ -5,7 +5,7 @@ class ApplicationHelperTest < ActiveSupport::TestCase
 
   self.fixture_table_names = []
 
-  test "calculates progress within the current level from total EXP" do
+  test "総EXPから現在のレベル内の進捗を計算する" do
     user = User.new(level: 2, exp: 151)
 
     assert_equal(
@@ -19,7 +19,7 @@ class ApplicationHelperTest < ActiveSupport::TestCase
     )
   end
 
-  test "clamps progress when EXP reaches the next level threshold" do
+  test "EXPが次のレベル閾値に達したときに進捗を制限する" do
     user = User.new(level: 2, exp: 202)
 
     assert_equal 100, level_progress(user)[:percentage]

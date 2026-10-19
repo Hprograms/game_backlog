@@ -1,0 +1,43 @@
+<% trophy_categories = [
+  { id: "level", title: "レベル到達", trophies: @trophies.select { |trophy| trophy.code.to_s.start_with?("level_") } },
+  { id: "clear", title: "ゲームクリア数", trophies: @trophies.select { |trophy| trophy.code.to_s.start_with?("clear_") } },
+  { id: "play-time", title: "プレイ時間", trophies: @trophies.select { |trophy| trophy.code.to_s.start_with?("play_time_", "total_play_time_") } },
+  { id: "genre", title: "ジャンルマスター", trophies: @trophies.select { |trophy| trophy.code.to_s.start_with?("genre_") } }
+] %>
+
+<main class="trophies-page">
+  <header class="trophies-header">
+    <span class="material-symbols-outlined trophies-header-icon" aria-hidden="true">emoji_events</span>
+    <div>
+      <p class="trophies-eyebrow">ACHIEVEMENT COLLECTION</p>
+      <h1>トロフィー一覧</h1>
+      <p class="trophies-intro">冒険の記録と、これから手にする栄誉。</p>
+    </div>
+  </header>
+
+  <% trophy_categories.each do |category| %>
+    <% next if category[:trophies].empty? %>
+    <% unlocked_count = category[:trophies].count { |trophy| @unlocked_trophies_by_id.key?(trophy.id) } %>
+
+    <section class="trophy-category" aria-labelledby="trophy-category-<%= category[:id] %>">
+      <div class="trophy-category-heading">
+        <h2 id="trophy-category-<%= category[:id] %>"><%= category[:title] %></h2>
+        <span><%= unlocked_count %> / <%= category[:trophies].size %> 獲得</span>
+      </div>
+
+      <div class="trophy-grid">
+        <% category[:trophies].each do |trophy| %>
+          <% user_trophy = @unlocked_trophies_by_id[trophy.id] %>
+          <article class="trophy-card <%= user_trophy ? "is-unlocked" : "is-locked" %>">
+            <span class="material-symbols-outlined trophy-card-icon" aria-hidden="true"><%= trophy.icon_name %></span>
+            <h3 class="trophy-card-name"><%= trophy.name %></h3>
+            <p class="trophy-card-description"><%= trophy.description %></p>
+            <% if user_trophy&.unlocked_at %>
+              <p class="trophy-card-date"><%= user_trophy.unlocked_at.strftime("%Y.%m.%d") %> 獲得</p>
+            <% end %>
+          </article>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+</main>

@@ -6,5 +6,6 @@ Rails.application.routes.draw do
       get :search # /games/search というURLが作られます
     end
   end
+  resources :trophies, only: [ :index ]
   root to: "home#index"
 end

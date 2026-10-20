@@ -78,21 +78,3 @@ $ rails db:create db:migrate db:seed
 # サーバーの起動
 $ rails s
 ```
-
-### 既存ユーザーをClerkへ紐付ける
-
-旧認証からの移行では既存のUserとゲームデータを保持します。メールアドレスだけでの自動連携は行わないため、既存ユーザーは本番デプロイ後、Clerkで最初にログインする前に一度だけClerk IDを登録してください。
-
-1. Clerk Dashboardで対象ユーザーのID（`user_...`）とメールアドレスを確認します。Clerkのメールアドレスが既存Userと同一であることを確認してください。
-2. 本番環境に新しいコードをデプロイし、データベースマイグレーションを適用します。
-3. 本番環境で次のコマンドを実行し、メールアドレスとClerk IDを置き換えます。
-
-```bash
-bin/rails runner -e production '
-user = User.find_by!(email: "既存Userに保存されたメールアドレス")
-raise "User is already linked to Clerk" if user.clerk_user_id.present?
-user.update!(clerk_user_id: "user_ClerkのユーザーID")
-'
-```
-
-この紐付けは一度だけ実行してください。メールアドレスが一致しない場合や、既に別のClerk IDへ紐付いている場合は処理を進めず、対象ユーザーを確認してください。

@@ -5,18 +5,20 @@ class User < ApplicationRecord
   has_many :user_trophies, dependent: :destroy
   has_many :trophies, through: :user_trophies
 
-  def add_exp!(amount)
+  def add_exp!(amount, game = nil)
     with_lock do
       total_exp = exp + amount
       new_level = level
       new_level += 1 while total_exp >= total_exp_required_for_level(new_level + 1)
 
+      leveled_up = new_level > level
       update!(exp: total_exp, level: new_level)
-      unlock_trophies!
+      create_activity("level_up", game) if leveled_up
+      unlock_trophies!(game)
     end
   end
 
-  def unlock_trophies!
+  def unlock_trophies!(game = nil)
     owned_trophy_ids = user_trophies.pluck(:trophy_id)
     cleared_games = games.where(status: "クリア済")
     cleared_counts_by_genre = cleared_games.group(:genre).count
@@ -46,6 +48,7 @@ class User < ApplicationRecord
       next if owned_trophy_ids.include?(trophy.id)
 
       user_trophies.create!(trophy: trophy, unlocked_at: Time.current)
+      create_activity("trophy_unlocked", game)
     end
   end
 
@@ -83,6 +86,17 @@ class User < ApplicationRecord
   end
 
   private
+
+  def create_activity(action_type, game)
+    return unless game
+
+    Activity.create!(
+      user_id: id,
+      game_id: game.id,
+      action_type: action_type,
+      occurred_at: Time.current
+    )
+  end
 
   def total_exp_required_for_level(target_level)
     completed_levels = target_level - 1

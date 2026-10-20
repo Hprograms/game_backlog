@@ -51,23 +51,27 @@ class UserTest < ActiveSupport::TestCase
 
   test "総EXPに基づいて複数レベルを上げる" do
     user = User.create!(email: "level-test@example.com")
+    game = user.games.create!(title: "Level-up trigger game", status: "未着手")
 
-    user.add_exp!(19_602)
+    user.add_exp!(19_602, game)
 
     assert_equal 19_602, user.exp
     assert_equal 100, user.level
     assert user.user_trophies.joins(:trophy).exists?(trophies: { code: "level_100" })
+    assert Activity.exists?(user: user, game: game, action_type: "level_up")
   end
 
   test "Lv99からLv100には累計296EXPが必要" do
     user = User.create!(email: "level-99-test@example.com", level: 99, exp: 19_306)
+    game = user.games.create!(title: "Level 100 trigger game", status: "未着手")
 
-    user.add_exp!(295)
+    user.add_exp!(295, game)
     assert_equal 99, user.reload.level
 
-    user.add_exp!(1)
+    user.add_exp!(1, game)
     assert_equal 100, user.reload.level
     assert_equal 19_602, user.exp
+    assert_equal 1, Activity.where(user: user, game: game, action_type: "level_up").count
   end
 
   test "条件を満たした全トロフィーを獲得し、トロフィー獲得判定メソッドを再実行しても獲得トロフィー重複しない" do
@@ -94,12 +98,15 @@ class UserTest < ActiveSupport::TestCase
     end
     user.games.update_all(status: "クリア済")
 
-    user.unlock_trophies!
+    trigger_game = user.games.first
+    user.unlock_trophies!(trigger_game)
     assert_equal 12, user.user_trophies.count
     assert user.user_trophies.all? { |user_trophy| user_trophy.unlocked_at.present? }
+    assert_equal 12, Activity.where(user: user, game: trigger_game, action_type: "trophy_unlocked").count
 
-    user.unlock_trophies!
+    user.unlock_trophies!(trigger_game)
     assert_equal 12, user.user_trophies.count
+    assert_equal 12, Activity.where(user: user, game: trigger_game, action_type: "trophy_unlocked").count
   end
 
   test "クリアしていないゲームはクリア数とプレイ時間・ジャンル判定に含めない" do
@@ -109,7 +116,7 @@ class UserTest < ActiveSupport::TestCase
     end
     user.games.create!(title: "Uncleared RPG", genre: "RPG", status: "プレイ中", play_time: 500)
 
-    user.unlock_trophies!
+    user.unlock_trophies!(user.games.first)
 
     assert_empty user.user_trophies
   end

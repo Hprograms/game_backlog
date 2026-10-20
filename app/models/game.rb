@@ -52,7 +52,7 @@ class Game < ApplicationRecord
   def unlock_trophies
     return if @trophies_unlocked_during_save
 
-    user.unlock_trophies!
+    user.unlock_trophies!(self)
   ensure
     @trophies_unlocked_during_save = false
   end
@@ -65,7 +65,7 @@ class Game < ApplicationRecord
     )
     return unless updated == 1
 
-    user.add_exp!(100 + (play_time || 0) * 10)
+    user.add_exp!(100 + (play_time || 0) * 10, self)
     @trophies_unlocked_during_save = true
   end
 
@@ -79,7 +79,7 @@ class Game < ApplicationRecord
     ).update_all(play_time_exp_awarded_for_clear: true)
     return unless updated == 1
 
-    user.add_exp!(play_time * 10)
+    user.add_exp!(play_time * 10, self)
     @trophies_unlocked_during_save = true
   end
 end

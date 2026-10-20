@@ -12,7 +12,7 @@
     
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
     
-    <%= stylesheet_link_tag "application", "games", "login", "trophies", media: "all", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "games", "login", "trophies", "profiles", media: "all", "data-turbo-track": "reload" %>
     <% if Clerk.configuration.publishable_key.present? %>
       <% clerk_frontend_api = clerk_frontend_api_url %>
       <script defer crossorigin="anonymous" src="<%= clerk_frontend_api %>/npm/@clerk/ui@1/dist/ui.browser.js"></script>

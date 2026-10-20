@@ -16,6 +16,8 @@ class GameTest < ActiveSupport::TestCase
     assert_equal 4, @user.level
     assert @game.reload.exp_awarded_for_clear
     assert @user.user_trophies.joins(:trophy).exists?(trophies: { code: "clear_1" })
+    assert Activity.exists?(user: @user, game: @game, action_type: "level_up")
+    assert Activity.exists?(user: @user, game: @game, action_type: "trophy_unlocked")
   end
 
   test "クリア済ゲームのプレイ時間更新でトロフィーを判定する" do

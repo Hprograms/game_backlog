@@ -1,0 +1,20 @@
+<section class="profile-setup-panel glass-panel">
+  <div class="profile-setup-content">
+    <span class="material-symbols-outlined profile-setup-icon" aria-hidden="true">person</span>
+    <h1 class="profile-setup-title">あなたの なまえを おしえてください</h1>
+
+    <% if @user.errors.any? %>
+      <div class="profile-setup-errors" role="alert">
+        <% @user.errors.full_messages.each do |message| %>
+          <p><%= message %></p>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%= form_with model: @user, url: profile_path, class: "profile-setup-form" do |form| %>
+      <%= form.label :name, "なまえ", class: "profile-setup-label" %>
+      <%= form.text_field :name, maxlength: 15, autofocus: true, autocomplete: "nickname", class: "form-control profile-setup-input" %>
+      <%= form.submit(@user.name.present? ? "へんこうする" : "この なまえで はじめる", class: "btn profile-setup-submit") %>
+    <% end %>
+  </div>
+</section>

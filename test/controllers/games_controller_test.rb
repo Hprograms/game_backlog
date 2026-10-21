@@ -26,7 +26,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_user_session_path
   end
 
-  test "勇者名が未設定の場合は名前設定画面へ誘導される" do
+  test "ユーザー名が未設定の場合は名前設定画面へ誘導される" do
     @user.update!(name: nil)
 
     with_clerk_session do
@@ -44,7 +44,8 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select ".level-progress-label:first-child", text: "勇者 テスト勇者"
     assert_select ".level-progress-label:last-child", text: "- Lv. 1"
-    assert_select ".profile-edit-link[href='#{edit_profile_path}']"
+    assert_select ".level-progress-panel > .profile-edit-link[href='#{edit_profile_path}']"
+    assert_select ".level-progress-current .profile-edit-link", count: 0
     assert_select ".level-progress-remaining", text: /次のレベルまであと 100 EXP/
     assert_select '.level-progress-track[role="progressbar"][aria-valuenow="0"]'
   end

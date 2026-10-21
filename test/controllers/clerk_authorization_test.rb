@@ -5,7 +5,8 @@ class ClerkAuthorizationTest < ActionDispatch::IntegrationTest
     @clerk_user = create_clerk_user("user_clerk_owner", "owner@example.com")
     @user = User.create!(
       email: "owner@example.com",
-      clerk_user_id: @clerk_user.id
+      clerk_user_id: @clerk_user.id,
+      name: "オーナー"
     )
     @game = Game.create!(title: "Owner game", status: "未着手", user: @user)
   end
@@ -33,6 +34,11 @@ class ClerkAuthorizationTest < ActionDispatch::IntegrationTest
 
   test "別のClerkユーザーは他人のゲームを参照・更新できない" do
     attacker = create_clerk_user("user_clerk_attacker", "attacker@example.com")
+    User.create!(
+      email: "attacker@example.com",
+      clerk_user_id: attacker.id,
+      name: "侵入者"
+    )
 
     with_clerk_session(attacker) do
       get game_path(@game)

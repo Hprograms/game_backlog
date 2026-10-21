@@ -10,6 +10,22 @@ class UserTest < ActiveSupport::TestCase
     end
   end
 
+  test "ユーザー名が未設定でも有効" do
+    [ nil, "" ].each do |name|
+      @user.name = name
+      assert @user.valid?
+    end
+  end
+
+  test "ユーザー名は15文字まで" do
+    @user.name = "あ" * 15
+    assert @user.valid?
+
+    @user.name = "あ" * 16
+    assert_not @user.valid?
+    assert_includes @user.errors.attribute_names, :name
+  end
+
   test "ClerkユーザーをClerk IDでアプリユーザーに対応づける" do
     clerk_user = clerk_user_record(
       id: "user_clerk_123",

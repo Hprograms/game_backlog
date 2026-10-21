@@ -8,7 +8,8 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     @clerk_user = build_clerk_user("user_clerk_games_test", "test@example.com")
     @user = User.create!(
       email: "test@example.com",
-      clerk_user_id: @clerk_user.id
+      clerk_user_id: @clerk_user.id,
+      name: "テスト勇者"
     )
     @game = Game.create!(
       title: "ゼルダの伝説",
@@ -25,13 +26,26 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_user_session_path
   end
 
+  test "ユーザー名が未設定の場合は名前設定画面へ誘導される" do
+    @user.update!(name: nil)
+
+    with_clerk_session do
+      get games_path
+    end
+
+    assert_redirected_to edit_profile_path
+  end
+
   # ログインしている場合は一覧が表示される
   test "ログイン済みで一覧画面にアクセスできる" do
     with_clerk_session do
       get games_path
     end
     assert_response :success
-    assert_select ".level-progress-current", text: "Lv. 1"
+    assert_select ".level-progress-label:first-child", text: "勇者 テスト勇者"
+    assert_select ".level-progress-label:last-child", text: "- Lv. 1"
+    assert_select ".level-progress-panel > .profile-edit-link[href='#{edit_profile_path}']"
+    assert_select ".level-progress-current .profile-edit-link", count: 0
     assert_select ".level-progress-remaining", text: /次のレベルまであと 100 EXP/
     assert_select '.level-progress-track[role="progressbar"][aria-valuenow="0"]'
   end
@@ -44,7 +58,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
-    assert_select ".level-progress-current", text: "Lv. 2"
+    assert_select ".level-progress-label:last-child", text: "- Lv. 2"
     assert_select ".level-progress-remaining", text: /次のレベルまであと 51 EXP/
     assert_select '.level-progress-track[aria-valuenow="50"]'
     assert_select '.level-progress-fill[style="width: 50%"]'

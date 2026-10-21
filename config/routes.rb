@@ -7,5 +7,6 @@ Rails.application.routes.draw do
     end
   end
   resources :trophies, only: [ :index ]
+  resource :profile, only: [ :edit, :update ]
   root to: "home#index"
 end

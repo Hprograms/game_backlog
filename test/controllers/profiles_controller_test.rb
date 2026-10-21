@@ -20,6 +20,21 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select ".profile-setup-title", text: "あなたの なまえを おしえてください"
     assert_select 'input[name="user[name]"][maxlength="15"]'
+    assert_select ".profile-setup-cancel", count: 0
+  end
+
+  test "名前設定済みなら設定画面からホームへ戻れる" do
+    @user.update!(name: "以前の名前")
+
+    with_clerk_session do
+      get edit_profile_path
+    end
+
+    assert_response :success
+    assert_select ".profile-setup-actions" do
+      assert_select "a.profile-setup-cancel[href='#{root_path}']", text: "もどる", index: 0
+      assert_select "input.profile-setup-submit", index: 1
+    end
   end
 
   test "名前設定に成功したらホームへ戻る" do

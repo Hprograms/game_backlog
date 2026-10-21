@@ -1,12 +1,13 @@
 <% progress = level_progress(current_app_user) %>
 
 <div class="gaming-hud-panel level-progress-panel" aria-label="レベル進捗">
+  <%= link_to edit_profile_path, class: "profile-edit-link", title: "ユーザー名を編集", aria: { label: "ユーザー名を編集" } do %>
+    <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+  <% end %>
+
   <div class="level-progress-heading">
     <div class="level-progress-current">
       <span class="level-progress-label">勇者 <%= current_user.name %></span>
-      <%= link_to edit_profile_path, class: "profile-edit-link", title: "勇者名を編集", aria: { label: "勇者名を編集" } do %>
-        <span class="material-symbols-outlined" aria-hidden="true">edit</span>
-      <% end %>
       <span class="level-progress-label">- Lv. <%= current_user.level %></span>
     </div>
     <div class="level-progress-remaining">

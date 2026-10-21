@@ -14,7 +14,12 @@
     <%= form_with model: @user, url: profile_path, class: "profile-setup-form" do |form| %>
       <%= form.label :name, "なまえ", class: "profile-setup-label" %>
       <%= form.text_field :name, maxlength: 15, autofocus: true, autocomplete: "nickname", class: "form-control profile-setup-input" %>
-      <%= form.submit(@user.name.present? ? "へんこうする" : "この なまえで はじめる", class: "btn profile-setup-submit") %>
+      <div class="profile-setup-actions">
+        <% if @user.name.present? %>
+          <%= link_to "もどる", root_path, class: "profile-setup-cancel" %>
+        <% end %>
+        <%= form.submit(@user.name.present? ? "へんこうする" : "この なまえで はじめる", class: "btn profile-setup-submit") %>
+      </div>
     <% end %>
   </div>
 </section>

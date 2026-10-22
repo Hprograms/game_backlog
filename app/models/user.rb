@@ -2,6 +2,7 @@ class User < ApplicationRecord
   class ClerkIdentityConflict < StandardError; end
 
   has_many :games, dependent: :destroy
+  has_many :activities, dependent: :destroy
   has_many :user_trophies, dependent: :destroy
   has_many :trophies, through: :user_trophies
 

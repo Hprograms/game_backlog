@@ -1,0 +1,19 @@
+<article class="activity-message">
+  <div class="activity-message-text">
+    <% case activity.action_type %>
+    <% when "started" %>
+      ＊ 勇者 <%= current_user.name %> は 『<%= activity.game.title %>』 の ぼうけんを はじめた！
+    <% when "cleared" %>
+      ＊ 勇者 <%= current_user.name %> は 『<%= activity.game.title %>』 を クリアした！
+    <% when "reviewed" %>
+      ＊ 勇者 <%= current_user.name %> は 『<%= activity.game.title %>』 の レビューを かいた！
+    <% when "level_up" %>
+      ＊ 勇者 <%= current_user.name %> は レベルが あがった！
+    <% when "trophy_unlocked" %>
+      ＊ 勇者 <%= current_user.name %> は トロフィーを てにいれた！
+    <% end %>
+  </div>
+  <time class="activity-message-time" datetime="<%= activity.occurred_at.iso8601 %>">
+    <%= activity.occurred_at.strftime("%Y年%m月%d日 %H:%M") %>
+  </time>
+</article>

@@ -1,19 +1,30 @@
-<article class="activity-message">
-  <div class="activity-message-text">
-    <% case activity.action_type %>
-    <% when "started" %>
+<% activity_theme = {
+  "started" => { icon: "sports_esports", color: "blue" },
+  "cleared" => { icon: "emoji_events", color: "yellow" },
+  "reviewed" => { icon: "rate_review", color: "green" },
+  "level_up" => { icon: "trending_up", color: "purple" },
+  "trophy_unlocked" => { icon: "military_tech", color: "orange" }
+}.fetch(activity.action_type, { icon: "history", color: "blue" }) %>
+
+<article class="activity-message activity-message--<%= activity_theme[:color] %>">
+  <span class="material-symbols-outlined activity-message-icon" aria-hidden="true"><%= activity_theme[:icon] %></span>
+  <div class="activity-message-content">
+    <div class="activity-message-text">
+      <% case activity.action_type %>
+      <% when "started" %>
       ＊ 勇者 <%= current_user.name %> は 『<%= activity.game.title %>』 の ぼうけんを はじめた！
-    <% when "cleared" %>
+      <% when "cleared" %>
       ＊ 勇者 <%= current_user.name %> は 『<%= activity.game.title %>』 を クリアした！
-    <% when "reviewed" %>
+      <% when "reviewed" %>
       ＊ 勇者 <%= current_user.name %> は 『<%= activity.game.title %>』 の レビューを かいた！
-    <% when "level_up" %>
+      <% when "level_up" %>
       ＊ 勇者 <%= current_user.name %> は レベルが あがった！
-    <% when "trophy_unlocked" %>
+      <% when "trophy_unlocked" %>
       ＊ 勇者 <%= current_user.name %> は トロフィーを てにいれた！
-    <% end %>
+      <% end %>
+    </div>
+    <time class="activity-message-time" datetime="<%= activity.occurred_at.iso8601 %>">
+      <%= activity.occurred_at.strftime("%Y年%m月%d日 %H:%M") %>
+    </time>
   </div>
-  <time class="activity-message-time" datetime="<%= activity.occurred_at.iso8601 %>">
-    <%= activity.occurred_at.strftime("%Y年%m月%d日 %H:%M") %>
-  </time>
 </article>

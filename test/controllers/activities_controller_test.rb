@@ -31,10 +31,33 @@ class ActivitiesControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1.activities-title", text: "冒険の書"
     assert_select "#activities .activity-message", count: 20
     assert_select "#activities .activity-message-text", text: /勇者 テスト勇者 は 『冒険のゲーム』 の ぼうけんを はじめた！/
+    assert_select "#activities .activity-message--blue .activity-message-icon", text: "sports_esports", count: 20
     assert_select "#load-more-container a[href='#{activities_path(page: 2)}']"
     first_datetime = Time.iso8601(css_select("#activities time").first["datetime"])
     last_datetime = Time.iso8601(css_select("#activities time").last["datetime"])
     assert_operator first_datetime, :>, last_datetime
+  end
+
+  test "アクションごとにテーマ色とアイコンを表示する" do
+    expected_themes = {
+      "cleared" => [ "yellow", "emoji_events", "を クリアした！" ],
+      "reviewed" => [ "green", "rate_review", "の レビューを かいた！" ],
+      "level_up" => [ "purple", "trending_up", "レベルが あがった！" ],
+      "trophy_unlocked" => [ "orange", "military_tech", "トロフィーを てにいれた！" ]
+    }
+    expected_themes.each_key do |action_type|
+      Activity.create!(user: @user, game: @game, action_type: action_type, occurred_at: Time.current)
+    end
+
+    with_clerk_session do
+      get activities_path
+    end
+
+    assert_response :success
+    expected_themes.each do |action_type, (color, icon, message)|
+      assert_select ".activity-message--#{color} .activity-message-icon", text: icon
+      assert_select ".activity-message--#{color} .activity-message-text", text: /#{Regexp.escape(message)}/
+    end
   end
 
   test "追加読み込みでは残りの履歴を追加し、次がなければボタンを空にする" do

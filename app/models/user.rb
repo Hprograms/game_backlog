@@ -5,7 +5,9 @@ class User < ApplicationRecord
   has_many :user_trophies, dependent: :destroy
   has_many :trophies, through: :user_trophies
 
-  def add_exp!(amount, game = nil)
+  validates :name, length: { maximum: 15 }, allow_blank: true
+
+  def add_exp!(amount)
     with_lock do
       total_exp = exp + amount
       new_level = level

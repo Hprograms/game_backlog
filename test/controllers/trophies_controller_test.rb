@@ -8,7 +8,8 @@ class TrophiesControllerTest < ActionDispatch::IntegrationTest
     @clerk_user = clerk_user_record("user_clerk_trophies_test", "trophies@example.com")
     @user = User.create!(
       email: "trophies@example.com",
-      clerk_user_id: @clerk_user.id
+      clerk_user_id: @clerk_user.id,
+      name: "トロフィー勇者"
     )
     @unlocked_trophy = Trophy.create!(
       code: "level_10",

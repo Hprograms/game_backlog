@@ -1,6 +1,6 @@
 class Game < ApplicationRecord
   belongs_to :user
-
+  has_many :activities, dependent: :destroy
   has_one_attached :image
 
   validates :title, presence: true

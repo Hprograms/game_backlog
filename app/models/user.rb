@@ -7,7 +7,7 @@ class User < ApplicationRecord
 
   validates :name, length: { maximum: 15 }, allow_blank: true
 
-  def add_exp!(amount)
+  def add_exp!(amount, game = nil)
     with_lock do
       total_exp = exp + amount
       new_level = level

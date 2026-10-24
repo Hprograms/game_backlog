@@ -9,13 +9,33 @@ html, body {
 }
 
 /* --- Header & Layout Styles --- */
-.brand-title {
-  letter-spacing: 0.05em;
+.navbar {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
-.brand-icon {
-  font-size: 1.5rem;
-  color: #0dcaf0; 
+.brand-logo-image {
+  height: 48px;
+  width: auto;
+  transition: filter 0.2s ease;
+}
+
+.brand-title-text {
+  font-family: 'DotGothic16', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: #f8fafc;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.brand-title:hover .brand-logo-image {
+  filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.6));
+}
+
+.brand-title:hover .brand-title-text {
+  color: var(--cyan-accent, #00e5ff);
+  text-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
 }
 
 .main-container {

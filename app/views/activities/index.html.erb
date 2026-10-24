@@ -1,0 +1,9 @@
+<section class="activities-page">
+  <h1 class="activities-title">冒険の書</h1>
+
+  <div id="activities" class="activities-list">
+    <%= render @activities %>
+  </div>
+
+  <%= render "load_more", next_page: @next_page %>
+</section>

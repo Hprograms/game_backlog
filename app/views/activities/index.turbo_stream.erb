@@ -1,0 +1,2 @@
+<%= turbo_stream.append "activities", partial: "activities/activity", collection: @activities %>
+<%= turbo_stream.replace "load-more-container", partial: "activities/load_more", locals: { next_page: @next_page } %>

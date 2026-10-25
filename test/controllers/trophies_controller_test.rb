@@ -48,7 +48,7 @@ class TrophiesControllerTest < ActionDispatch::IntegrationTest
   test "ログインなしで一覧画面にアクセスするとリダイレクトされる" do
     get trophies_path
 
-    assert_redirected_to new_user_session_path
+    assert_redirected_to root_path
   end
 
   test "獲得済みと未獲得のトロフィーをカテゴリ別に表示する" do

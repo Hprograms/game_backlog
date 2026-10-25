@@ -38,7 +38,7 @@ class ApplicationController < ActionController::Base
 
     respond_to do |format|
       format.html do
-        redirect_to new_user_session_path, alert: "このページを表示するにはログインしてください"
+        redirect_to root_path, alert: "このページを表示するにはログインしてください"
       end
       format.any { head :unauthorized }
     end

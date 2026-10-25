@@ -23,7 +23,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
   # ログインしていない場合はリダイレクトされる
   test "ログインなしで一覧画面にアクセスするとリダイレクトされる" do
     get games_path
-    assert_redirected_to new_user_session_path
+    assert_redirected_to root_path
   end
 
   test "ユーザー名が未設定の場合は名前設定画面へ誘導される" do
@@ -260,7 +260,7 @@ end
         }
       }
     end
-    assert_redirected_to new_user_session_path
+    assert_redirected_to root_path
   end
 
   # 自分のゲームを削除できる

@@ -1,37 +1,5 @@
-<% progress = level_progress(current_app_user) %>
-
-<div class="gaming-hud-panel level-progress-panel" aria-label="レベル進捗">
-  <%= link_to edit_profile_path, class: "profile-edit-link", title: "ユーザー名を編集", aria: { label: "ユーザー名を編集" } do %>
-    <span class="material-symbols-outlined" aria-hidden="true">settings</span>
-  <% end %>
-
-  <div class="level-progress-heading">
-    <div class="level-progress-current">
-      <span class="level-progress-label">勇者 <%= current_user.name %></span>
-      <span class="level-progress-label">- Lv. <%= current_user.level %></span>
-    </div>
-    <div class="level-progress-remaining">
-      次のレベルまであと <strong><%= progress[:remaining_exp] %> EXP</strong>
-    </div>
-  </div>
-
-  <div
-    class="level-progress-track"
-    role="progressbar"
-    aria-label="次のレベルまでの進捗"
-    aria-valuemin="0"
-    aria-valuemax="100"
-    aria-valuenow="<%= progress[:percentage] %>">
-    <div class="level-progress-fill" style="width: <%= progress[:percentage] %>%"></div>
-  </div>
-
-  <div class="level-progress-count">
-    <%= progress[:current_exp] %> / <%= progress[:required_exp] %> EXP
-  </div>
-</div>
-
 <div class="card gaming-hud-panel">
-  <div class="card-body p-4">
+  <div class="card-body p-2 p-md-3">
     <div class="row text-center">
       <div class="col-6 col-md-3 stat-col border-end border-secondary border-opacity-25 mb-3 mb-md-0">
         <div class="mb-2 text-primary">
@@ -97,7 +65,7 @@
 <% else %>
   <div class="row g-3 g-md-4 mb-5">
     <% @games.each do |game| %>
-      <div class="col-6 col-md-4 col-lg-3">
+      <div class="col-6 col-sm-4 col-md-3 col-xl-2">
         <div class="game-poster-card">
           <div class="poster-actions">
             <%= link_to edit_game_path(game), class: "action-btn", title: "編集" do %>

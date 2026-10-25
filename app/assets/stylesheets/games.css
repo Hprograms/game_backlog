@@ -39,7 +39,7 @@ html, body {
 }
 
 .main-container {
-  padding-top: 3rem;
+  padding-top: 1.5rem;
   padding-bottom: 3rem;
 }
 
@@ -50,11 +50,11 @@ html, body {
   border-radius: 12px;
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .level-progress-panel {
-  padding: 1.25rem 1.5rem;
+  padding: 0.75rem 1rem;
 }
 
 .level-progress-heading {
@@ -71,7 +71,7 @@ html, body {
   left: 50%;
   transform: translateX(-50%);
   color: #f8fafc;
-  font-size: 1.25rem;
+  font-size: 1.05rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-shadow: 0 0 12px rgba(0, 229, 255, 0.45);
@@ -111,12 +111,12 @@ html, body {
 }
 
 .hud-icon {
-  font-size: 32px;
+  font-size: 24px;
   filter: drop-shadow(0 0 8px currentColor);
 }
 
 .stat-value {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 800;
   line-height: 1.2;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
@@ -144,7 +144,7 @@ html, body {
 }
 
 /* --- Controls Bar --- */
-.controls-bar { margin-bottom: 2rem; }
+.controls-bar { margin-bottom: 1rem; }
 
 .filter-tabs .btn {
   border: none;
@@ -238,7 +238,7 @@ html, body {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 1.2rem;
+  padding: 0.75rem;
   transition: all 0.3s ease;
 }
 
@@ -249,7 +249,7 @@ html, body {
 .poster-title {
   color: white;
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 0.85rem;
   line-height: 1.3;
   margin-bottom: 0.3rem;
   display: -webkit-box;
@@ -896,4 +896,28 @@ html, body {
   .game-record-item--wide {
     grid-column: auto;
   }
+}
+
+/* --- Header Level Bar --- */
+.user-profile-widget {
+  min-width: 40px;
+}
+
+.header-level-container {
+  width: 100%;
+  max-width: 48px;
+}
+
+.header-progress-track {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.header-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00e5ff, #8b5cf6);
+  box-shadow: 0 0 5px rgba(0, 229, 255, 0.5);
+  transition: width 0.3s ease;
 }

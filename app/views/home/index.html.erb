@@ -1,6 +1,18 @@
-<div class="text-center py-5">
-  <h1 class="mb-3">ツミクエスト</h1>
-  <p class="text-muted mb-4">積んでいるゲームをすっきり管理しよう</p>
-  <%= link_to "ログイン", new_user_session_path, class: "btn btn-primary me-2" %>
-  <%= link_to "新規登録", new_user_registration_path, class: "btn btn-outline-primary" %>
+<div class="d-flex flex-column align-items-center mt-5"
+     data-controller="clerk-auth"
+     data-clerk-auth-sign-in-url-value="/"
+     data-clerk-auth-sign-up-url-value="/?mode=signup"
+     data-clerk-auth-redirect-url-value="<%= games_path %>">
+
+  <div class="text-center mb-4 pb-2">
+    <%= image_tag "TsumiQuest-logo2.png", alt: "ツミクエスト", style: "height: 180px; filter: drop-shadow(0 0 20px rgba(0, 229, 255, 0.4));" %>
+  </div>
+
+  <% if params[:mode] == 'signup' %>
+    <div data-clerk-auth-target="signUp"></div>
+  <% else %>
+    <div data-clerk-auth-target="signIn"></div>
+  <% end %>
+
+  <p class="text-danger mt-3 mb-0" data-clerk-auth-target="error" role="alert" hidden></p>
 </div>

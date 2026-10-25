@@ -22,6 +22,7 @@
       <script defer crossorigin="anonymous" data-clerk-publishable-key="<%= Clerk.configuration.publishable_key %>" src="<%= clerk_frontend_api %>/npm/@clerk/clerk-js@6/dist/clerk.browser.js"></script>
     <% end %>
     <%= javascript_importmap_tags %>
+    <%= yield :head %>
   </head>
   <body>
     <% unless controller_name == "home" %>

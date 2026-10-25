@@ -24,46 +24,45 @@
     <%= javascript_importmap_tags %>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div class="container-fluid px-4 px-xl-5">
-        <a class="navbar-brand glow-effect d-flex align-items-center brand-title" href="/">
-          <%= image_tag "TsumiQuest-logo.png", alt: "ロゴ", class: "brand-logo-image me-2" %>
-          <span class="brand-title-text">ツミクエスト</span>
-        </a>
-        <div class="ms-auto">
-          <% if clerk_authenticated? %>
-            <div data-controller="clerk-auth" class="d-flex align-items-center gap-3">
-              <%= link_to trophies_path, class: "btn btn-outline-light btn-sm d-inline-flex align-items-center gap-1" do %>
-                <span class="material-symbols-outlined" aria-hidden="true">emoji_events</span>
-                <span>トロフィー</span>
-              <% end %>
-              <%= link_to activities_path, class: "btn btn-outline-light btn-sm d-inline-flex align-items-center gap-1" do %>
-                <span class="material-symbols-outlined" aria-hidden="true">history</span>
-                <span>冒険の書</span>
-              <% end %>
-              <div class="user-profile-widget d-flex flex-column align-items-center">
-                <div data-clerk-auth-target="userButton"></div>
-                <% if current_user %>
-                  <% progress = level_progress(current_user) %>
-                  <div class="header-level-container mt-1" title="<%= progress[:current_exp] %> / <%= progress[:required_exp] %> EXP">
-                    <div class="d-flex justify-content-between align-items-center" style="font-size: 0.65rem; line-height: 1;">
-                      <span class="text-white fw-bold">Lv.<%= current_user.level %></span>
-                    </div>
-                    <div class="header-progress-track mt-1">
-                      <div class="header-progress-fill" style="width: <%= progress[:percentage] %>%"></div>
-                    </div>
-                  </div>
+    <% unless controller_name == "home" %>
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid px-4 px-xl-5">
+          <a class="navbar-brand glow-effect d-flex align-items-center brand-title" href="/">
+            <%= image_tag "TsumiQuest-logo.png", alt: "ロゴ", class: "brand-logo-image me-2" %>
+            <span class="brand-title-text">ツミクエスト</span>
+          </a>
+          <div class="ms-auto">
+            <% if clerk_authenticated? %>
+              <div data-controller="clerk-auth" class="d-flex align-items-center gap-3">
+                <%= link_to trophies_path, class: "btn btn-outline-light btn-sm d-inline-flex align-items-center gap-1" do %>
+                  <span class="material-symbols-outlined" aria-hidden="true">emoji_events</span>
+                  <span>トロフィー</span>
                 <% end %>
+                <%= link_to activities_path, class: "btn btn-outline-light btn-sm d-inline-flex align-items-center gap-1" do %>
+                  <span class="material-symbols-outlined" aria-hidden="true">history</span>
+                  <span>冒険の書</span>
+                <% end %>
+                <div class="user-profile-widget d-flex flex-column align-items-center">
+                  <div data-clerk-auth-target="userButton"></div>
+                  <% if current_user %>
+                    <% progress = level_progress(current_user) %>
+                    <div class="header-level-container mt-1" title="<%= progress[:current_exp] %> / <%= progress[:required_exp] %> EXP">
+                      <div class="d-flex justify-content-between align-items-center" style="font-size: 0.65rem; line-height: 1;">
+                        <span class="text-white fw-bold">Lv.<%= current_user.level %></span>
+                      </div>
+                      <div class="header-progress-track mt-1">
+                        <div class="header-progress-fill" style="width: <%= progress[:percentage] %>%"></div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+                <span class="text-danger" data-clerk-auth-target="error" role="alert" hidden></span>
               </div>
-              <span class="text-danger" data-clerk-auth-target="error" role="alert" hidden></span>
-            </div>
-          <% else %>
-            <%= link_to "ログイン", new_user_session_path, class: "btn btn-outline-light btn-sm me-2" %>
-            <%= link_to "新規登録", new_user_registration_path, class: "btn btn-light btn-sm" %>
-          <% end %>
+            <% end %>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    <% end %>
 
     <div class="container-fluid px-4 px-xl-5 main-container">
       <% if notice %>

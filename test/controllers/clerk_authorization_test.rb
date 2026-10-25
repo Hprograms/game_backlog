@@ -11,10 +11,10 @@ class ClerkAuthorizationTest < ActionDispatch::IntegrationTest
     @game = Game.create!(title: "Owner game", status: "未着手", user: @user)
   end
 
-  test "未認証のHTMLリクエストはClerkログイン画面へ誘導する" do
+  test "未認証のHTMLリクエストはホーム画面へ誘導する" do
     get games_path
 
-    assert_redirected_to new_user_session_path
+    assert_redirected_to root_path
   end
 
   test "未認証のJSONリクエストは401を返す" do

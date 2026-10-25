@@ -31,6 +31,7 @@ const loadClerk = async () => {
 
   const customLocalization = localization ? {
     ...localization,
+    formFieldInputPlaceholder__signUpPassword: "パスワードを入力",
     signIn: {
       ...localization.signIn,
       start: {
@@ -48,6 +49,10 @@ const loadClerk = async () => {
         actionText: "すでにアカウントをお持ちですか？",
         actionLink: "ログイン",
       },
+    },
+    userButton: {
+      ...localization.userButton,
+      action__signOut: "ログアウト",
     },
   } : undefined;
 
@@ -67,9 +72,19 @@ export default class extends Controller {
   }
 
   async connect() {
+    // 注意: turbo:before-cache では cleanup しない。
+    // Clerkが #/factor-one などへ遷移した際、Turboが同一ページ内の移動でも
+    // before-cache を発火するため、表示中のClerkを壊してしまう。
+    // キャッシュ対策は、ビュー側の <meta name="turbo-cache-control" content="no-cache"> で行う。
+
     try {
       await loadClerk();
       if (!this.element.isConnected) return;
+
+      // Turboのスナップショットから復元された「古いClerkのDOM」が残っていると
+      // 重複表示になるため、マウント前に同期的に空にする。
+      // (この時点ではこの要素にClerkのReactルートは存在しない)
+      this.clearStaleDom();
 
       if (this.hasSignInTarget) {
         window.Clerk.mountSignIn(this.signInTarget, {
@@ -100,21 +115,23 @@ export default class extends Controller {
   }
 
   disconnect() {
+    this.unmountClerk();
+  }
+
+  clearStaleDom() {
+    if (this.hasSignInTarget) this.signInTarget.replaceChildren();
+    if (this.hasSignUpTarget) this.signUpTarget.replaceChildren();
+    if (this.hasUserButtonTarget) this.userButtonTarget.replaceChildren();
+  }
+
+  // Clerk側のアンマウントだけを行う。
+  // innerHTML を手動で消すと、非同期で進むReactのアンマウントと競合して
+  // removeChild の NotFoundError になるため、DOMには触らない。
+  unmountClerk() {
     if (!window.Clerk) return;
 
-    if (this.hasSignInTarget) {
-      window.Clerk.unmountSignIn(this.signInTarget);
-      this.signInTarget.innerHTML = "";
-    }
-
-    if (this.hasSignUpTarget) {
-      window.Clerk.unmountSignUp(this.signUpTarget);
-      this.signUpTarget.innerHTML = "";
-    }
-
-    if (this.hasUserButtonTarget) {
-      window.Clerk.unmountUserButton(this.userButtonTarget);
-      this.userButtonTarget.innerHTML = "";
-    }
+    if (this.hasSignInTarget) window.Clerk.unmountSignIn(this.signInTarget);
+    if (this.hasSignUpTarget) window.Clerk.unmountSignUp(this.signUpTarget);
+    if (this.hasUserButtonTarget) window.Clerk.unmountUserButton(this.userButtonTarget);
   }
 }

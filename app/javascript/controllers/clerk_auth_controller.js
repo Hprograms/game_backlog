@@ -31,6 +31,7 @@ const loadClerk = async () => {
 
   const customLocalization = localization ? {
     ...localization,
+    formFieldInputPlaceholder__signUpPassword: "パスワードを入力",
     signIn: {
       ...localization.signIn,
       start: {
@@ -48,6 +49,10 @@ const loadClerk = async () => {
         actionText: "すでにアカウントをお持ちですか？",
         actionLink: "ログイン",
       },
+    },
+    userButton: {
+      ...localization.userButton,
+      action__signOut: "ログアウト",
     },
   } : undefined;
 

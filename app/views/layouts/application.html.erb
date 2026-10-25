@@ -25,7 +25,7 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div class="container">
+      <div class="container-fluid px-4 px-xl-5">
         <a class="navbar-brand glow-effect d-flex align-items-center brand-title" href="/">
           <%= image_tag "TsumiQuest-logo.png", alt: "ロゴ", class: "brand-logo-image me-2" %>
           <span class="brand-title-text">ツミクエスト</span>
@@ -65,7 +65,7 @@
       </div>
     </nav>
 
-    <div class="container main-container">
+    <div class="container-fluid px-4 px-xl-5 main-container">
       <% if notice %>
         <div class="alert alert-success animate-in"><%= notice %></div>
       <% end %>

@@ -101,8 +101,20 @@ export default class extends Controller {
 
   disconnect() {
     if (!window.Clerk) return;
-    if (this.hasSignInTarget) window.Clerk.unmountSignIn(this.signInTarget);
-    if (this.hasSignUpTarget) window.Clerk.unmountSignUp(this.signUpTarget);
-    if (this.hasUserButtonTarget) window.Clerk.unmountUserButton(this.userButtonTarget);
+
+    if (this.hasSignInTarget) {
+      window.Clerk.unmountSignIn(this.signInTarget);
+      this.signInTarget.innerHTML = "";
+    }
+
+    if (this.hasSignUpTarget) {
+      window.Clerk.unmountSignUp(this.signUpTarget);
+      this.signUpTarget.innerHTML = "";
+    }
+
+    if (this.hasUserButtonTarget) {
+      window.Clerk.unmountUserButton(this.userButtonTarget);
+      this.userButtonTarget.innerHTML = "";
+    }
   }
 }

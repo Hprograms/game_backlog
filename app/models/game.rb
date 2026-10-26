@@ -7,8 +7,8 @@ class Game < ApplicationRecord
   validates :status, inclusion: { in: %w[未着手 プレイ中 クリア済] }
   validates :rating, numericality: { in: 1..5 }, allow_nil: true
 
+  after_save :award_play_time_exp, if: -> { saved_change_to_play_time? }
   after_save :award_exp_for_clear, if: -> { saved_change_to_status? && status == "クリア済" }
-  after_save :award_missing_play_time_exp, if: -> { saved_change_to_play_time? && status == "クリア済" }
   after_save :unlock_trophies, if: -> { status == "クリア済" && (saved_change_to_status? || saved_change_to_play_time?) }
   after_save :record_activity
 
@@ -58,28 +58,20 @@ class Game < ApplicationRecord
   end
 
   def award_exp_for_clear
-    bonus_awarded = play_time.present?
-    updated = self.class.where(id: id, exp_awarded_for_clear: false).update_all(
-      exp_awarded_for_clear: true,
-      play_time_exp_awarded_for_clear: bonus_awarded
-    )
+    updated = self.class.where(id: id, exp_awarded_for_clear: false).update_all(exp_awarded_for_clear: true)
     return unless updated == 1
 
-    user.add_exp!(100 + (play_time || 0) * 10, self)
+    user.add_exp!(100, self)
     @trophies_unlocked_during_save = true
   end
 
-  def award_missing_play_time_exp
-    return if play_time.nil?
+  def award_play_time_exp
+    return unless play_time.present? && play_time > awarded_play_time
 
-    updated = self.class.where(
-      id: id,
-      exp_awarded_for_clear: true,
-      play_time_exp_awarded_for_clear: false
-    ).update_all(play_time_exp_awarded_for_clear: true)
-    return unless updated == 1
+    diff = play_time - awarded_play_time
+    update_column(:awarded_play_time, play_time)
 
-    user.add_exp!(play_time * 10, self)
+    user.add_exp!(diff * 10, self)
     @trophies_unlocked_during_save = true
   end
 end

@@ -6,6 +6,7 @@ class GameTest < ActiveSupport::TestCase
   setup do
     @user = User.create!(email: "game-test@example.com")
     Trophy.find_or_create_by!(code: "clear_1")
+    Trophy.find_or_create_by!(code: "level_10")
     @game = @user.games.create!(title: "Test Game", status: "プレイ中", play_time: 30)
   end
 
@@ -29,29 +30,39 @@ class GameTest < ActiveSupport::TestCase
     assert @user.user_trophies.joins(:trophy).exists?(trophies: { code: "play_time_100" })
   end
 
-  test "プレイ時間がnilのときに基本EXPだけが付与される" do
+  test "プレイ時間をnilにしても既に付与されたEXPは維持される" do
     @game.update!(play_time: nil, status: "クリア済")
 
-    assert_equal 100, @user.reload.exp
-    assert_equal 2, @user.level
+    assert_equal 400, @user.reload.exp
+    assert_equal 4, @user.level
   end
 
-  test "クリア後にプレイ時間を追加しても不足分のボーナスは1回だけ付与される" do
+  test "クリア後もプレイ時間の増加に応じてEXPが付与される" do
     @game.update!(play_time: nil, status: "クリア済")
     @game.update!(play_time: 30)
     @game.update!(play_time: 40)
 
-    assert_equal 400, @user.reload.exp
-    assert_equal 4, @user.level
-    assert @game.reload.play_time_exp_awarded_for_clear
+    assert_equal 500, @user.reload.exp
+    assert_equal 5, @user.level
+    assert_equal 40, @game.reload.awarded_play_time
   end
 
-  test "クリア報酬を付与した後にプレイ時間を変更しても追加EXPは発生しない" do
+  test "クリア報酬はプレイ時間EXPと独立して付与される" do
     @game.update!(status: "クリア済")
     @game.update!(play_time: 40)
 
-    assert_equal 400, @user.reload.exp
-    assert @game.reload.play_time_exp_awarded_for_clear
+    assert_equal 500, @user.reload.exp
+    assert_equal 40, @game.reload.awarded_play_time
+  end
+
+  test "プレイ時間の増分だけEXPが付与され、減少ではEXPが減らない" do
+    @game.update!(play_time: 35)
+    assert_equal 350, @user.reload.exp
+    assert_equal 35, @game.reload.awarded_play_time
+
+    @game.update!(play_time: 30)
+    assert_equal 350, @user.reload.exp
+    assert_equal 35, @game.reload.awarded_play_time
   end
 
   test "クリア報酬は複数回付与されない" do
@@ -124,7 +135,7 @@ class GameTest < ActiveSupport::TestCase
   test "すでに報酬済みのゲームにはクリアEXPは付与されない" do
     @game.update!(exp_awarded_for_clear: true, status: "クリア済")
 
-    assert_equal 0, @user.reload.exp
-    assert_equal 1, @user.level
+    assert_equal 300, @user.reload.exp
+    assert_equal 3, @user.level
   end
 end

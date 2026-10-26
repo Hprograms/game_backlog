@@ -93,6 +93,11 @@
             </span>
           </div>
 
+          <div class="game-record-item">
+            <span class="game-record-label">総プレイ時間</span>
+            <span class="game-record-value game-total-play-time"><%= format_play_time(@game.play_time) %></span>
+          </div>
+
           <% if @game.memo.present? %>
             <div class="game-record-item game-record-item--wide game-record-memo">
               <span class="game-record-label">メモ</span>

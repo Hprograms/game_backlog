@@ -66,10 +66,16 @@
           <%= f.date_field :purchased_at, class: "form-control modern-input" %>
         </div>
         <div class="col-sm-6">
-          <label class="modern-label" for="game_play_time">プレイ時間</label>
-          <div class="d-flex align-items-end">
-            <%= f.number_field :play_time, class: "form-control modern-input me-2", placeholder: "0", min: 0, step: 1 %>
-            <span class="input-unit">時間</span>
+          <label class="modern-label">プレイ時間</label>
+          <div class="d-flex gap-3">
+            <div class="d-flex align-items-end flex-grow-1">
+              <%= f.number_field :play_time_hours, class: "form-control modern-input me-2", placeholder: "0", min: 0, step: 1, aria: { label: "プレイ時間（時間）" } %>
+              <span class="input-unit">時間</span>
+            </div>
+            <div class="d-flex align-items-end flex-grow-1">
+              <%= f.number_field :play_time_minutes, class: "form-control modern-input me-2", placeholder: "0", min: 0, step: 1, aria: { label: "プレイ時間（分）" } %>
+              <span class="input-unit">分</span>
+            </div>
           </div>
         </div>
       </div>

@@ -30,7 +30,7 @@ class GameTest < ActiveSupport::TestCase
     assert @user.user_trophies.joins(:trophy).exists?(trophies: { code: "play_time_100" })
   end
 
-  test "クリア済みステータスでもプレイ時間の更新でEXPが付与される" do
+  test "クリア済みゲームでもプレイ時間の更新でEXPが付与される" do
     @game.update!(play_time: nil, status: "クリア済")
     assert_equal 8_000, @user.reload.exp
 

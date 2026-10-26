@@ -10,11 +10,29 @@ class GameTest < ActiveSupport::TestCase
     @game = @user.games.create!(title: "Test Game", status: "プレイ中", play_time: 30)
   end
 
+  test "プレイ時間を時間と分で読み書きする" do
+    assert_equal 0, @game.play_time_hours
+    assert_equal 30, @game.play_time_minutes
+
+    @game.update!(play_time_hours: "2", play_time_minutes: "10")
+
+    assert_equal 130, @game.reload.play_time
+    assert_equal 2, @game.play_time_hours
+    assert_equal 10, @game.play_time_minutes
+  end
+
+  test "プレイ時間がnilなら時間と分の仮想属性もnilを返す" do
+    game = @user.games.build(title: "No play time", status: "未着手")
+
+    assert_nil game.play_time_hours
+    assert_nil game.play_time_minutes
+  end
+
   test "クリアで5000EXPとプレイ時間EXPが付与されレベルが更新される" do
     @game.update!(status: "クリア済")
 
-    assert_equal 8_000, @user.reload.exp
-    assert_equal 21, @user.level
+    assert_equal 5_060, @user.reload.exp
+    assert_equal 16, @user.level
     assert @game.reload.exp_awarded_for_clear
     assert @user.user_trophies.joins(:trophy).exists?(trophies: { code: "clear_1" })
     assert Activity.exists?(user: @user, game: @game, action_type: "level_up")
@@ -30,21 +48,21 @@ class GameTest < ActiveSupport::TestCase
     assert @user.user_trophies.joins(:trophy).exists?(trophies: { code: "play_time_100" })
   end
 
-  test "クリア済みステータスでもプレイ時間の更新でEXPが付与される" do
+  test "クリア済みゲームでもプレイ時間の更新でEXPが付与される" do
     @game.update!(play_time: nil, status: "クリア済")
-    assert_equal 8_000, @user.reload.exp
+    assert_equal 5_060, @user.reload.exp
 
     @game.update!(play_time: 40)
 
-    assert_equal 9_000, @user.reload.exp
+    assert_equal 5_080, @user.reload.exp
     assert_equal 40, @game.reload.awarded_play_time
   end
 
   test "プレイ時間をnilにしても既に付与されたEXPは維持される" do
     @game.update!(play_time: nil, status: "クリア済")
 
-    assert_equal 8_000, @user.reload.exp
-    assert_equal 21, @user.level
+    assert_equal 5_060, @user.reload.exp
+    assert_equal 16, @user.level
   end
 
   test "クリア後もプレイ時間の増加に応じてEXPが付与される" do
@@ -52,8 +70,8 @@ class GameTest < ActiveSupport::TestCase
     @game.update!(play_time: 30)
     @game.update!(play_time: 40)
 
-    assert_equal 9_000, @user.reload.exp
-    assert_equal 22, @user.level
+    assert_equal 5_080, @user.reload.exp
+    assert_equal 16, @user.level
     assert_equal 40, @game.reload.awarded_play_time
   end
 
@@ -61,18 +79,18 @@ class GameTest < ActiveSupport::TestCase
     @game.update!(status: "クリア済")
     @game.update!(play_time: 40)
 
-    assert_equal 9_000, @user.reload.exp
-    assert_equal 22, @user.level
+    assert_equal 5_080, @user.reload.exp
+    assert_equal 16, @user.level
     assert_equal 40, @game.reload.awarded_play_time
   end
 
   test "プレイ時間の増分だけEXPが付与され、減少ではEXPが減らない" do
     @game.update!(play_time: 35)
-    assert_equal 3_500, @user.reload.exp
+    assert_equal 70, @user.reload.exp
     assert_equal 35, @game.reload.awarded_play_time
 
     @game.update!(play_time: 30)
-    assert_equal 3_500, @user.reload.exp
+    assert_equal 70, @user.reload.exp
     assert_equal 35, @game.reload.awarded_play_time
   end
 
@@ -81,8 +99,8 @@ class GameTest < ActiveSupport::TestCase
     @game.update!(status: "プレイ中")
     @game.update!(status: "クリア済")
 
-    assert_equal 8_000, @user.reload.exp
-    assert_equal 21, @user.level
+    assert_equal 5_060, @user.reload.exp
+    assert_equal 16, @user.level
   end
 
   test "プレイ中でゲームを作成するとstartedアクティビティを作成する" do
@@ -146,7 +164,7 @@ class GameTest < ActiveSupport::TestCase
   test "すでに報酬済みのゲームにはクリアEXPは付与されない" do
     @game.update!(exp_awarded_for_clear: true, status: "クリア済")
 
-    assert_equal 3_000, @user.reload.exp
-    assert_equal 12, @user.level
+    assert_equal 60, @user.reload.exp
+    assert_equal 1, @user.level
   end
 end

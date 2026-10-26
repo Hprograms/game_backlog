@@ -76,7 +76,7 @@ class GamesController < ApplicationController
   end
 
   def game_params
-    params.require(:game).permit(:title, :platform, :genre, :status, :memo, :rating, :purchased_at, :image, :play_time, :played_at, :started_at, :finished_at, :igdb_rating, :developer, :description)
+    params.require(:game).permit(:title, :platform, :genre, :status, :memo, :rating, :purchased_at, :image, :play_time, :play_time_hours, :play_time_minutes, :played_at, :started_at, :finished_at, :igdb_rating, :developer, :description)
   end
 
   def attach_igdb_image

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_20_122938) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_26_122122) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -73,6 +73,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_20_122938) do
     t.integer "igdb_rating"
     t.boolean "exp_awarded_for_clear", default: false, null: false
     t.boolean "play_time_exp_awarded_for_clear", default: false, null: false
+    t.integer "awarded_play_time", default: 0, null: false
     t.index ["user_id"], name: "index_games_on_user_id"
   end
 

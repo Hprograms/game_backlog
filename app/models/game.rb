@@ -3,9 +3,33 @@ class Game < ApplicationRecord
   has_many :activities, dependent: :destroy
   has_one_attached :image
 
+  before_validation :set_play_time_from_parts, if: :play_time_parts_assigned?
+
   validates :title, presence: true
   validates :status, inclusion: { in: %w[未着手 プレイ中 クリア済] }
   validates :rating, numericality: { in: 1..5 }, allow_nil: true
+
+  def play_time_hours=(hours)
+    @play_time_hours = hours.presence&.to_i
+  end
+
+  def play_time_hours
+    return @play_time_hours if instance_variable_defined?(:@play_time_hours)
+    return if play_time.nil?
+
+    play_time / 60
+  end
+
+  def play_time_minutes=(minutes)
+    @play_time_minutes = minutes.presence&.to_i
+  end
+
+  def play_time_minutes
+    return @play_time_minutes if instance_variable_defined?(:@play_time_minutes)
+    return if play_time.nil?
+
+    play_time % 60
+  end
 
   after_save :award_play_time_exp, if: -> { saved_change_to_play_time? }
   after_save :award_exp_for_clear, if: -> { saved_change_to_status? && status == "クリア済" }
@@ -13,6 +37,18 @@ class Game < ApplicationRecord
   after_save :record_activity
 
   private
+
+  def play_time_parts_assigned?
+    instance_variable_defined?(:@play_time_hours) || instance_variable_defined?(:@play_time_minutes)
+  end
+
+  def set_play_time_from_parts
+    self.play_time = if play_time_hours.blank? && play_time_minutes.blank?
+      nil
+    else
+      (play_time_hours.presence&.to_i || 0) * 60 + (play_time_minutes.presence&.to_i || 0)
+    end
+  end
 
   def record_activity
     if saved_change_to_status? && status == "プレイ中"
@@ -66,12 +102,13 @@ class Game < ApplicationRecord
   end
 
   def award_play_time_exp
-    return unless play_time.present? && play_time > awarded_play_time
+    current_awarded = awarded_play_time || 0
+    return unless play_time.present? && play_time > current_awarded
 
-    diff = play_time - awarded_play_time
+    diff = play_time - current_awarded
     update_column(:awarded_play_time, play_time)
 
-    user.add_exp!(diff * 100, self)
+    user.add_exp!(diff * 2, self)
     @trophies_unlocked_during_save = true
   end
 end

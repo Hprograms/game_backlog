@@ -75,6 +75,10 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_select 'input[name="game[igdb_rating]"]'
     assert_select 'input[name="game[developer]"]'
     assert_select 'input[name="game[description]"]'
+    assert_select 'input[name="game[play_time_hours]"]'
+    assert_select 'input[name="game[play_time_minutes]"]'
+    assert_select ".input-unit", text: "時間"
+    assert_select ".input-unit", text: "分"
     assert_select ".api-metadata", count: 0
     assert_select 'input[name="game[metascore]"]', count: 0
     assert_select 'input[name="game[average_playtime]"]', count: 0
@@ -85,13 +89,14 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
       developer: "開発スタジオ",
       description: "あらすじの1行目\nあらすじの2行目",
       igdb_rating: 91,
-      status: "クリア済",
       rating: 4,
       purchased_at: Date.new(2026, 1, 2),
       started_at: Date.new(2026, 2, 3),
       finished_at: Date.new(2026, 3, 4),
       memo: "記録の1行目\n記録の2行目"
     )
+    @game.update_column(:status, "クリア済")
+    @game.update_column(:play_time, 130)
 
     with_clerk_session do
       get game_path(@game)
@@ -105,6 +110,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".game-show-tag--score", text: /91/
     assert_select ".game-description br"
     assert_select ".game-record-status.is-cleared", text: "クリア済"
+    assert_select ".game-total-play-time", text: "2時間10分"
     assert_select ".game-rating .is-active", count: 4
     assert_select ".game-memo br"
     assert_select ".game-show-actions a[href='#{games_path}']"
@@ -140,12 +146,15 @@ test "ログイン済みでゲームを登録できる" do
           title: "モンスターハンター",
           platform: "Switch",
           genre: "アクション",
-          status: "未着手"
+          status: "未着手",
+          play_time_hours: "2",
+          play_time_minutes: "10"
         }
       }
     end
   end
   assert_redirected_to game_path(Game.last)
+  assert_equal 130, Game.last.play_time
 end
 
 test "IGDBの開発元とあらすじをゲームに保存できる" do

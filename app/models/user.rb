@@ -8,6 +8,20 @@ class User < ApplicationRecord
 
   validates :name, length: { maximum: 15 }, allow_blank: true
 
+  def exp_required_for_next_level
+    level < 100 ? (30 * level) + 70 : 3_000
+  end
+
+  def total_exp_required_for_level(target_level)
+    levels_before_target = [ target_level - 1, 0 ].max
+    levels_up_to_99 = [ levels_before_target, 99 ].min
+    exp_through_level_99 = (30 * levels_up_to_99 * (levels_up_to_99 + 1) / 2) +
+      (70 * levels_up_to_99)
+    exp_after_level_99 = [ levels_before_target - 99, 0 ].max * 3_000
+
+    exp_through_level_99 + exp_after_level_99
+  end
+
   def add_exp!(amount, game = nil)
     with_lock do
       total_exp = exp + amount
@@ -99,10 +113,5 @@ class User < ApplicationRecord
       action_type: action_type,
       occurred_at: Time.current
     )
-  end
-
-  def total_exp_required_for_level(target_level)
-    completed_levels = target_level - 1
-    completed_levels * 100 + completed_levels * (completed_levels - 1)
   end
 end

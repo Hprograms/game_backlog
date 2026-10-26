@@ -61,7 +61,7 @@ class Game < ApplicationRecord
     updated = self.class.where(id: id, exp_awarded_for_clear: false).update_all(exp_awarded_for_clear: true)
     return unless updated == 1
 
-    user.add_exp!(100, self)
+    user.add_exp!(5_000, self)
     @trophies_unlocked_during_save = true
   end
 
@@ -71,7 +71,7 @@ class Game < ApplicationRecord
     diff = play_time - awarded_play_time
     update_column(:awarded_play_time, play_time)
 
-    user.add_exp!(diff * 10, self)
+    user.add_exp!(diff * 100, self)
     @trophies_unlocked_during_save = true
   end
 end

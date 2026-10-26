@@ -69,25 +69,32 @@ class UserTest < ActiveSupport::TestCase
     user = User.create!(email: "level-test@example.com")
     game = user.games.create!(title: "Level-up trigger game", status: "未着手")
 
-    user.add_exp!(19_602, game)
+    user.add_exp!(155_430, game)
 
-    assert_equal 19_602, user.exp
+    assert_equal 155_430, user.exp
     assert_equal 100, user.level
     assert user.user_trophies.joins(:trophy).exists?(trophies: { code: "level_100" })
     assert Activity.exists?(user: user, game: game, action_type: "level_up")
   end
 
-  test "Lv99からLv100には累計296EXPが必要" do
-    user = User.create!(email: "level-99-test@example.com", level: 99, exp: 19_306)
+  test "Lv99からLv100には3040EXPが必要" do
+    user = User.create!(email: "level-99-test@example.com", level: 99, exp: 152_390)
     game = user.games.create!(title: "Level 100 trigger game", status: "未着手")
 
-    user.add_exp!(295, game)
+    user.add_exp!(3_039, game)
     assert_equal 99, user.reload.level
 
     user.add_exp!(1, game)
     assert_equal 100, user.reload.level
-    assert_equal 19_602, user.exp
+    assert_equal 155_430, user.exp
     assert_equal 1, Activity.where(user: user, game: game, action_type: "level_up").count
+  end
+
+  test "Lv100以降は次のレベルまで3000EXPで、累計必要EXPにも反映する" do
+    user = User.new(level: 100)
+
+    assert_equal 3_000, user.exp_required_for_next_level
+    assert_equal 158_430, user.total_exp_required_for_level(101)
   end
 
   test "条件を満たした全トロフィーを獲得し、トロフィー獲得判定メソッドを再実行しても獲得トロフィー重複しない" do
@@ -130,9 +137,10 @@ class UserTest < ActiveSupport::TestCase
     %w[clear_1 play_time_100 total_play_time_500 genre_rpg_5].each do |code|
       Trophy.create!(code: code, name: code, description: code, icon_name: code)
     end
-    user.games.create!(title: "Uncleared RPG", genre: "RPG", status: "プレイ中", play_time: 500)
+    game = user.games.create!(title: "Uncleared RPG", genre: "RPG", status: "プレイ中")
+    game.update_column(:play_time, 500)
 
-    user.unlock_trophies!(user.games.first)
+    user.unlock_trophies!(game)
 
     assert_empty user.user_trophies
   end

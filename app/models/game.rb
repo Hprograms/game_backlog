@@ -1,8 +1,11 @@
 class Game < ApplicationRecord
+  attr_accessor :earned_exp_results
+
   belongs_to :user
   has_many :activities, dependent: :destroy
   has_one_attached :image
 
+  before_save { self.earned_exp_results ||= [] }
   before_validation :set_play_time_from_parts, if: :play_time_parts_assigned?
   before_create :mark_legacy_status_as_awarded
 
@@ -111,6 +114,7 @@ class Game < ApplicationRecord
     return unless updated == 1
 
     user.add_exp!(5_000, self)
+    earned_exp_results << { type: :clear, exp: 5_000 }
     @trophies_unlocked_during_save = true
   end
 
@@ -122,6 +126,7 @@ class Game < ApplicationRecord
     update_column(:awarded_play_time, play_time)
 
     user.add_exp!(diff * 2, self)
+    earned_exp_results << { type: :play_time, minutes: diff, exp: diff * 2 }
     @trophies_unlocked_during_save = true
   end
 end

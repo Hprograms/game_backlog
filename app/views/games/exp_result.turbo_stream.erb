@@ -1,0 +1,13 @@
+<turbo-stream action="append" targets="body">
+  <template>
+    <%= render partial: "games/exp_result_modal",
+      formats: [:html],
+      locals: {
+        game: @game,
+        previous_level: @previous_level,
+        previous_exp: @previous_exp,
+        new_level: @new_level,
+        new_exp: @new_exp
+      } %>
+  </template>
+</turbo-stream>

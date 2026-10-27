@@ -7,10 +7,12 @@ class Game < ApplicationRecord
 
   before_save { self.earned_exp_results ||= [] }
   before_validation :set_play_time_from_parts, if: :play_time_parts_assigned?
+  before_create :mark_legacy_status_as_awarded
 
   validates :title, presence: true
   validates :status, inclusion: { in: %w[未着手 プレイ中 クリア済] }
   validates :rating, numericality: { in: 1..5 }, allow_nil: true
+  validate :play_time_cannot_be_decreased, on: :update
 
   def play_time_hours=(hours)
     @play_time_hours = hours.presence&.to_i
@@ -51,6 +53,17 @@ class Game < ApplicationRecord
     else
       (play_time_hours.presence&.to_i || 0) * 60 + (play_time_minutes.presence&.to_i || 0)
     end
+  end
+
+  def mark_legacy_status_as_awarded
+    self.awarded_play_time = play_time || 0
+    self.exp_awarded_for_clear = true if status == "クリア済"
+  end
+
+  def play_time_cannot_be_decreased
+    return unless play_time.present? && play_time_was.present? && play_time < play_time_was
+
+    errors.add(:base, "プレイ時間を現在の記録より減らすことはできません")
   end
 
   def record_activity

@@ -28,6 +28,27 @@ class GameTest < ActiveSupport::TestCase
     assert_nil game.play_time_minutes
   end
 
+  test "EXP獲得内訳にクリアボーナスとプレイ時間分を記録する" do
+    game = @user.games.create!(title: "EXP results game", status: "未着手")
+    game.update!(status: "クリア済")
+
+    assert_equal [ { type: :clear, exp: 5_000 } ], game.earned_exp_results
+
+    game = Game.find(game.id)
+    game.update!(play_time: 5)
+
+    assert_equal [ { type: :play_time, minutes: 5, exp: 10 } ], game.earned_exp_results
+  end
+
+  test "クリアとプレイ時間を同時に更新した際、両方の内訳が記録される" do
+    game = @user.games.create!(title: "Both EXP results game", status: "未着手")
+    
+    game.update!(status: "クリア済", play_time: 30)
+
+    assert_includes game.earned_exp_results, { type: :clear, exp: 5_000 }
+    assert_includes game.earned_exp_results, { type: :play_time, minutes: 30, exp: 60 }
+  end
+
   test "クリアで5000EXPとプレイ時間EXPが付与されレベルが更新される" do
     @game.update!(status: "クリア済")
 

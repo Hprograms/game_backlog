@@ -18,6 +18,8 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
       status: "未着手",
       user: @user
     )
+
+    Trophy.create!(code: "clear_1", name: "初クリア", description: "初めてゲームをクリアした")
   end
 
   # ログインしていない場合はリダイレクトされる
@@ -42,12 +44,21 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
       get games_path
     end
     assert_response :success
-    assert_select ".level-progress-label:first-child", text: "勇者 テスト勇者"
-    assert_select ".level-progress-label:last-child", text: "- Lv. 1"
-    assert_select ".level-progress-panel > .profile-edit-link[href='#{edit_profile_path}']"
-    assert_select ".level-progress-current .profile-edit-link", count: 0
-    assert_select ".level-progress-remaining", text: /次のレベルまであと 100 EXP/
-    assert_select '.level-progress-track[role="progressbar"][aria-valuenow="0"]'
+    assert_select ".header-level-container"
+    assert_select "span.text-white.fw-bold", text: "Lv.1"
+    assert_select ".header-progress-track"
+    assert_select ".header-level-container[title='0 / 100 EXP']"
+  end
+
+  test "一覧画面にタイマーUIとPLAYボタンを表示する" do
+    with_clerk_session do
+      get games_path
+    end
+
+    assert_response :success
+    assert_select "html[data-controller='timer']"
+    assert_select "#floating-timer[data-timer-target='floating'][hidden]"
+    assert_select "button.btn-play[data-action='click->timer#start'][data-game-id='#{@game.id}'][data-game-title='#{@game.title}']"
   end
 
   test "一覧画面に現在のレベル内EXPと進捗を表示する" do
@@ -58,10 +69,9 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
-    assert_select ".level-progress-label:last-child", text: "- Lv. 2"
-    assert_select ".level-progress-remaining", text: /次のレベルまであと 51 EXP/
-    assert_select '.level-progress-track[aria-valuenow="50"]'
-    assert_select '.level-progress-fill[style="width: 50%"]'
+    assert_select "span.text-white.fw-bold", text: "Lv.2"
+    assert_select ".header-level-container[title='51 / 130 EXP']"
+    assert_select '.header-progress-fill[style="width: 39%"]'
   end
 
   test "新規フォームにIGDBサジェスト用の項目が表示される" do

@@ -68,6 +68,9 @@
       <div class="col-6 col-sm-4 col-md-3 col-xl-2">
         <div class="game-poster-card">
           <div class="poster-actions">
+            <button type="button" class="action-btn btn-play" data-action="click->timer#start" data-game-id="<%= game.id %>" data-game-title="<%= game.title %>" title="プレイ開始">
+              <span class="material-symbols-outlined">play_arrow</span>
+            </button>
             <%= link_to edit_game_path(game), class: "action-btn", title: "編集" do %>
               <span class="material-symbols-outlined">edit</span>
             <% end %>

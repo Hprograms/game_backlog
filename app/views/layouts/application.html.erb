@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-controller="timer">
   <head>
     <title>ツミクエスト</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -25,6 +25,19 @@
     <%= yield :head %>
   </head>
   <body>
+    <div id="floating-timer" class="floating-timer" data-timer-target="floating" hidden>
+      <div class="timer-content">
+        <div class="timer-info">
+          <span class="material-symbols-outlined timer-icon">sports_esports</span>
+          <span class="timer-game-title" data-timer-target="title">ゲーム名</span>
+        </div>
+        <div class="timer-display" data-timer-target="time">00:00:00</div>
+        <button type="button" class="btn-stop-timer" data-action="click->timer#stop">
+          <span class="material-symbols-outlined">stop</span>
+          STOP
+        </button>
+      </div>
+    </div>
     <% unless controller_name == "home" %>
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid px-4 px-xl-5">

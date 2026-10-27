@@ -28,8 +28,7 @@ class GameTest < ActiveSupport::TestCase
     assert_nil game.play_time_minutes
   end
 
-<<<<<<< Updated upstream
-=======
+
   test "プレイ時間を過去の記録より減らせない" do
     assert_not @game.update(play_time: 29)
 
@@ -61,6 +60,7 @@ class GameTest < ActiveSupport::TestCase
     assert_includes game.earned_exp_results, { type: :clear, exp: 5000 }
   end
 
+
   test "EXP獲得内訳にクリアボーナスとプレイ時間分を記録する" do
     game = @user.games.create!(title: "EXP results game", status: "未着手")
     game.update!(status: "クリア済")
@@ -82,7 +82,6 @@ class GameTest < ActiveSupport::TestCase
     assert_includes game.earned_exp_results, { type: :play_time, minutes: 30, exp: 60 }
   end
 
->>>>>>> Stashed changes
   test "クリアで5000EXPとプレイ時間EXPが付与されレベルが更新される" do
     @game.update!(status: "クリア済")
 

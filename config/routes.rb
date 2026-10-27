@@ -3,6 +3,9 @@ Rails.application.routes.draw do
     collection do
       get :search # /games/search というURLが作られます
     end
+    member do
+      post :timer_update
+    end
   end
   resources :trophies, only: [ :index ]
   resources :activities, only: [ :index ]

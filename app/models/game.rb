@@ -1,15 +1,22 @@
 class Game < ApplicationRecord
+  attr_accessor :used_timer
+
   belongs_to :user
   has_many :activities, dependent: :destroy
   has_one_attached :image
 
   before_validation :set_play_time_from_parts, if: :play_time_parts_assigned?
+  before_save :reset_earned_exp_results
   before_create :mark_legacy_status_as_awarded
 
   validates :title, presence: true
   validates :status, inclusion: { in: %w[未着手 プレイ中 クリア済] }
   validates :rating, numericality: { in: 1..5 }, allow_nil: true
   validate :play_time_cannot_be_decreased, on: :update
+
+  def earned_exp_results
+    @earned_exp_results ||= []
+  end
 
   def play_time_hours=(hours)
     @play_time_hours = hours.presence&.to_i
@@ -39,6 +46,10 @@ class Game < ApplicationRecord
   after_save :record_activity
 
   private
+
+  def reset_earned_exp_results
+    @earned_exp_results = []
+  end
 
   def play_time_parts_assigned?
     instance_variable_defined?(:@play_time_hours) || instance_variable_defined?(:@play_time_minutes)
@@ -111,6 +122,7 @@ class Game < ApplicationRecord
     return unless updated == 1
 
     user.add_exp!(5_000, self)
+    earned_exp_results << { type: :clear, exp: 5_000 }
     @trophies_unlocked_during_save = true
   end
 
@@ -121,7 +133,16 @@ class Game < ApplicationRecord
     diff = play_time - current_awarded
     update_column(:awarded_play_time, play_time)
 
-    user.add_exp!(diff * 2, self)
+    base_exp = diff * 2
+    user.add_exp!(base_exp, self)
+    earned_exp_results << { type: :play_time, minutes: diff, exp: base_exp }
+
+    if used_timer
+      timer_bonus = base_exp / 5
+      user.add_exp!(timer_bonus, self) if timer_bonus.positive?
+      earned_exp_results << { type: :timer_bonus, exp: timer_bonus }
+    end
+
     @trophies_unlocked_during_save = true
   end
 end

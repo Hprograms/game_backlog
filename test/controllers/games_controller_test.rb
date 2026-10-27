@@ -20,6 +20,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     )
 
     Trophy.create!(code: "clear_1", name: "初クリア", description: "初めてゲームをクリアした")
+    Trophy.create!(code: "level_10", name: "レベル10", description: "レベル10に到達した")
   end
 
   # ログインしていない場合はリダイレクトされる
@@ -313,6 +314,78 @@ end
     end
     assert_redirected_to game_path(@game)
     assert_equal "更新後のタイトル", @game.reload.title
+  end
+
+  test "タイマーのプレイ時間を加算してEXPリザルトを返す" do
+    with_clerk_session do
+      post timer_update_game_path(@game),
+        params: { play_time_minutes: 25, status: "プレイ中" },
+        as: :json,
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :success
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
+    assert_equal 25, @game.reload.play_time
+    assert_equal "プレイ中", @game.status
+    assert_equal 60, @user.reload.exp
+    assert_includes response.body, 'action="append" targets="body"'
+    assert_includes response.body, "⏱️ タイマー稼働ボーナス"
+    assert_includes response.body, "+ 10 EXP"
+    assert_includes response.body, "TOTAL EXP"
+  end
+
+  test "タイマーのクリア結果でプレイ時間とクリア状態を保存してEXPを付与する" do
+    with_clerk_session do
+      post timer_update_game_path(@game),
+        params: { play_time_minutes: 10, status: "クリア済" },
+        as: :json,
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :success, response.body
+    assert_equal 10, @game.reload.play_time
+    assert_equal "クリア済", @game.status
+    assert_equal 5_024, @user.reload.exp
+    assert_includes response.body, "🎉 クリアボーナス"
+    assert_includes response.body, "⏱️ タイマー稼働ボーナス"
+    assert_includes response.body, "TOTAL EXP"
+  end
+
+  test "不正なタイマー結果は保存しない" do
+    with_clerk_session do
+      post timer_update_game_path(@game),
+        params: { play_time_minutes: -1, status: "未着手" },
+        as: :json,
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      assert_response :unprocessable_entity
+
+      post timer_update_game_path(@game),
+        params: { play_time_minutes: "invalid", status: "プレイ中" },
+        as: :json,
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :unprocessable_entity
+    assert_nil @game.reload.play_time
+    assert_equal "未着手", @game.status
+    assert_equal 0, @user.reload.exp
+  end
+
+  test "他人のゲームのタイマー結果は保存できない" do
+    other_user = User.create!(email: "timer-other@example.com")
+    other_game = Game.create!(title: "他人のゲーム", status: "未着手", user: other_user)
+
+    with_clerk_session do
+      post timer_update_game_path(other_game),
+        params: { play_time_minutes: 10, status: "プレイ中" },
+        as: :json,
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :not_found
+    assert_nil other_game.reload.play_time
+    assert_equal "未着手", other_game.status
   end
 
 

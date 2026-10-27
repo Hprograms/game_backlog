@@ -1,0 +1,49 @@
+<% previous_progress = level_progress(User.new(level: previous_level, exp: previous_exp)) %>
+<% new_progress = level_progress(User.new(level: new_level, exp: new_exp)) %>
+<% total_earned_exp = game.earned_exp_results.sum { |result| result[:exp] } %>
+
+<div class="exp-result-overlay" data-controller="exp-result"
+     data-exp-result-prev-level-value="<%= previous_level %>"
+     data-exp-result-new-level-value="<%= new_level %>"
+     data-exp-result-prev-percentage-value="<%= previous_progress[:percentage] %>"
+     data-exp-result-new-percentage-value="<%= new_progress[:percentage] %>">
+  <section class="exp-result-modal" role="dialog" aria-modal="true" aria-labelledby="exp-result-title">
+    <h2 id="exp-result-title" class="exp-result-title">RESULT</h2>
+
+    <ul class="exp-result-breakdown">
+      <% game.earned_exp_results.each do |result| %>
+        <li>
+          <% if result[:type] == :play_time %>
+            <span>プレイ時間更新  ( + <%= format_play_time(result[:minutes]) %> )</span>
+          <% elsif result[:type] == :clear %>
+            <span>クリアボーナス</span>
+          <% end %>
+          <strong>＋ <%= result[:exp] %> EXP</strong>
+        </li>
+      <% end %>
+    </ul>
+
+    <p class="exp-result-total">合計獲得EXP <strong>＋ <%= total_earned_exp %> EXP</strong></p>
+
+    <div class="exp-result-level">
+      <div class="exp-result-level-labels">
+        <span data-exp-result-target="levelText">Lv. <%= previous_level %></span>
+        <span><%= previous_progress[:current_exp] %> / <%= previous_progress[:required_exp] %> EXP</span>
+      </div>
+      <div class="exp-result-progress-track" role="progressbar"
+           aria-label="レベル経験値の進捗"
+           aria-valuemin="0"
+           aria-valuemax="100"
+           aria-valuenow="<%= previous_progress[:percentage] %>">
+        <div class="exp-result-progress-bar" data-exp-result-target="bar"
+             style="width: <%= previous_progress[:percentage] %>%"></div>
+      </div>
+    </div>
+
+    <p class="exp-result-level-up" data-exp-result-target="levelUpMessage" hidden>
+      LEVEL UP! Lv.<%= previous_level %> ➔ Lv.<%= new_level %>
+    </p>
+
+    <button type="button" class="exp-result-close" data-action="click->exp-result#close">閉じる</button>
+  </section>
+</div>

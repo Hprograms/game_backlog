@@ -1,65 +1,67 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["bar", "levelText", "levelUpMessage"]
+  static targets = ["bar", "levelText", "levelUpMessage", "expText"]
   static values = {
     prevLevel: Number,
     newLevel: Number,
     prevPercentage: Number,
-    newPercentage: Number
+    newPercentage: Number,
+    newExpText: String
   }
 
   connect() {
-    this.animationTimeouts = new Set()
+    this.track = this.barTarget.closest('[role="progressbar"]')
     this.barTarget.style.width = `${this.prevPercentageValue}%`
-    this.animateProgress()
+    this.track?.setAttribute("aria-valuenow", this.prevPercentageValue)
+    this.animationTimeout = setTimeout(() => {
+      this.animationFrame = requestAnimationFrame(() => this.animateProgress(this.prevLevelValue))
+    }, 500)
   }
 
   disconnect() {
-    this.animationTimeouts.forEach(clearTimeout)
-    this.animationTimeouts.clear()
+    cancelAnimationFrame(this.animationFrame)
+    clearTimeout(this.animationTimeout)
   }
 
-  close() {
+  close(event) {
+    event.preventDefault()
     this.element.remove()
   }
 
-  async animateProgress() {
-    await this.wait(300)
-    if (!this.element.isConnected) return
-
-    const levelsGained = this.newLevelValue - this.prevLevelValue
-    if (levelsGained <= 0) {
-      this.barTarget.style.width = `${this.newPercentageValue}%`
+  animateProgress(level) {
+    if (level >= this.newLevelValue) {
+      if (this.hasExpTextTarget) {
+        this.expTextTarget.textContent = this.newExpTextValue
+      }
+      this.levelTextTarget.textContent = `Lv. ${this.newLevelValue}`
+      this.animateBar(this.newPercentageValue)
+      if (this.prevLevelValue !== this.newLevelValue) {
+        this.animationTimeout = setTimeout(() => {
+          this.levelUpMessageTarget.hidden = false
+        }, 950)
+      }
       return
     }
 
-    let currentLevel = this.prevLevelValue
-    for (let level = 0; level < levelsGained; level += 1) {
-      this.barTarget.style.width = "100%"
-      await this.wait(500)
-      if (!this.element.isConnected) return
+    this.animateBar(100)
+    this.animationTimeout = setTimeout(() => {
+      const nextLevel = level + 1
+      this.levelTextTarget.textContent = `Lv. ${nextLevel}`
 
       this.barTarget.style.transition = "none"
-      this.barTarget.style.width = "0%"
-      this.barTarget.offsetWidth
+      this.animateBar(0)
+      
+      this.barTarget.offsetWidth 
+
       this.barTarget.style.transition = ""
 
-      currentLevel += 1
-      this.levelTextTarget.textContent = `Lv. ${currentLevel}`
-    }
-
-    this.barTarget.style.width = `${this.newPercentageValue}%`
-    this.levelUpMessageTarget.hidden = false
+      this.animationTimeout = setTimeout(() => this.animateProgress(nextLevel), 80)
+    }, 950)
   }
 
-  wait(duration) {
-    return new Promise((resolve) => {
-      const timeout = setTimeout(() => {
-        this.animationTimeouts.delete(timeout)
-        resolve()
-      }, duration)
-      this.animationTimeouts.add(timeout)
-    })
+  animateBar(percentage) {
+    this.barTarget.style.width = `${percentage}%`
+    this.track?.setAttribute("aria-valuenow", percentage)
   }
 }

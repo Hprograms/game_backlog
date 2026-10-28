@@ -1,5 +1,6 @@
 class GamesController < ApplicationController
   before_action :set_game, only: [ :show, :edit, :update, :destroy, :destroy_image ]
+  before_action :set_timer_game, only: :timer_update
 
   def index
     @games = current_app_user.games.with_attached_image.order(created_at: :desc)
@@ -37,16 +38,16 @@ class GamesController < ApplicationController
       attach_igdb_image
       if @game.earned_exp_results.present?
         current_app_user.reload
-        @new_level = current_app_user.level
-        @new_exp = current_app_user.exp
-
-        respond_to do |format|
-          format.turbo_stream { render :exp_result }
-          format.html { redirect_to @game, notice: "ゲームを保存しました。" }
-        end
-      else
-        redirect_to @game, notice: "ゲームを登録しました！"
+        session[:exp_result_data] = {
+          game_title: @game.title,
+          previous_level: @previous_level,
+          previous_exp: @previous_exp,
+          new_level: current_app_user.level,
+          new_exp: current_app_user.exp,
+          results: @game.earned_exp_results
+        }
       end
+      redirect_to @game, notice: "ゲームを保存しました。"
     else
       render :new, status: :unprocessable_entity
     end
@@ -62,16 +63,16 @@ class GamesController < ApplicationController
       attach_igdb_image
       if @game.earned_exp_results.present?
         current_app_user.reload
-        @new_level = current_app_user.level
-        @new_exp = current_app_user.exp
-
-        respond_to do |format|
-          format.turbo_stream { render :exp_result }
-          format.html { redirect_to @game, notice: "ゲームを保存しました。" }
-        end
-      else
-        redirect_to @game, notice: "更新しました！"
+        session[:exp_result_data] = {
+          game_title: @game.title,
+          previous_level: @previous_level,
+          previous_exp: @previous_exp,
+          new_level: current_app_user.level,
+          new_exp: current_app_user.exp,
+          results: @game.earned_exp_results
+        }
       end
+      redirect_to @game, notice: "ゲームを保存しました。"
     else
       render :edit, status: :unprocessable_entity
     end
@@ -91,8 +92,41 @@ class GamesController < ApplicationController
     render json: params[:query].present? ? IgdbApiService.search(params[:query]) : []
   end
 
+  def timer_update
+    begin
+      play_time_minutes = Integer(params[:play_time_minutes])
+    rescue ArgumentError, TypeError
+      return head :unprocessable_entity
+    end
+
+    status = params[:status]
+
+    unless play_time_minutes >= 0 && %w[プレイ中 クリア済].include?(status)
+      return head :unprocessable_entity
+    end
+
+    @previous_level = current_app_user.level
+    @previous_exp = current_app_user.exp
+    @game.play_time = (@game.play_time || 0) + play_time_minutes
+    @game.status = status
+    @game.used_timer = true
+
+    unless @game.save
+      return render plain: @game.errors.full_messages.to_sentence, status: :unprocessable_entity
+    end
+
+    @new_level = current_app_user.reload.level
+    @new_exp = current_app_user.exp
+    render :exp_result, formats: :turbo_stream
+  end
+
 
   private
+
+  def set_timer_game
+    @game = current_app_user.games.find_by(id: params[:id])
+    head :not_found unless @game
+  end
 
   def set_game
       @game = current_app_user.games.find_by(id: params[:id])

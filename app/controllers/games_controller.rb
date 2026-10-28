@@ -34,7 +34,6 @@ class GamesController < ApplicationController
 
     @previous_level = current_app_user.level
     @previous_exp = current_app_user.exp
-
     if @game.save
       attach_igdb_image
       if @game.earned_exp_results.present?
@@ -60,7 +59,6 @@ class GamesController < ApplicationController
   def update
     @previous_level = current_app_user.level
     @previous_exp = current_app_user.exp
-
     if @game.update(game_params)
       attach_igdb_image
       if @game.earned_exp_results.present?

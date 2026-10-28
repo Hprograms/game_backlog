@@ -5,6 +5,7 @@ class Game < ApplicationRecord
   has_many :activities, dependent: :destroy
   has_one_attached :image
 
+  before_save { self.earned_exp_results ||= [] }
   before_validation :set_play_time_from_parts, if: :play_time_parts_assigned?
   before_save :reset_earned_exp_results
   before_create :mark_legacy_status_as_awarded

@@ -12,11 +12,11 @@
     <ul class="exp-result-breakdown">
       <% earned_exp_results.each do |result| %>
         <li>
-          <% if result[:type] == :play_time %>
-            <span>🕹️ プレイ時間 ( + <%= format_play_time(result[:minutes]) %> )</span>
-          <% elsif result[:type] == :clear %>
+          <% if result[:type].to_s == "play_time" %>
+            <span>🕹️ プレイ時間 ( + <%= format_play_time(result[:minutes].to_i) %> )</span>
+          <% elsif result[:type].to_s == "clear" %>
             <span>🎉 クリアボーナス</span>
-          <% elsif result[:type] == :timer_bonus %>
+          <% elsif result[:type].to_s == "timer_bonus" %>
             <span>⏱️ タイマー稼働ボーナス</span>
           <% end %>
           <strong>+ <%= result[:exp] %> EXP</strong>

@@ -28,7 +28,6 @@ class GameTest < ActiveSupport::TestCase
     assert_nil game.play_time_minutes
   end
 
-
   test "プレイ時間を過去の記録より減らせない" do
     assert_not @game.update(play_time: 29)
 

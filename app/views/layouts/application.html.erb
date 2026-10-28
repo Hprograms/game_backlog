@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-controller="timer">
   <head>
     <title>ツミクエスト</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -25,6 +25,35 @@
     <%= yield :head %>
   </head>
   <body>
+    <div id="floating-timer" class="floating-timer" data-timer-target="floating" hidden>
+      <div class="timer-content" data-timer-target="content">
+        <div class="timer-info">
+          <span class="material-symbols-outlined timer-icon">sports_esports</span>
+          <span class="timer-game-title" data-timer-target="title">ゲーム名</span>
+        </div>
+        <div class="timer-display" data-timer-target="time">00:00:00</div>
+        <button type="button" class="btn-stop-timer" data-action="click->timer#stop">
+          <span class="material-symbols-outlined">stop</span>
+          STOP
+        </button>
+      </div>
+      <div class="timer-status-modal" data-timer-target="statusModal" role="dialog" aria-modal="true" hidden>
+        <h3 class="timer-status-title">タイマーを停止しました</h3>
+        <p class="timer-status-text">今回のプレイ時間: <strong data-timer-target="resultTime">0</strong> 分</p>
+        <div class="timer-status-actions">
+          <button type="button" class="btn btn-outline-info" data-action="click->timer#saveProgress">
+            まだ続ける（プレイ中）
+          </button>
+          <button type="button" class="btn btn-outline-success" data-action="click->timer#saveClear">
+            🎉 クリアした！（クリア済）
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm mt-3" data-action="click->timer#cancel">
+            保存せずに破棄
+          </button>
+        </div>
+        <p class="timer-status-error" data-timer-target="error" role="alert" hidden></p>
+      </div>
+    </div>
     <% unless controller_name == "home" %>
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid px-4 px-xl-5">
@@ -74,5 +103,17 @@
       <% end %>
       <%= yield %>
     </div>
+    <% if session[:exp_result_data].present? %>
+      <% exp_data = session.delete(:exp_result_data).deep_symbolize_keys %>
+      <%= render partial: "games/exp_result_modal",
+                 locals: {
+                   game_title: exp_data[:game_title],
+                   previous_level: exp_data[:previous_level],
+                   previous_exp: exp_data[:previous_exp],
+                   new_level: exp_data[:new_level],
+                   new_exp: exp_data[:new_exp],
+                   earned_exp_results: exp_data[:results]
+                 } %>
+    <% end %>
   </body>
 </html>

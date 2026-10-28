@@ -316,18 +316,26 @@ end
     assert_equal "更新後のタイトル", @game.reload.title
   end
 
-  test "更新でEXPを獲得した場合はTurbo Streamでリザルトを返す" do
+  test "更新でEXPを獲得した場合は詳細画面へリダイレクトしてモーダルを一度表示する" do
     with_clerk_session do
       patch game_path(@game),
         params: { game: { play_time: 1 } },
         headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+      assert_redirected_to game_path(@game)
+      assert_equal "ゲームを保存しました。", flash[:notice]
+      assert session[:exp_result_data].present?
+
+      follow_redirect!
     end
 
     assert_response :success
-    assert_equal "text/vnd.turbo-stream.html", response.media_type
-    assert_includes response.body, 'action="append" targets="body"'
+    assert_equal "text/html", response.media_type
+    assert_includes response.body, 'data-controller="exp-result"'
+    assert_includes response.body, "ゼルダの伝説"
     assert_includes response.body, "TOTAL EXP"
     assert_equal 2, @user.reload.exp
+    assert_nil session[:exp_result_data]
   end
 
   test "タイマーのプレイ時間を加算してEXPリザルトを返す" do

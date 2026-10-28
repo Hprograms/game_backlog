@@ -103,5 +103,17 @@
       <% end %>
       <%= yield %>
     </div>
+    <% if session[:exp_result_data].present? %>
+      <% exp_data = session.delete(:exp_result_data).deep_symbolize_keys %>
+      <%= render partial: "games/exp_result_modal",
+                 locals: {
+                   game_title: exp_data[:game_title],
+                   previous_level: exp_data[:previous_level],
+                   previous_exp: exp_data[:previous_exp],
+                   new_level: exp_data[:new_level],
+                   new_exp: exp_data[:new_exp],
+                   earned_exp_results: exp_data[:results]
+                 } %>
+    <% end %>
   </body>
 </html>

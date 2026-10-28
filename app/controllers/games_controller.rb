@@ -39,15 +39,16 @@ class GamesController < ApplicationController
       attach_igdb_image
       if @game.earned_exp_results.present?
         current_app_user.reload
-        @new_level = current_app_user.level
-        @new_exp = current_app_user.exp
-        respond_to do |format|
-          format.turbo_stream { render :exp_result }
-          format.html { redirect_to @game, notice: "ゲームを登録しました。" }
-        end
-      else
-        redirect_to @game, notice: "ゲームを登録しました。"
+        session[:exp_result_data] = {
+          game_title: @game.title,
+          previous_level: @previous_level,
+          previous_exp: @previous_exp,
+          new_level: current_app_user.level,
+          new_exp: current_app_user.exp,
+          results: @game.earned_exp_results
+        }
       end
+      redirect_to @game, notice: "ゲームを保存しました。"
     else
       render :new, status: :unprocessable_entity
     end
@@ -64,15 +65,16 @@ class GamesController < ApplicationController
       attach_igdb_image
       if @game.earned_exp_results.present?
         current_app_user.reload
-        @new_level = current_app_user.level
-        @new_exp = current_app_user.exp
-        respond_to do |format|
-          format.turbo_stream { render :exp_result }
-          format.html { redirect_to @game, notice: "ゲームを更新しました。" }
-        end
-      else
-        redirect_to @game, notice: "ゲームを更新しました。"
+        session[:exp_result_data] = {
+          game_title: @game.title,
+          previous_level: @previous_level,
+          previous_exp: @previous_exp,
+          new_level: current_app_user.level,
+          new_exp: current_app_user.exp,
+          results: @game.earned_exp_results
+        }
       end
+      redirect_to @game, notice: "ゲームを保存しました。"
     else
       render :edit, status: :unprocessable_entity
     end

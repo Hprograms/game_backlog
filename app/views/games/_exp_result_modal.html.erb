@@ -1,6 +1,6 @@
 <% previous_progress = level_progress(User.new(level: previous_level, exp: previous_exp)) %>
 <% new_progress = level_progress(User.new(level: new_level, exp: new_exp)) %>
-<% total_earned_exp = game.earned_exp_results.sum { |result| result[:exp] } %>
+<% total_earned_exp = earned_exp_results.sum { |result| result[:exp] } %>
 <div class="exp-result-overlay" data-controller="exp-result"
      data-exp-result-prev-level-value="<%= previous_level %>"
      data-exp-result-new-level-value="<%= new_level %>"
@@ -10,7 +10,7 @@
   <section class="exp-result-modal" role="dialog" aria-modal="true" aria-labelledby="exp-result-title">
     <h2 id="exp-result-title" class="exp-result-title">RESULT</h2>
     <ul class="exp-result-breakdown">
-      <% game.earned_exp_results.each do |result| %>
+      <% earned_exp_results.each do |result| %>
         <li>
           <% if result[:type] == :play_time %>
             <span>🕹️ プレイ時間 ( + <%= format_play_time(result[:minutes]) %> )</span>
@@ -23,6 +23,7 @@
         </li>
       <% end %>
     </ul>
+    <p class="exp-result-game"><%= game_title %></p>
     <p class="exp-result-total">TOTAL EXP <strong>+ <%= total_earned_exp %> EXP</strong></p>
     <div class="exp-result-level">
       <div class="exp-result-level-labels">

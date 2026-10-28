@@ -14,7 +14,9 @@ export default class extends Controller {
     this.track = this.barTarget.closest('[role="progressbar"]')
     this.barTarget.style.width = `${this.prevPercentageValue}%`
     this.track?.setAttribute("aria-valuenow", this.prevPercentageValue)
-    this.animationFrame = requestAnimationFrame(() => this.animateProgress(this.prevLevelValue))
+    this.animationTimeout = setTimeout(() => {
+      this.animationFrame = requestAnimationFrame(() => this.animateProgress(this.prevLevelValue))
+    }, 500)
   }
 
   disconnect() {

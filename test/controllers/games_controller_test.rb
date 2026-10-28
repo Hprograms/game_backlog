@@ -168,6 +168,45 @@ test "ログイン済みでゲームを登録できる" do
   assert_equal 130, Game.last.play_time
 end
 
+test "ゲーム登録でEXPを獲得した場合にリザルト用データを設定する" do
+  with_clerk_session do
+    post games_path, params: {
+      game: {
+        title: "プレイ時間EXPのゲーム",
+        status: "未着手",
+        play_time_minutes: "5"
+      }
+    }
+  end
+
+  assert_redirected_to game_path(Game.last)
+  assert_equal [ { type: :play_time, minutes: 5, exp: 10 } ], assigns(:game).earned_exp_results
+  assert_equal 1, assigns(:previous_level)
+  assert_equal 0, assigns(:previous_exp)
+  assert_equal 1, assigns(:new_level)
+  assert_equal 10, assigns(:new_exp)
+end
+
+test "EXP獲得時にTurbo Streamでリザルトモーダルを返す" do
+  with_clerk_session do
+    patch game_path(@game), params: {
+      game: { play_time: 2 }
+    }, as: :turbo_stream
+  end
+
+  assert_response :success
+  assert_equal "text/vnd.turbo-stream.html", response.media_type
+  assert_includes response.body, 'action="append" targets="body"'
+  assert_includes response.body, 'data-controller="exp-result"'
+  assert_includes response.body, 'data-exp-result-target="levelText"'
+  assert_includes response.body, 'data-exp-result-target="bar"'
+  assert_includes response.body, 'data-exp-result-target="levelUpMessage" hidden'
+  assert_includes response.body, 'data-action="click->exp-result#close"'
+  assert_includes response.body, "プレイ時間"
+  assert_includes response.body, "合計獲得EXP"
+  assert_includes response.body, "4 EXP"
+end
+
 test "IGDBの開発元とあらすじをゲームに保存できる" do
   with_clerk_session do
     post games_path, params: {

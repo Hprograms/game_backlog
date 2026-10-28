@@ -59,6 +59,7 @@ class GameTest < ActiveSupport::TestCase
     assert_includes game.earned_exp_results, { type: :clear, exp: 5000 }
   end
 
+
   test "EXP獲得内訳にクリアボーナスとプレイ時間分を記録する" do
     game = @user.games.create!(title: "EXP results game", status: "未着手")
     game.update!(status: "クリア済")

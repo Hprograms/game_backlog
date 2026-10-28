@@ -138,7 +138,7 @@ class Game < ApplicationRecord
     earned_exp_results << { type: :play_time, minutes: diff, exp: base_exp }
 
     if used_timer
-      timer_bonus = base_exp / 5
+      timer_bonus = (base_exp * 0.2).ceil
       user.add_exp!(timer_bonus, self) if timer_bonus.positive?
       earned_exp_results << { type: :timer_bonus, exp: timer_bonus }
     end

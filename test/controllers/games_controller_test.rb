@@ -316,6 +316,20 @@ end
     assert_equal "更新後のタイトル", @game.reload.title
   end
 
+  test "更新でEXPを獲得した場合はTurbo Streamでリザルトを返す" do
+    with_clerk_session do
+      patch game_path(@game),
+        params: { game: { play_time: 1 } },
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :success
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
+    assert_includes response.body, 'action="append" targets="body"'
+    assert_includes response.body, "TOTAL EXP"
+    assert_equal 2, @user.reload.exp
+  end
+
   test "タイマーのプレイ時間を加算してEXPリザルトを返す" do
     with_clerk_session do
       post timer_update_game_path(@game),
@@ -333,6 +347,20 @@ end
     assert_includes response.body, "⏱️ タイマー稼働ボーナス"
     assert_includes response.body, "+ 10 EXP"
     assert_includes response.body, "TOTAL EXP"
+  end
+
+  test "1分のタイマー計測でも最低1EXPのボーナスが付与される" do
+    with_clerk_session do
+      post timer_update_game_path(@game),
+        params: { play_time_minutes: 1, status: "プレイ中" },
+        as: :json,
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :success
+    assert_equal 3, @user.reload.exp
+    assert_includes response.body, "🕹️ プレイ時間 ( + 1分 )"
+    assert_includes response.body, "+ 1 EXP"
   end
 
   test "タイマーのクリア結果でプレイ時間とクリア状態を保存してEXPを付与する" do

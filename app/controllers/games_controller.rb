@@ -32,9 +32,22 @@ class GamesController < ApplicationController
       @game.description = IgdbApiService.translate_text(original_description).presence || original_description
     end
 
+    @previous_level = current_app_user.level
+    @previous_exp = current_app_user.exp
+
     if @game.save
       attach_igdb_image
-      redirect_to @game, notice: "ゲームを登録しました！"
+      if @game.earned_exp_results.present?
+        current_app_user.reload
+        @new_level = current_app_user.level
+        @new_exp = current_app_user.exp
+        respond_to do |format|
+          format.turbo_stream { render :exp_result }
+          format.html { redirect_to @game, notice: "ゲームを登録しました。" }
+        end
+      else
+        redirect_to @game, notice: "ゲームを登録しました。"
+      end
     else
       render :new, status: :unprocessable_entity
     end
@@ -44,9 +57,22 @@ class GamesController < ApplicationController
   end
 
   def update
+    @previous_level = current_app_user.level
+    @previous_exp = current_app_user.exp
+
     if @game.update(game_params)
       attach_igdb_image
-      redirect_to @game, notice: "更新しました！"
+      if @game.earned_exp_results.present?
+        current_app_user.reload
+        @new_level = current_app_user.level
+        @new_exp = current_app_user.exp
+        respond_to do |format|
+          format.turbo_stream { render :exp_result }
+          format.html { redirect_to @game, notice: "ゲームを更新しました。" }
+        end
+      else
+        redirect_to @game, notice: "ゲームを更新しました。"
+      end
     else
       render :edit, status: :unprocessable_entity
     end

@@ -84,8 +84,11 @@
   min-width: 0;
 }
 
-.timer-icon {
-  color: #67e8f9;
+.timer-icon-img {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 
 .timer-game-title {
@@ -107,10 +110,11 @@
 .btn-stop-timer {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.7rem;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
   color: white;
-  font-weight: 700;
   background: #dc2626;
   border: 1px solid #ef4444;
   border-radius: 8px;
@@ -119,11 +123,12 @@
 
 .btn-stop-timer:hover {
   background: #b91c1c;
+  border-color: #dc2626;
   transform: translateY(-1px);
 }
 
 .btn-stop-timer .material-symbols-outlined {
-  font-size: 1.15rem;
+  font-size: 1.35rem;
 }
 
 @media (max-width: 480px) {

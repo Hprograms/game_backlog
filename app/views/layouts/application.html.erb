@@ -29,13 +29,12 @@
       <div class="timer-warning text-danger fw-bold text-center mb-1" data-timer-target="warning" hidden>他のゲームを記録中です。</div>
       <div class="timer-content" data-timer-target="content">
         <div class="timer-info">
-          <span class="material-symbols-outlined timer-icon">sports_esports</span>
+          <%= image_tag "exp_results/hourglass.png", class: "timer-icon-img", alt: "Timer" %>
           <span class="timer-game-title" data-timer-target="title">ゲーム名</span>
         </div>
         <div class="timer-display" data-timer-target="time">00:00:00</div>
-        <button type="button" class="btn-stop-timer" data-action="click->timer#stop">
+        <button type="button" class="btn-stop-timer" data-action="click->timer#stop" title="計測終了">
           <span class="material-symbols-outlined">stop</span>
-          STOP
         </button>
       </div>
       <div class="timer-status-modal" data-timer-target="statusModal" role="dialog" aria-modal="true" hidden>

@@ -41,14 +41,24 @@
       <div class="timer-status-modal" data-timer-target="statusModal" role="dialog" aria-modal="true" hidden>
         <h3 class="timer-status-title">タイマーを停止しました</h3>
         <p class="timer-status-text">今回のプレイ時間: <strong data-timer-target="resultTime">0</strong> 分</p>
-        <div class="timer-status-actions">
-          <button type="button" class="btn btn-outline-info" data-action="click->timer#saveProgress">
-            まだ続ける（プレイ中）
+
+        <div class="mb-3 text-start">
+          <div class="form-check d-flex align-items-center justify-content-center gap-2">
+            <input class="form-check-input mt-0" type="checkbox" id="timer-clear-check" data-timer-target="clearCheck" data-action="change->timer#toggleClearWarning">
+            <label class="form-check-label text-white fw-bold" for="timer-clear-check" style="cursor: pointer;">
+              クエストクリア！（ゲームをクリアした）
+            </label>
+          </div>
+          <p class="text-warning text-center mt-2 mb-0" style="font-size: 0.8rem;" data-timer-target="clearWarning" hidden>
+            ※特大クリアボーナスを獲得します！<br>以降、未クリア状態に戻すことはできません。
+          </p>
+        </div>
+
+        <div class="timer-status-actions d-flex flex-column gap-2">
+          <button type="button" class="btn btn-primary w-100 fw-bold" data-timer-target="saveButton" data-action="click->timer#save">
+            EXPを獲得する
           </button>
-          <button type="button" class="btn btn-outline-success" data-action="click->timer#saveClear">
-            🎉 クリアした！（クリア済）
-          </button>
-          <button type="button" class="btn btn-outline-secondary btn-sm mt-3" data-action="click->timer#cancel">
+          <button type="button" class="btn btn-outline-secondary w-100" data-action="click->timer#cancel">
             計測を破棄する
           </button>
         </div>

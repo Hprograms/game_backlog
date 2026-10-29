@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["title", "time", "floating", "content", "statusModal", "resultTime", "error", "warning"]
+  static targets = ["title", "time", "floating", "content", "statusModal", "resultTime", "error", "warning", "clearCheck", "clearWarning", "saveButton"]
 
   connect() {
     this.intervalId = null
@@ -63,26 +63,35 @@ export default class extends Controller {
     this.statusModalTarget.hidden = false
   }
 
-  saveProgress(event) {
-    event.preventDefault()
-    this.submitTimerResult("プレイ中")
+  toggleClearWarning() {
+    if (this.clearCheckTarget.checked) {
+      this.clearWarningTarget.hidden = false
+      this.saveButtonTarget.textContent = "クリアしてEXPを獲得！"
+      this.saveButtonTarget.classList.replace("btn-primary", "btn-warning")
+    } else {
+      this.clearWarningTarget.hidden = true
+      this.saveButtonTarget.textContent = "EXPを獲得する"
+      this.saveButtonTarget.classList.replace("btn-warning", "btn-primary")
+    }
   }
 
-  saveClear(event) {
+  save(event) {
     event.preventDefault()
-    this.submitTimerResult("クリア済")
+    const status = this.clearCheckTarget.checked ? "クリア済" : "プレイ中"
+    this.submitTimerResult(status)
   }
 
   cancel(event) {
+    event.preventDefault()
     if (!window.confirm("これまでの計測時間が失われます。本当に破棄しますか？")) return
 
-    event.preventDefault()
     this.clearTimer()
     this.statusModalTarget.hidden = true
     this.floatingTarget.hidden = true
     this.startedAt = null
     this.gameId = null
     this.removeHighlight()
+    this.resetClearCheck()
   }
 
   async submitTimerResult(status) {
@@ -125,6 +134,14 @@ export default class extends Controller {
       this.errorTarget.hidden = false
     } finally {
       this.submitting = false
+      this.resetClearCheck()
+    }
+  }
+
+  resetClearCheck() {
+    if (this.hasClearCheckTarget) {
+      this.clearCheckTarget.checked = false
+      this.toggleClearWarning()
     }
   }
 

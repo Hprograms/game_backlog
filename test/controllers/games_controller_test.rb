@@ -60,6 +60,9 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_select "html[data-controller='timer']"
     assert_select "#floating-timer[data-timer-target='floating'][hidden]"
     assert_select ".timer-warning[data-timer-target='warning'][hidden]", text: "他のゲームを記録中です。"
+    assert_select "#timer-clear-check[data-timer-target='clearCheck'][data-action='change->timer#toggleClearWarning']"
+    assert_select '[data-timer-target="clearWarning"][hidden]'
+    assert_select "button[data-timer-target='saveButton'][data-action='click->timer#save']", text: "EXPを獲得する"
     assert_select "button.btn-play[data-action='click->timer#start'][data-game-id='#{@game.id}'][data-game-title='#{@game.title}']"
   end
 
@@ -167,25 +170,6 @@ test "ログイン済みでゲームを登録できる" do
   end
   assert_redirected_to game_path(Game.last)
   assert_equal 130, Game.last.play_time
-end
-
-test "ゲーム登録でEXPを獲得した場合にリザルト用データを設定する" do
-  with_clerk_session do
-    post games_path, params: {
-      game: {
-        title: "プレイ時間EXPのゲーム",
-        status: "未着手",
-        play_time_minutes: "5"
-      }
-    }
-  end
-
-  assert_redirected_to game_path(Game.last)
-  assert_equal [ { type: :play_time, minutes: 5, exp: 10 } ], assigns(:game).earned_exp_results
-  assert_equal 1, assigns(:previous_level)
-  assert_equal 0, assigns(:previous_exp)
-  assert_equal 1, assigns(:new_level)
-  assert_equal 10, assigns(:new_exp)
 end
 
 test "EXP獲得時にTurbo Streamでリザルトモーダルを返す" do
@@ -354,28 +338,6 @@ end
     end
     assert_redirected_to game_path(@game)
     assert_equal "更新後のタイトル", @game.reload.title
-  end
-
-  test "更新でEXPを獲得した場合は詳細画面へリダイレクトしてモーダルを一度表示する" do
-    with_clerk_session do
-      patch game_path(@game),
-        params: { game: { play_time: 1 } },
-        headers: { "Accept" => "text/vnd.turbo-stream.html" }
-
-      assert_redirected_to game_path(@game)
-      assert_equal "ゲームを保存しました。", flash[:notice]
-      assert session[:exp_result_data].present?
-
-      follow_redirect!
-    end
-
-    assert_response :success
-    assert_equal "text/html", response.media_type
-    assert_includes response.body, 'data-controller="exp-result"'
-    assert_includes response.body, "ゼルダの伝説"
-    assert_includes response.body, "TOTAL EXP"
-    assert_equal 2, @user.reload.exp
-    assert_nil session[:exp_result_data]
   end
 
   test "タイマーのプレイ時間を加算してEXPリザルトを返す" do

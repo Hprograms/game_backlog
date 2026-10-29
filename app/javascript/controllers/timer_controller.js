@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["title", "time", "floating", "content", "statusModal", "resultTime", "error", "warning", "clearCheck", "clearWarning", "saveButton"]
+  static targets = ["title", "time", "floating", "content", "overlay", "resultTime", "error", "warning", "clearCheck", "clearWarning", "saveButton", "modalTitle", "modalTime", "poster"]
 
   connect() {
     this.intervalId = null
@@ -25,6 +25,7 @@ export default class extends Controller {
   start(event) {
     if (this.intervalId || this.startedAt) {
       if (this.hasWarningTarget) {
+        this.warningTarget.textContent = "他のゲームを記録中です。"
         this.warningTarget.hidden = false
         clearTimeout(this.warningTimeout)
         this.warningTimeout = setTimeout(() => { this.warningTarget.hidden = true }, 3000)
@@ -35,11 +36,14 @@ export default class extends Controller {
     const { gameId, gameTitle } = event.currentTarget.dataset
     this.gameId = gameId
     this.gameTitle = gameTitle
+    const card = event.currentTarget.closest(".game-poster-card")
+    const img = card ? card.querySelector(".poster-image") : null
+    this.gameImageUrl = img ? img.src : null
     this.titleTarget.textContent = this.gameTitle
     this.elapsedSeconds = 0
     this.startedAt = Date.now()
     this.contentTarget.hidden = false
-    this.statusModalTarget.hidden = true
+    this.overlayTarget.hidden = true
     this.errorTarget.hidden = true
     this.errorTarget.textContent = ""
     this.timeTarget.textContent = "00:00:00"
@@ -59,18 +63,39 @@ export default class extends Controller {
     this.clearTimer()
     this.resultMinutes = Math.floor(this.elapsedSeconds / 60)
     this.resultTimeTarget.textContent = this.resultMinutes
+    this.modalTimeTarget.textContent = this.timeTarget.textContent
+    this.modalTitleTarget.textContent = this.gameTitle
+    if (this.gameImageUrl) {
+      this.posterTarget.src = this.gameImageUrl
+      this.posterTarget.hidden = false
+    } else {
+      this.posterTarget.hidden = true
+    }
+
     this.contentTarget.hidden = true
-    this.statusModalTarget.hidden = false
+    this.floatingTarget.hidden = true
+    this.overlayTarget.hidden = false
+  }
+
+  resume(event) {
+    if (event) event.preventDefault()
+
+    this.startedAt = Date.now() - (this.elapsedSeconds * 1000)
+    this.intervalId = setInterval(() => this.updateTime(), 1000)
+
+    this.overlayTarget.hidden = true
+    this.floatingTarget.hidden = false
+    this.contentTarget.hidden = false
   }
 
   toggleClearWarning() {
     if (this.clearCheckTarget.checked) {
       this.clearWarningTarget.hidden = false
-      this.saveButtonTarget.textContent = "クリアしてEXPを獲得！"
+      this.saveButtonTarget.textContent = "クリアボーナスを含めてEXPを獲得"
       this.saveButtonTarget.classList.replace("btn-primary", "btn-warning")
     } else {
       this.clearWarningTarget.hidden = true
-      this.saveButtonTarget.textContent = "EXPを獲得する"
+      this.saveButtonTarget.textContent = "EXPを獲得して終了"
       this.saveButtonTarget.classList.replace("btn-warning", "btn-primary")
     }
   }
@@ -86,7 +111,7 @@ export default class extends Controller {
     if (!window.confirm("これまでの計測時間が失われます。本当に破棄しますか？")) return
 
     this.clearTimer()
-    this.statusModalTarget.hidden = true
+    this.overlayTarget.hidden = true
     this.floatingTarget.hidden = true
     this.startedAt = null
     this.gameId = null
@@ -125,16 +150,17 @@ export default class extends Controller {
         throw new Error("EXPリザルトを表示できませんでした。ページを再読み込みしてください。")
       }
       window.Turbo.renderStreamMessage(stream)
+      this.overlayTarget.hidden = true
       this.floatingTarget.hidden = true
       this.startedAt = null
       this.gameId = null
       this.removeHighlight()
+      this.resetClearCheck()
     } catch (error) {
       this.errorTarget.textContent = error.message || "プレイ記録を保存できませんでした。"
       this.errorTarget.hidden = false
     } finally {
       this.submitting = false
-      this.resetClearCheck()
     }
   }
 

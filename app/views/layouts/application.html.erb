@@ -25,40 +25,60 @@
     <%= yield :head %>
   </head>
   <body>
+    <!-- フローティングタイマー (計測中) -->
     <div id="floating-timer" class="floating-timer" data-timer-target="floating" hidden>
-      <div class="timer-warning text-danger fw-bold text-center mb-1" data-timer-target="warning" hidden>他のゲームを記録中です。</div>
+      <div class="timer-warning text-danger fw-bold text-center mb-1" data-timer-target="warning" hidden></div>
       <div class="timer-content" data-timer-target="content">
         <div class="timer-info">
           <%= image_tag "exp_results/hourglass.png", class: "timer-icon-img", alt: "Timer" %>
-          <span class="timer-game-title" data-timer-target="title">ゲーム名</span>
+          <span class="timer-game-title" data-timer-target="title"></span>
         </div>
         <div class="timer-display" data-timer-target="time">00:00:00</div>
-        <button type="button" class="btn-stop-timer" data-action="click->timer#stop" title="計測終了">
-          <span class="material-symbols-outlined">stop</span>
+        <button type="button" class="btn-stop-timer" data-action="click->timer#stop" title="計測一時停止">
+          <span class="material-symbols-outlined">pause</span>
         </button>
       </div>
-      <div class="timer-status-modal" data-timer-target="statusModal" role="dialog" aria-modal="true" hidden>
-        <h3 class="timer-status-title">タイマーを停止しました</h3>
-        <p class="timer-status-text">今回のプレイ時間: <strong data-timer-target="resultTime">0</strong> 分</p>
+    </div>
 
-        <div class="mb-3 text-start">
-          <div class="form-check d-flex align-items-center justify-content-center gap-2">
-            <input class="form-check-input mt-0" type="checkbox" id="timer-clear-check" data-timer-target="clearCheck" data-action="change->timer#toggleClearWarning">
-            <label class="form-check-label text-white fw-bold" for="timer-clear-check" style="cursor: pointer;">
-              クエストクリア！（ゲームをクリアした）
-            </label>
-          </div>
-          <p class="text-warning text-center mt-2 mb-0" style="font-size: 0.8rem;" data-timer-target="clearWarning" hidden>
-            ※特大クリアボーナスを獲得します！<br>以降、未クリア状態に戻すことはできません。
-          </p>
+    <!-- 停止時モーダル (オーバーレイ) -->
+    <div class="timer-modal-overlay" data-timer-target="overlay" hidden>
+      <div class="timer-status-modal" role="dialog" aria-modal="true">
+        <h3 class="timer-status-title">
+          <span class="material-symbols-outlined me-1" style="vertical-align: bottom;">pause_circle</span>
+          計測一時停止中...
+        </h3>
+
+        <div class="timer-modal-game-info">
+          <img src="" class="timer-modal-poster" data-timer-target="poster" alt="Game Poster" hidden>
+          <div class="timer-modal-title" data-timer-target="modalTitle"></div>
         </div>
 
-        <div class="timer-status-actions d-flex flex-column gap-2">
-          <button type="button" class="btn btn-primary w-100 fw-bold" data-timer-target="saveButton" data-action="click->timer#save">
-            EXPを獲得する
+        <div class="timer-modal-time-display" data-timer-target="modalTime">00:00:00</div>
+        <p class="timer-status-text">現在のプレイ時間: <strong data-timer-target="resultTime">0</strong> 分</p>
+
+        <div class="timer-modal-toggle-section">
+          <label class="toggle-switch">
+            <input type="checkbox" id="timer-clear-check" data-timer-target="clearCheck" data-action="change->timer#toggleClearWarning">
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="toggle-label">
+            <%= image_tag "exp_results/cracker.png", class: "cracker-icon", alt: "Clear" %>
+            <span>ゲームクリアとして記録</span>
+          </div>
+        </div>
+        <p class="text-warning text-center mt-2 mb-3 fw-bold" style="font-size: 0.8rem;" data-timer-target="clearWarning" hidden>
+          ※特大クリアボーナスを獲得します！<br>以降、未クリア状態に戻すことはできません。
+        </p>
+
+        <div class="timer-status-actions d-flex flex-column gap-2 mt-4">
+          <button type="button" class="btn btn-primary w-100 fw-bold py-2" data-timer-target="saveButton" data-action="click->timer#save">
+            EXPを獲得して終了
           </button>
-          <button type="button" class="btn btn-outline-secondary w-100" data-action="click->timer#cancel">
-            計測を破棄する
+          <button type="button" class="btn btn-outline-light w-100 py-2 fw-bold" data-action="click->timer#resume">
+            <span class="material-symbols-outlined fs-6 me-1" style="vertical-align: text-bottom;">play_arrow</span>計測を再開する
+          </button>
+          <button type="button" class="btn btn-link text-danger w-100 mt-2 text-decoration-none" style="font-size: 0.85rem;" data-action="click->timer#cancel">
+            破棄して閉じる
           </button>
         </div>
         <p class="timer-status-error" data-timer-target="error" role="alert" hidden></p>

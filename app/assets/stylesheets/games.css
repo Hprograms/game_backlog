@@ -1182,3 +1182,10 @@ html, body {
     font-size: 0.9rem;
   }
 }
+
+/* --- Active Timer Highlight --- */
+.game-poster-card.is-active-timer {
+  border-color: var(--cyan-accent, #00e5ff);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+  transform: translateY(-4px);
+}

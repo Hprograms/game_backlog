@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["title", "time", "floating", "content", "statusModal", "resultTime", "error"]
+  static targets = ["title", "time", "floating", "content", "statusModal", "resultTime", "error", "warning"]
 
   connect() {
     this.intervalId = null
@@ -11,6 +11,7 @@ export default class extends Controller {
 
   disconnect() {
     this.clearTimer()
+    clearTimeout(this.warningTimeout)
   }
 
   floatingTargetConnected() {
@@ -22,6 +23,15 @@ export default class extends Controller {
   }
 
   start(event) {
+    if (this.intervalId || this.startedAt) {
+      if (this.hasWarningTarget) {
+        this.warningTarget.hidden = false
+        clearTimeout(this.warningTimeout)
+        this.warningTimeout = setTimeout(() => { this.warningTarget.hidden = true }, 3000)
+      }
+      return
+    }
+
     const { gameId, gameTitle } = event.currentTarget.dataset
     this.gameId = gameId
     this.gameTitle = gameTitle
@@ -34,9 +44,12 @@ export default class extends Controller {
     this.errorTarget.textContent = ""
     this.timeTarget.textContent = "00:00:00"
     this.floatingTarget.hidden = false
+    clearTimeout(this.warningTimeout)
+    if (this.hasWarningTarget) this.warningTarget.hidden = true
 
     this.clearTimer()
     this.intervalId = setInterval(() => this.updateTime(), 1000)
+    this.highlightCard(this.gameId)
   }
 
   stop() {
@@ -61,11 +74,15 @@ export default class extends Controller {
   }
 
   cancel(event) {
+    if (!window.confirm("これまでの計測時間が失われます。本当に破棄しますか？")) return
+
     event.preventDefault()
+    this.clearTimer()
     this.statusModalTarget.hidden = true
     this.floatingTarget.hidden = true
     this.startedAt = null
     this.gameId = null
+    this.removeHighlight()
   }
 
   async submitTimerResult(status) {
@@ -102,6 +119,7 @@ export default class extends Controller {
       this.floatingTarget.hidden = true
       this.startedAt = null
       this.gameId = null
+      this.removeHighlight()
     } catch (error) {
       this.errorTarget.textContent = error.message || "プレイ記録を保存できませんでした。"
       this.errorTarget.hidden = false
@@ -125,5 +143,16 @@ export default class extends Controller {
       clearInterval(this.intervalId)
       this.intervalId = null
     }
+  }
+
+  highlightCard(gameId) {
+    const playButton = document.querySelector(`button[data-game-id="${gameId}"]`)
+    playButton?.closest(".game-poster-card")?.classList.add("is-active-timer")
+  }
+
+  removeHighlight() {
+    document.querySelectorAll(".game-poster-card.is-active-timer").forEach(card => {
+      card.classList.remove("is-active-timer")
+    })
   }
 }

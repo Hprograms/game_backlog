@@ -59,6 +59,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "html[data-controller='timer']"
     assert_select "#floating-timer[data-timer-target='floating'][hidden]"
+    assert_select ".timer-warning[data-timer-target='warning'][hidden]", text: "他のゲームを記録中です。"
     assert_select "button.btn-play[data-action='click->timer#start'][data-game-id='#{@game.id}'][data-game-title='#{@game.title}']"
   end
 

@@ -26,6 +26,7 @@
   </head>
   <body>
     <div id="floating-timer" class="floating-timer" data-timer-target="floating" hidden>
+      <div class="timer-warning text-danger fw-bold text-center mb-1" data-timer-target="warning" hidden>他のゲームを記録中です。</div>
       <div class="timer-content" data-timer-target="content">
         <div class="timer-info">
           <span class="material-symbols-outlined timer-icon">sports_esports</span>
@@ -48,7 +49,7 @@
             🎉 クリアした！（クリア済）
           </button>
           <button type="button" class="btn btn-outline-secondary btn-sm mt-3" data-action="click->timer#cancel">
-            保存せずに破棄
+            計測を破棄する
           </button>
         </div>
         <p class="timer-status-error" data-timer-target="error" role="alert" hidden></p>

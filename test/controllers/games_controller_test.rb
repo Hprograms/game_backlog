@@ -59,10 +59,16 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "html[data-controller='timer']"
     assert_select "#floating-timer[data-timer-target='floating'][hidden]"
-    assert_select ".timer-warning[data-timer-target='warning'][hidden]", text: "他のゲームを記録中です。"
+    assert_select ".timer-warning[data-timer-target='warning'][hidden]"
+    assert_select ".timer-modal-overlay[data-timer-target='overlay'][hidden]"
+    assert_select ".timer-modal-poster[data-timer-target='poster'][hidden]"
+    assert_select ".timer-modal-title[data-timer-target='modalTitle']"
+    assert_select ".timer-modal-time-display[data-timer-target='modalTime']"
     assert_select "#timer-clear-check[data-timer-target='clearCheck'][data-action='change->timer#toggleClearWarning']"
     assert_select '[data-timer-target="clearWarning"][hidden]'
-    assert_select "button[data-timer-target='saveButton'][data-action='click->timer#save']", text: "EXPを獲得する"
+    assert_select "img.cracker-icon[src*='cracker']"
+    assert_select "button[data-timer-target='saveButton'][data-action='click->timer#save']", text: "EXPを獲得して終了"
+    assert_select "button[data-action='click->timer#resume']", text: /計測を再開する/
     assert_select "button.btn-play[data-action='click->timer#start'][data-game-id='#{@game.id}'][data-game-title='#{@game.title}']"
   end
 

@@ -178,23 +178,29 @@ test "ログイン済みでゲームを登録できる" do
   assert_equal 130, Game.last.play_time
 end
 
-test "EXP獲得時にTurbo Streamでリザルトモーダルを返す" do
+test "EXP獲得時に詳細画面で日本語リザルトモーダルを表示する" do
   with_clerk_session do
     patch game_path(@game), params: {
       game: { play_time: 2 }
     }, as: :turbo_stream
+    assert_redirected_to game_path(@game)
+    follow_redirect!
   end
 
   assert_response :success
-  assert_equal "text/vnd.turbo-stream.html", response.media_type
-  assert_includes response.body, 'action="append" targets="body"'
   assert_includes response.body, 'data-controller="exp-result"'
   assert_includes response.body, 'data-exp-result-target="levelText"'
   assert_includes response.body, 'data-exp-result-target="bar"'
-  assert_includes response.body, 'data-exp-result-target="levelUpMessage" hidden'
+  assert_includes response.body, 'data-exp-result-target="levelUpLogo" hidden'
+  assert_select "button.exp-result-close[data-exp-result-target='closeButton'][hidden]"
+  assert_includes response.body, "cracker-left"
+  assert_includes response.body, "cracker-right"
+  assert_includes response.body, "exp_results/levelup"
+  assert_includes response.body, "exp-result-levelup-logo-wrapper"
   assert_includes response.body, 'data-action="click->exp-result#close"'
-  assert_includes response.body, "プレイ時間"
-  assert_includes response.body, "合計獲得EXP"
+  assert_includes response.body, "プレイ時間ボーナス"
+  assert_includes response.body, "計："
+  assert_includes response.body, "冒 険 の 成 果"
   assert_includes response.body, "4 EXP"
 end
 
@@ -360,9 +366,23 @@ end
     assert_equal "プレイ中", @game.status
     assert_equal 60, @user.reload.exp
     assert_includes response.body, 'action="append" targets="body"'
-    assert_includes response.body, "⏱️ タイマー稼働ボーナス"
+    assert_includes response.body, "タイマーボーナス"
     assert_includes response.body, "+ 10 EXP"
-    assert_includes response.body, "TOTAL EXP"
+    assert_includes response.body, "計："
+  end
+
+  test "EXPを獲得しないタイマー記録でも0 EXPの内訳を表示する" do
+    with_clerk_session do
+      post timer_update_game_path(@game),
+        params: { play_time_minutes: 0, status: "プレイ中" },
+        as: :json,
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :success
+    assert_includes response.body, "プレイ時間ボーナス (0分)"
+    assert_includes response.body, "+ 0 EXP"
+    assert_includes response.body, "計："
   end
 
   test "1分のタイマー計測でも最低1EXPのボーナスが付与される" do
@@ -375,7 +395,7 @@ end
 
     assert_response :success
     assert_equal 3, @user.reload.exp
-    assert_includes response.body, "🕹️ プレイ時間 ( + 1分 )"
+    assert_includes response.body, "プレイ時間ボーナス (1分)"
     assert_includes response.body, "+ 1 EXP"
   end
 
@@ -391,9 +411,9 @@ end
     assert_equal 10, @game.reload.play_time
     assert_equal "クリア済", @game.status
     assert_equal 5_024, @user.reload.exp
-    assert_includes response.body, "🎉 クリアボーナス"
-    assert_includes response.body, "⏱️ タイマー稼働ボーナス"
-    assert_includes response.body, "TOTAL EXP"
+    assert_includes response.body, "クリアボーナス"
+    assert_includes response.body, "タイマーボーナス"
+    assert_includes response.body, "計："
   end
 
   test "不正なタイマー結果は保存しない" do

@@ -1,0 +1,19 @@
+<div id="games-list">
+  <% if @games.empty? %>
+    <div class="card gaming-hud-panel text-center py-5">
+      <div class="card-body">
+        <div class="text-muted mb-3" style="opacity: 0.5;">
+          <span class="material-symbols-outlined" style="font-size: 64px;">inventory_2</span>
+        </div>
+        <p class="text-muted mb-4"><%= @filter_status.present? ? "条件に一致するゲームはありません" : "まだゲームが登録されていません" %></p>
+        <%= link_to "最初のゲームを追加する", new_game_path, class: "btn-add-game d-inline-flex" %>
+      </div>
+    </div>
+  <% else %>
+    <div class="row g-3 g-md-4 mb-5">
+      <% @games.each do |game| %>
+        <%= render "game_card", game: game %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

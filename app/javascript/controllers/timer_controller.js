@@ -102,7 +102,7 @@ export default class extends Controller {
 
   save(event) {
     event.preventDefault()
-    const status = this.clearCheckTarget.checked ? "クリア済" : "プレイ中"
+    const status = this.clearCheckTarget.checked ? "cleared" : null
     this.submitTimerResult(status)
   }
 
@@ -127,7 +127,11 @@ export default class extends Controller {
     this.errorTarget.textContent = ""
 
     try {
-      const response = await fetch(`/games/${encodeURIComponent(this.gameId)}/timer_update`, {
+      const requestUrl = new URL(`/games/${encodeURIComponent(this.gameId)}/timer_update`, window.location.origin)
+      const filterStatus = new URLSearchParams(window.location.search).get("status")
+      if (filterStatus) requestUrl.searchParams.set("filter_status", filterStatus)
+
+      const response = await fetch(requestUrl, {
         method: "POST",
         headers: {
           "Accept": "text/vnd.turbo-stream.html",
@@ -136,7 +140,7 @@ export default class extends Controller {
         },
         body: JSON.stringify({
           play_time_minutes: this.resultMinutes,
-          status
+          ...(status ? { status } : {})
         })
       })
 

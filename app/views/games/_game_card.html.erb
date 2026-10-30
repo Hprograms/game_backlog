@@ -1,0 +1,45 @@
+<div class="col-6 col-sm-4 col-md-3 col-xl-2" id="<%= dom_id(game, :poster) %>">
+  <div class="game-poster-card">
+    <div class="poster-actions">
+      <button type="button" class="action-btn btn-play" data-action="click->timer#start" data-game-id="<%= game.id %>" data-game-title="<%= game.title %>" title="プレイ開始">
+        <span class="material-symbols-outlined">play_arrow</span>
+      </button>
+      <%= link_to edit_game_path(game), class: "action-btn", title: "編集" do %>
+        <span class="material-symbols-outlined">edit</span>
+      <% end %>
+      <%= link_to game_path(game), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "action-btn btn-delete", title: "削除" do %>
+        <span class="material-symbols-outlined">delete</span>
+      <% end %>
+    </div>
+
+    <%= link_to game_path(game), class: "d-block h-100" do %>
+      <% if game.image.attached? %>
+        <%= image_tag game.image, class: "poster-image" %>
+      <% else %>
+        <div class="no-image-placeholder">
+          <span class="material-symbols-outlined" style="font-size: 48px; opacity: 0.5; margin-bottom: 0.5rem;">image</span>
+          <small>No Image</small>
+        </div>
+      <% end %>
+
+      <div class="poster-overlay">
+        <div class="poster-title"><%= game.title %></div>
+        
+        <div class="poster-status">
+          <div class="status-dot status-<%= game.status %>"></div>
+          <%= game.status %>
+        </div>
+
+        <div class="poster-details">
+          <div class="detail-item">
+            <span class="material-symbols-outlined">desktop_windows</span> <%= game.platform %>
+          </div>
+          <div class="detail-item">
+            <span class="material-symbols-outlined" style="color: #fbbf24;">star</span> 
+            <%= game.rating ? "#{game.rating}.0" : "未評価" %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

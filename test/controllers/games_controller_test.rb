@@ -355,7 +355,7 @@ end
   test "タイマーのプレイ時間を加算してEXPリザルトを返す" do
     with_clerk_session do
       post timer_update_game_path(@game),
-        params: { play_time_minutes: 25, status: "プレイ中" },
+        params: { play_time_minutes: 25 },
         as: :json,
         headers: { "Accept" => "text/vnd.turbo-stream.html" }
     end
@@ -369,12 +369,17 @@ end
     assert_includes response.body, "タイマーボーナス"
     assert_includes response.body, "+ 10 EXP"
     assert_includes response.body, "計："
+    response_fragment = Nokogiri::HTML.fragment(response.body)
+    stats_template = response_fragment.at_css('turbo-stream[target="game-stats"] template')
+    list_template = response_fragment.at_css('turbo-stream[target="games-list"] template')
+    assert_equal %w[1 0 1 0], stats_template.css(".stat-value").map { |value| value.text.strip }
+    assert_includes list_template.text, "プレイ中"
   end
 
   test "EXPを獲得しないタイマー記録でも0 EXPの内訳を表示する" do
     with_clerk_session do
       post timer_update_game_path(@game),
-        params: { play_time_minutes: 0, status: "プレイ中" },
+        params: { play_time_minutes: 0 },
         as: :json,
         headers: { "Accept" => "text/vnd.turbo-stream.html" }
     end
@@ -388,12 +393,13 @@ end
   test "1分のタイマー計測でも最低1EXPのボーナスが付与される" do
     with_clerk_session do
       post timer_update_game_path(@game),
-        params: { play_time_minutes: 1, status: "プレイ中" },
+        params: { play_time_minutes: 1 },
         as: :json,
         headers: { "Accept" => "text/vnd.turbo-stream.html" }
     end
 
     assert_response :success
+    assert_equal "プレイ中", @game.reload.status
     assert_equal 3, @user.reload.exp
     assert_includes response.body, "プレイ時間ボーナス (1分)"
     assert_includes response.body, "+ 1 EXP"
@@ -402,7 +408,7 @@ end
   test "タイマーのクリア結果でプレイ時間とクリア状態を保存してEXPを付与する" do
     with_clerk_session do
       post timer_update_game_path(@game),
-        params: { play_time_minutes: 10, status: "クリア済" },
+        params: { play_time_minutes: 10, status: "cleared" },
         as: :json,
         headers: { "Accept" => "text/vnd.turbo-stream.html" }
     end
@@ -416,16 +422,40 @@ end
     assert_includes response.body, "計："
   end
 
+  test "タイマー結果でゲーム一覧と件数を更新し、絞り込みから外れたカードを除く" do
+    other_game = @user.games.create!(title: "別の未着手ゲーム", status: "未着手")
+
+    with_clerk_session do
+      post timer_update_game_path(@game, filter_status: "未着手"),
+        params: { play_time_minutes: 10, status: "cleared" },
+        as: :json,
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :success
+    assert_equal "クリア済", @game.reload.status
+
+    response_fragment = Nokogiri::HTML.fragment(response.body)
+    stats_template = response_fragment.at_css('turbo-stream[target="game-stats"] template')
+    list_template = response_fragment.at_css('turbo-stream[target="games-list"] template')
+    assert stats_template
+    assert list_template
+    assert_equal %w[2 1 0 1], stats_template.css(".stat-value").map { |value| value.text.strip }
+    assert_includes stats_template.text, "クリア済 (50%)"
+    assert_includes list_template.text, other_game.title
+    refute_includes list_template.to_html, "poster_game_#{@game.id}"
+  end
+
   test "不正なタイマー結果は保存しない" do
     with_clerk_session do
       post timer_update_game_path(@game),
-        params: { play_time_minutes: -1, status: "未着手" },
+        params: { play_time_minutes: -1 },
         as: :json,
         headers: { "Accept" => "text/vnd.turbo-stream.html" }
       assert_response :unprocessable_entity
 
       post timer_update_game_path(@game),
-        params: { play_time_minutes: "invalid", status: "プレイ中" },
+        params: { play_time_minutes: "invalid" },
         as: :json,
         headers: { "Accept" => "text/vnd.turbo-stream.html" }
     end
@@ -442,7 +472,7 @@ end
 
     with_clerk_session do
       post timer_update_game_path(other_game),
-        params: { play_time_minutes: 10, status: "プレイ中" },
+        params: { play_time_minutes: 10 },
         as: :json,
         headers: { "Accept" => "text/vnd.turbo-stream.html" }
     end

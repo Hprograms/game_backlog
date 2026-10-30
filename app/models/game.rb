@@ -8,6 +8,7 @@ class Game < ApplicationRecord
   before_save { self.earned_exp_results ||= [] }
   before_validation :set_play_time_from_parts, if: :play_time_parts_assigned?
   before_save :reset_earned_exp_results
+  before_save :auto_update_status_to_playing
   before_create :mark_legacy_status_as_awarded
 
   validates :title, presence: true
@@ -50,6 +51,10 @@ class Game < ApplicationRecord
 
   def reset_earned_exp_results
     @earned_exp_results = []
+  end
+
+  def auto_update_status_to_playing
+    self.status = "プレイ中" if status == "未着手" && play_time.to_i >= 1
   end
 
   def play_time_parts_assigned?

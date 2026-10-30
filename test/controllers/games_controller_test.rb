@@ -410,6 +410,67 @@ end
     assert_nil session[:unlocked_trophies_data]
   end
 
+  test "クリア済みゲームのジャンル変更で5本目のRPGトロフィーモーダルを表示する" do
+    Trophy.create!(code: "genre_rpg_5", name: "ロールプレイヤー", description: "RPGを5本クリアした証")
+    4.times do |index|
+      @user.games.create!(title: "RPG #{index}", genre: "RPG", status: "未着手")
+    end
+    @user.games.where(genre: "RPG").update_all(status: "クリア済")
+    @game.update_columns(status: "クリア済")
+    @user.unlock_trophies!(@game)
+
+    with_clerk_session do
+      patch game_path(@game), params: {
+        game: { genre: "RPG" }
+      }
+    end
+
+    assert_redirected_to game_path(@game)
+    assert_equal [
+      { name: "ロールプレイヤー", code: "genre_rpg_5", description: "RPGを5本クリアした証" }
+    ], session[:unlocked_trophies_data]
+
+    with_clerk_session do
+      follow_redirect!
+    end
+
+    assert_response :success
+    assert_select '[data-controller="trophy-result"]'
+    assert_select ".trophy-result-name", text: "ロールプレイヤー"
+  end
+
+  test "IGDB画像添付の追加保存後も新規RPGトロフィーのモーダルデータを維持する" do
+    Trophy.create!(code: "genre_rpg_5", name: "ロールプレイヤー", description: "RPGを5本クリアした証")
+    4.times do |index|
+      @user.games.create!(title: "RPG #{index}", genre: "RPG", status: "未着手")
+    end
+    @user.games.where(genre: "RPG").update_all(status: "クリア済")
+    @user.unlock_trophies!(@game)
+
+    image_attachment_save = ->(game, _) { game.save! }
+    IgdbApiService.stub(:attach_cover_image, image_attachment_save) do
+      with_clerk_session do
+        post games_path, params: {
+          game: { title: "Final Fantasy X", genre: "RPG", status: "クリア済" },
+          igdb_image_url: "https://images.igdb.com/cover.jpg"
+        }
+      end
+    end
+
+    assert_redirected_to game_path(Game.order(:created_at).last)
+    assert_equal [
+      { name: "ロールプレイヤー", code: "genre_rpg_5", description: "RPGを5本クリアした証" }
+    ], session[:unlocked_trophies_data]
+
+    with_clerk_session do
+      follow_redirect!
+    end
+
+    assert_response :success
+    assert_select '[data-controller="trophy-result"]'
+    assert_select ".trophy-result-name", text: "ロールプレイヤー"
+  end
+
   test "タイマーのプレイ時間を加算してEXPリザルトを返す" do
     with_clerk_session do
       post timer_update_game_path(@game),

@@ -44,7 +44,7 @@ class Game < ApplicationRecord
 
   after_save :award_play_time_exp, if: -> { saved_change_to_play_time? }
   after_save :award_exp_for_clear, if: -> { saved_change_to_status? && status == "クリア済" }
-  after_save :unlock_trophies, if: -> { status == "クリア済" && (saved_change_to_status? || saved_change_to_play_time?) }
+  after_save :unlock_trophies, if: -> { status == "クリア済" && (saved_change_to_status? || saved_change_to_play_time? || saved_change_to_genre?) }
   after_save :record_activity
 
   private

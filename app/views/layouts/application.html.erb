@@ -148,5 +148,9 @@
                    earned_exp_results: exp_data[:results]
                  } %>
     <% end %>
+    <% if session[:unlocked_trophies_data].present? %>
+      <% unlocked_trophies = session.delete(:unlocked_trophies_data).map(&:deep_symbolize_keys) %>
+      <%= render partial: "games/trophy_result_modal", locals: { unlocked_trophies: unlocked_trophies } %>
+    <% end %>
   </body>
 </html>

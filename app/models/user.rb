@@ -54,7 +54,7 @@ class User < ApplicationRecord
     eligible_codes << "clear_30" if cleared_count >= 30
     eligible_codes << "clear_50" if cleared_count >= 50
     eligible_codes << "play_time_100" if has_100_hour_clear
-    eligible_codes << "total_play_time_500" if total_play_time >= 500
+    eligible_codes << "total_play_time_500" if total_play_time >= 500 * 60
     eligible_codes << "genre_rpg_5" if cleared_counts_by_genre.fetch("RPG", 0) >= 5
     eligible_codes << "genre_action_5" if cleared_counts_by_genre.fetch("アクション", 0) >= 5
 

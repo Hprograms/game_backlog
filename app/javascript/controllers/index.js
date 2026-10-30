@@ -8,9 +8,11 @@ import HelloController from "controllers/hello_controller"
 import ClerkAuthController from "controllers/clerk_auth_controller"
 import TimerController from "controllers/timer_controller"
 import ExpResultController from "controllers/exp_result_controller"
+import TrophyResultController from "controllers/trophy_result_controller"
 
 application.register("game-form", GameFormController)
 application.register("hello", HelloController)
 application.register("clerk-auth", ClerkAuthController)
 application.register("timer", TimerController)
 application.register("exp-result", ExpResultController)
+application.register("trophy-result", TrophyResultController)

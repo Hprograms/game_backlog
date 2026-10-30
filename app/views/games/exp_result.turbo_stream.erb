@@ -14,3 +14,13 @@
       } %>
   </template>
 </turbo-stream>
+<% if @newly_unlocked_trophies.present? %>
+  <% unlocked_trophies = @newly_unlocked_trophies.map { |trophy| { name: trophy.name, code: trophy.code, description: trophy.description } } %>
+  <turbo-stream action="append" targets="body">
+    <template>
+      <%= render partial: "games/trophy_result_modal",
+        formats: [:html],
+        locals: { unlocked_trophies: unlocked_trophies } %>
+    </template>
+  </turbo-stream>
+<% end %>

@@ -1,3 +1,5 @@
+<%= turbo_stream.replace "game-stats", partial: "games/game_stats" %>
+<%= turbo_stream.replace "games-list", partial: "games/games_list" %>
 <turbo-stream action="append" targets="body">
   <template>
     <%= render partial: "games/exp_result_modal",

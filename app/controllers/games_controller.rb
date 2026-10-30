@@ -3,19 +3,7 @@ class GamesController < ApplicationController
   before_action :set_timer_game, only: :timer_update
 
   def index
-    @games = current_app_user.games.with_attached_image.order(created_at: :desc)
-    @games = @games.where(status: params[:status]) if params[:status].present?
-
-    # 全ゲーム数
-    @total_count = current_app_user.games.count
-
-    # 各ステータスごとのゲーム数を計算
-    @cleared_count = current_app_user.games.where(status: "クリア済").count
-    @playing_count = current_app_user.games.where(status: "プレイ中").count
-    @unplayed_count = current_app_user.games.where(status: "未着手").count
-
-    # クリア率の計算
-    @clear_rate = @total_count > 0 ? (@cleared_count * 100 / @total_count) : 0
+    load_index_data(params[:status])
   end
 
   def show
@@ -101,14 +89,15 @@ class GamesController < ApplicationController
 
     status = params[:status]
 
-    unless play_time_minutes >= 0 && %w[プレイ中 クリア済].include?(status)
+    unless play_time_minutes >= 0 &&
+        (status.blank? || %w[backlog playing cleared 未着手 プレイ中 クリア済].include?(status))
       return head :unprocessable_entity
     end
 
     @previous_level = current_app_user.level
     @previous_exp = current_app_user.exp
     @game.play_time = (@game.play_time || 0) + play_time_minutes
-    @game.status = status
+    @game.status = "クリア済" if %w[cleared クリア済].include?(status)
     @game.used_timer = true
 
     unless @game.save
@@ -117,11 +106,23 @@ class GamesController < ApplicationController
 
     @new_level = current_app_user.reload.level
     @new_exp = current_app_user.exp
+    load_index_data(params[:filter_status])
     render :exp_result, formats: :turbo_stream
   end
 
 
   private
+
+  def load_index_data(status)
+    games = current_app_user.games.with_attached_image.order(created_at: :desc)
+    @filter_status = status
+    @games = status.present? ? games.where(status: status) : games
+    @total_count = current_app_user.games.count
+    @cleared_count = current_app_user.games.where(status: "クリア済").count
+    @playing_count = current_app_user.games.where(status: "プレイ中").count
+    @unplayed_count = current_app_user.games.where(status: "未着手").count
+    @clear_rate = @total_count.positive? ? (@cleared_count * 100 / @total_count) : 0
+  end
 
   def set_timer_game
     @game = current_app_user.games.find_by(id: params[:id])

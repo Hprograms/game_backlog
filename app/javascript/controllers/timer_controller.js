@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["title", "time", "floating", "content", "statusModal", "resultTime", "error"]
+  static targets = ["title", "time", "floating", "content", "overlay", "resultTime", "error", "warning", "clearCheck", "clearWarning", "saveButton", "modalTitle", "modalTime", "poster"]
 
   connect() {
     this.intervalId = null
@@ -11,6 +11,7 @@ export default class extends Controller {
 
   disconnect() {
     this.clearTimer()
+    clearTimeout(this.warningTimeout)
   }
 
   floatingTargetConnected() {
@@ -22,21 +23,37 @@ export default class extends Controller {
   }
 
   start(event) {
+    if (this.intervalId || this.startedAt) {
+      if (this.hasWarningTarget) {
+        this.warningTarget.textContent = "他のゲームを記録中です。"
+        this.warningTarget.hidden = false
+        clearTimeout(this.warningTimeout)
+        this.warningTimeout = setTimeout(() => { this.warningTarget.hidden = true }, 3000)
+      }
+      return
+    }
+
     const { gameId, gameTitle } = event.currentTarget.dataset
     this.gameId = gameId
     this.gameTitle = gameTitle
+    const card = event.currentTarget.closest(".game-poster-card")
+    const img = card ? card.querySelector(".poster-image") : null
+    this.gameImageUrl = img ? img.src : null
     this.titleTarget.textContent = this.gameTitle
     this.elapsedSeconds = 0
     this.startedAt = Date.now()
     this.contentTarget.hidden = false
-    this.statusModalTarget.hidden = true
+    this.overlayTarget.hidden = true
     this.errorTarget.hidden = true
     this.errorTarget.textContent = ""
     this.timeTarget.textContent = "00:00:00"
     this.floatingTarget.hidden = false
+    clearTimeout(this.warningTimeout)
+    if (this.hasWarningTarget) this.warningTarget.hidden = true
 
     this.clearTimer()
     this.intervalId = setInterval(() => this.updateTime(), 1000)
+    this.highlightCard(this.gameId)
   }
 
   stop() {
@@ -46,26 +63,60 @@ export default class extends Controller {
     this.clearTimer()
     this.resultMinutes = Math.floor(this.elapsedSeconds / 60)
     this.resultTimeTarget.textContent = this.resultMinutes
+    this.modalTimeTarget.textContent = this.timeTarget.textContent
+    this.modalTitleTarget.textContent = this.gameTitle
+    if (this.gameImageUrl) {
+      this.posterTarget.src = this.gameImageUrl
+      this.posterTarget.hidden = false
+    } else {
+      this.posterTarget.hidden = true
+    }
+
     this.contentTarget.hidden = true
-    this.statusModalTarget.hidden = false
+    this.floatingTarget.hidden = true
+    this.overlayTarget.hidden = false
   }
 
-  saveProgress(event) {
-    event.preventDefault()
-    this.submitTimerResult("プレイ中")
+  resume(event) {
+    if (event) event.preventDefault()
+
+    this.startedAt = Date.now() - (this.elapsedSeconds * 1000)
+    this.intervalId = setInterval(() => this.updateTime(), 1000)
+
+    this.overlayTarget.hidden = true
+    this.floatingTarget.hidden = false
+    this.contentTarget.hidden = false
   }
 
-  saveClear(event) {
+  toggleClearWarning() {
+    if (this.clearCheckTarget.checked) {
+      this.clearWarningTarget.hidden = false
+      this.saveButtonTarget.textContent = "クリアボーナスを含めてEXPを獲得"
+      this.saveButtonTarget.classList.replace("btn-primary", "btn-warning")
+    } else {
+      this.clearWarningTarget.hidden = true
+      this.saveButtonTarget.textContent = "EXPを獲得して終了"
+      this.saveButtonTarget.classList.replace("btn-warning", "btn-primary")
+    }
+  }
+
+  save(event) {
     event.preventDefault()
-    this.submitTimerResult("クリア済")
+    const status = this.clearCheckTarget.checked ? "cleared" : null
+    this.submitTimerResult(status)
   }
 
   cancel(event) {
     event.preventDefault()
-    this.statusModalTarget.hidden = true
+    if (!window.confirm("これまでの計測時間が失われます。本当に破棄しますか？")) return
+
+    this.clearTimer()
+    this.overlayTarget.hidden = true
     this.floatingTarget.hidden = true
     this.startedAt = null
     this.gameId = null
+    this.removeHighlight()
+    this.resetClearCheck()
   }
 
   async submitTimerResult(status) {
@@ -76,7 +127,11 @@ export default class extends Controller {
     this.errorTarget.textContent = ""
 
     try {
-      const response = await fetch(`/games/${encodeURIComponent(this.gameId)}/timer_update`, {
+      const requestUrl = new URL(`/games/${encodeURIComponent(this.gameId)}/timer_update`, window.location.origin)
+      const filterStatus = new URLSearchParams(window.location.search).get("status")
+      if (filterStatus) requestUrl.searchParams.set("filter_status", filterStatus)
+
+      const response = await fetch(requestUrl, {
         method: "POST",
         headers: {
           "Accept": "text/vnd.turbo-stream.html",
@@ -85,7 +140,7 @@ export default class extends Controller {
         },
         body: JSON.stringify({
           play_time_minutes: this.resultMinutes,
-          status
+          ...(status ? { status } : {})
         })
       })
 
@@ -99,14 +154,24 @@ export default class extends Controller {
         throw new Error("EXPリザルトを表示できませんでした。ページを再読み込みしてください。")
       }
       window.Turbo.renderStreamMessage(stream)
+      this.overlayTarget.hidden = true
       this.floatingTarget.hidden = true
       this.startedAt = null
       this.gameId = null
+      this.removeHighlight()
+      this.resetClearCheck()
     } catch (error) {
       this.errorTarget.textContent = error.message || "プレイ記録を保存できませんでした。"
       this.errorTarget.hidden = false
     } finally {
       this.submitting = false
+    }
+  }
+
+  resetClearCheck() {
+    if (this.hasClearCheckTarget) {
+      this.clearCheckTarget.checked = false
+      this.toggleClearWarning()
     }
   }
 
@@ -125,5 +190,16 @@ export default class extends Controller {
       clearInterval(this.intervalId)
       this.intervalId = null
     }
+  }
+
+  highlightCard(gameId) {
+    const playButton = document.querySelector(`button[data-game-id="${gameId}"]`)
+    playButton?.closest(".game-poster-card")?.classList.add("is-active-timer")
+  }
+
+  removeHighlight() {
+    document.querySelectorAll(".game-poster-card.is-active-timer").forEach(card => {
+      card.classList.remove("is-active-timer")
+    })
   }
 }

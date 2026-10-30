@@ -67,7 +67,10 @@ class TrophiesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".trophy-card.is-locked .trophy-card-name", text: "精神と時の部屋"
     assert_select ".trophy-card.is-locked .trophy-card-name", text: "ロールプレイヤー"
     assert_select ".trophy-card-date", text: "2026.10.18 獲得"
-    assert_select ".trophy-card-icon", text: "military_tech"
+    assert_select "img.trophy-card-icon[alt=''][src*='trophies/levels/level_10']"
+    assert_select "img.trophy-card-icon[alt=''][src*='trophies/clears/clear_1']"
+    assert_select "img.trophy-card-icon[alt=''][src*='trophies/times/play_time_100']"
+    assert_select "img.trophy-card-icon[alt=''][src*='trophies/genre/genre_rpg_5']"
   end
 
   test "ヘッダーからトロフィー一覧へ移動できる" do

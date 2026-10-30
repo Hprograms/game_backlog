@@ -17,9 +17,11 @@
 }
 
 .trophies-header-icon {
-  color: #fbbf24;
-  font-size: 3.5rem;
-  text-shadow: 0 0 22px rgba(251, 191, 36, 0.55);
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 22px rgba(251, 191, 36, 0.55));
 }
 
 .trophies-eyebrow {
@@ -87,8 +89,10 @@
 }
 
 .trophy-card-icon {
-  color: #fbbf24;
-  font-size: 3rem;
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  image-rendering: pixelated;
   margin-bottom: 0.85rem;
 }
 
@@ -124,8 +128,7 @@
 }
 
 .trophy-card.is-unlocked .trophy-card-icon {
-  color: #fbbf24;
-  text-shadow: 0 0 18px rgba(251, 191, 36, 0.65);
+  filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.65));
 }
 
 .trophy-card.is-unlocked:hover {

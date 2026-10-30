@@ -1,13 +1,13 @@
 <% trophy_categories = [
-  { id: "level", title: "レベル到達", trophies: @trophies.select { |trophy| trophy.code.to_s.start_with?("level_") } },
-  { id: "clear", title: "ゲームクリア数", trophies: @trophies.select { |trophy| trophy.code.to_s.start_with?("clear_") } },
-  { id: "play-time", title: "プレイ時間", trophies: @trophies.select { |trophy| trophy.code.to_s.start_with?("play_time_", "total_play_time_") } },
-  { id: "genre", title: "ジャンルマスター", trophies: @trophies.select { |trophy| trophy.code.to_s.start_with?("genre_") } }
+  { id: "level", title: "レベル到達", folder: "levels", trophies: @trophies.select { |trophy| trophy.code.to_s.start_with?("level_") } },
+  { id: "clear", title: "ゲームクリア数", folder: "clears", trophies: @trophies.select { |trophy| trophy.code.to_s.start_with?("clear_") } },
+  { id: "play-time", title: "プレイ時間", folder: "times", trophies: @trophies.select { |trophy| trophy.code.to_s.start_with?("play_time_", "total_play_time_") } },
+  { id: "genre", title: "ジャンルマスター", folder: "genre", trophies: @trophies.select { |trophy| trophy.code.to_s.start_with?("genre_") } }
 ] %>
 
 <main class="trophies-page">
   <header class="trophies-header">
-    <span class="material-symbols-outlined trophies-header-icon" aria-hidden="true">emoji_events</span>
+    <%= image_tag "trophies/trophy.png", class: "trophies-header-icon", alt: "" %>
     <div>
       <p class="trophies-eyebrow">ACHIEVEMENT COLLECTION</p>
       <h1>トロフィー一覧</h1>
@@ -29,7 +29,7 @@
         <% category[:trophies].each do |trophy| %>
           <% user_trophy = @unlocked_trophies_by_id[trophy.id] %>
           <article class="trophy-card <%= user_trophy ? "is-unlocked" : "is-locked" %>">
-            <span class="material-symbols-outlined trophy-card-icon" aria-hidden="true"><%= trophy.icon_name %></span>
+            <%= image_tag "trophies/#{category[:folder]}/#{trophy.code}.png", class: "trophy-card-icon", alt: "" %>
             <h3 class="trophy-card-name"><%= trophy.name %></h3>
             <p class="trophy-card-description"><%= trophy.description %></p>
             <% if user_trophy&.unlocked_at %>

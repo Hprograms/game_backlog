@@ -1,44 +1,83 @@
 <% previous_progress = level_progress(User.new(level: previous_level, exp: previous_exp)) %>
 <% new_progress = level_progress(User.new(level: new_level, exp: new_exp)) %>
-<% total_earned_exp = earned_exp_results.sum { |result| result[:exp] } %>
+<% total_earned_exp = earned_exp_results.sum { |result| result[:exp].to_i } %>
+
 <div class="exp-result-overlay" data-controller="exp-result"
      data-exp-result-prev-level-value="<%= previous_level %>"
      data-exp-result-new-level-value="<%= new_level %>"
      data-exp-result-prev-percentage-value="<%= previous_progress[:percentage] %>"
      data-exp-result-new-percentage-value="<%= new_progress[:percentage] %>"
      data-exp-result-new-exp-text-value="<%= new_progress[:current_exp] %> / <%= new_progress[:required_exp] %> EXP">
-  <section class="exp-result-modal" role="dialog" aria-modal="true" aria-labelledby="exp-result-title">
-    <h2 id="exp-result-title" class="exp-result-title">RESULT</h2>
+  <div class="exp-result-stage">
+    <div class="exp-result-levelup-logo-wrapper" data-exp-result-target="levelUpLogo" hidden>
+      <%= image_tag "exp_results/cracker.png", class: "exp-result-cracker cracker-left", alt: "" %>
+      <%= image_tag "exp_results/levelup.png", class: "exp-result-levelup-logo", alt: "レベルアップ！" %>
+      <%= image_tag "exp_results/cracker.png", class: "exp-result-cracker cracker-right", alt: "" %>
+    </div>
+
+    <section class="exp-result-modal" role="dialog" aria-modal="true" aria-labelledby="exp-result-title">
+    <h2 id="exp-result-title" class="exp-result-title">
+      冒 険 の 成 果
+    </h2>
+
+    <div class="exp-result-game-info">
+      <% game = current_app_user.games.find_by(title: game_title) %>
+      <% if game&.image&.attached? %>
+        <%= image_tag game.image, class: "exp-result-poster", alt: game_title %>
+      <% else %>
+        <div class="exp-result-poster-placeholder">
+          <span class="material-symbols-outlined">sports_esports</span>
+        </div>
+      <% end %>
+      <p class="exp-result-game-title"><%= game_title %></p>
+    </div>
+
+    <div class="exp-result-divider"></div>
+
+    <h3 class="exp-result-section-title">【 獲得経験値 】</h3>
     <ul class="exp-result-breakdown">
-      <% earned_exp_results.each do |result| %>
+      <% if earned_exp_results.empty? %>
         <li>
-          <% if result[:type].to_s == "play_time" %>
-            <span>🕹️ プレイ時間 ( + <%= format_play_time(result[:minutes].to_i) %> )</span>
-          <% elsif result[:type].to_s == "clear" %>
-            <span>🎉 クリアボーナス</span>
-          <% elsif result[:type].to_s == "timer_bonus" %>
-            <span>⏱️ タイマー稼働ボーナス</span>
-          <% end %>
-          <strong>+ <%= result[:exp] %> EXP</strong>
+          <span>プレイ時間ボーナス (0分)</span>
+          <strong>+ 0 EXP</strong>
         </li>
+      <% else %>
+        <% earned_exp_results.each do |result| %>
+          <li>
+            <% if result[:type].to_s == "play_time" %>
+              <span>プレイ時間ボーナス (<%= format_play_time(result[:minutes].to_i) %>)</span>
+            <% elsif result[:type].to_s == "clear" %>
+              <span>クリアボーナス</span>
+            <% elsif result[:type].to_s == "timer_bonus" %>
+              <span>タイマーボーナス</span>
+            <% end %>
+            <strong>+ <%= result[:exp].to_i %> EXP</strong>
+          </li>
+        <% end %>
       <% end %>
     </ul>
-    <p class="exp-result-game"><%= game_title %></p>
-    <p class="exp-result-total">TOTAL EXP <strong>+ <%= total_earned_exp %> EXP</strong></p>
-    <div class="exp-result-level">
-      <div class="exp-result-level-labels">
-        <span data-exp-result-target="levelText">Lv. <%= previous_level %></span>
-        <span data-exp-result-target="expText"><%= previous_progress[:current_exp] %> / <%= previous_progress[:required_exp] %> EXP</span>
-      </div>
-      <div class="exp-result-progress-track" role="progressbar"
-           aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%= previous_progress[:percentage] %>">
-        <div class="exp-result-progress-bar" data-exp-result-target="bar"
-             style="width: <%= previous_progress[:percentage] %>%"></div>
+
+    <div class="exp-result-divider"></div>
+
+    <p class="exp-result-total">
+      計： <strong>+ <%= total_earned_exp %> EXP</strong>
+    </p>
+
+    <div class="exp-result-level-container">
+      <div class="exp-result-level">
+        <div class="exp-result-level-labels">
+          <span data-exp-result-target="levelText">Lv. <%= previous_level %></span>
+          <span data-exp-result-target="expText"><%= previous_progress[:current_exp] %> / <%= previous_progress[:required_exp] %> EXP</span>
+        </div>
+        <div class="exp-result-progress-track" role="progressbar"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%= previous_progress[:percentage] %>">
+          <div class="exp-result-progress-bar" data-exp-result-target="bar"
+               style="width: <%= previous_progress[:percentage] %>%"></div>
+        </div>
       </div>
     </div>
-    <p class="exp-result-level-up" data-exp-result-target="levelUpMessage" hidden>
-      LEVEL UP! Lv.<%= previous_level %> ➔ Lv.<%= new_level %>
-    </p>
-    <button type="button" class="exp-result-close" data-action="click->exp-result#close">閉じる</button>
-  </section>
+
+    <button type="button" class="exp-result-close" data-exp-result-target="closeButton" data-action="click->exp-result#close" hidden>閉じる</button>
+    </section>
+  </div>
 </div>

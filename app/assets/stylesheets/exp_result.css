@@ -1,0 +1,307 @@
+/* --- EXP Result Modal --- */
+.exp-result-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(2, 6, 23, 0.78);
+  animation: exp-result-overlay-in 0.25s ease-out;
+}
+
+.exp-result-modal {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 2rem;
+  color: #f8fafc;
+  text-align: center;
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+  border: 1px solid rgba(103, 232, 249, 0.55);
+  border-radius: 18px;
+  box-shadow: 0 0 35px rgba(34, 211, 238, 0.2);
+  animation: exp-result-modal-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.exp-result-stage {
+  position: relative;
+  width: min(26rem, 100%);
+}
+
+.exp-result-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0 0 1.25rem;
+  color: #67e8f9;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-shadow: 0 0 16px rgba(34, 211, 238, 0.35);
+}
+
+.exp-result-game-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.exp-result-poster {
+  width: 60px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.exp-result-poster-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 84px;
+  color: #64748b;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+}
+
+.exp-result-game-title {
+  margin: 0;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.exp-result-divider {
+  width: 100%;
+  height: 1px;
+  margin: 1rem 0;
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.exp-result-section-title {
+  margin-bottom: 0.75rem;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.exp-result-breakdown {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.exp-result-breakdown li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.6rem;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.15);
+}
+
+.exp-result-breakdown li:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.exp-result-breakdown strong {
+  flex-shrink: 0;
+  color: #fbbf24;
+}
+
+.exp-result-total {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 1rem 0 1.5rem;
+  color: #f8fafc;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.exp-result-total strong {
+  color: #fbbf24;
+  font-size: 1.25rem;
+}
+
+.exp-result-level {
+  margin-bottom: 1rem;
+  padding: 0.9rem;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 10px;
+}
+
+.exp-result-level-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.55rem;
+  color: #cbd5e1;
+  font-size: 0.85rem;
+}
+
+.exp-result-level-labels span:first-child {
+  color: #a5b4fc;
+  font-weight: 700;
+}
+
+.exp-result-progress-track {
+  height: 0.7rem;
+  overflow: hidden;
+  background: rgba(2, 6, 23, 0.8);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.exp-result-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #06b6d4, #8b5cf6);
+  border-radius: inherit;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.55);
+  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.exp-result-levelup-logo-wrapper {
+  position: absolute;
+  top: -90px;
+  left: 0;
+  right: 0;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  pointer-events: none;
+}
+
+.exp-result-levelup-logo-wrapper[hidden] {
+  display: none;
+}
+
+.exp-result-levelup-logo {
+  width: 75%;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.8));
+  animation: exp-result-stamp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  z-index: 12;
+}
+
+.exp-result-cracker {
+  position: absolute;
+  top: 50%;
+  z-index: 1201;
+  width: 90px;
+  height: 90px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+}
+
+.cracker-left {
+  left: -12%;
+  animation: cracker-pop-left 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+.cracker-right {
+  right: -12%;
+  animation: cracker-pop-right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+.exp-result-level-container {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.exp-result-close {
+  display: block;
+  min-width: 8rem;
+  margin: 1.25rem auto 0;
+  padding: 0.55rem 1rem;
+  color: #e2e8f0;
+  font-weight: 700;
+  background: rgba(51, 65, 85, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 8px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.exp-result-close[hidden] {
+  display: none;
+}
+
+.exp-result-close.animate-in {
+  animation: exp-result-fade-in 0.4s ease-out forwards;
+}
+
+.exp-result-close:hover {
+  background: rgba(71, 85, 105, 0.95);
+  border-color: #67e8f9;
+}
+
+@keyframes exp-result-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes exp-result-modal-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes exp-result-stamp {
+  0% { opacity: 0; transform: scale(1.5); }
+  50% { opacity: 1; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes cracker-pop-left {
+  0% {
+    opacity: 0;
+    transform: translate(20px, 30px) scale(0.4) rotate(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1) rotate(10deg);
+  }
+}
+
+@keyframes cracker-pop-right {
+  0% {
+    opacity: 0;
+    transform: translate(-20px, 30px) scaleX(-1) scale(0.4) rotate(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scaleX(-1) scale(1) rotate(10deg);
+  }
+}
+
+@keyframes exp-result-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+  .exp-result-modal {
+    padding: 1.4rem;
+  }
+
+  .exp-result-breakdown li {
+    font-size: 0.9rem;
+  }
+}

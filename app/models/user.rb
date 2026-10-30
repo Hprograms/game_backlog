@@ -41,7 +41,7 @@ class User < ApplicationRecord
     cleared_counts_by_genre = cleared_games.group(:genre).count
     cleared_count = cleared_counts_by_genre.values.sum
     total_play_time = cleared_games.sum(:play_time)
-    has_100_hour_clear = cleared_games.where("play_time >= ?", 100).exists?
+    has_100_hour_clear = cleared_games.where("play_time >= ?", 100 * 60).exists?
 
     eligible_codes = []
     eligible_codes << "level_10" if level >= 10

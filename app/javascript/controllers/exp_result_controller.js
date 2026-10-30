@@ -1,7 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
+import confetti from "canvas-confetti"
 
 export default class extends Controller {
-  static targets = ["bar", "levelText", "levelUpMessage", "expText"]
+  static targets = ["bar", "levelText", "levelUpLogo", "expText", "closeButton"]
   static values = {
     prevLevel: Number,
     newLevel: Number,
@@ -22,6 +23,8 @@ export default class extends Controller {
   disconnect() {
     cancelAnimationFrame(this.animationFrame)
     clearTimeout(this.animationTimeout)
+    clearTimeout(this.confettiTimeout)
+    clearTimeout(this.closeButtonTimeout)
   }
 
   close(event) {
@@ -36,10 +39,18 @@ export default class extends Controller {
       }
       this.levelTextTarget.textContent = `Lv. ${this.newLevelValue}`
       this.animateBar(this.newPercentageValue)
+      const transitionDuration = 950
+
       if (this.prevLevelValue !== this.newLevelValue) {
         this.animationTimeout = setTimeout(() => {
-          this.levelUpMessageTarget.hidden = false
-        }, 950)
+          if (this.hasLevelUpLogoTarget) {
+            this.levelUpLogoTarget.hidden = false
+          }
+          this.confettiTimeout = setTimeout(() => this.fireCrossConfetti(), 150)
+          this.showCloseButton(1400)
+        }, transitionDuration)
+      } else {
+        this.showCloseButton(transitionDuration)
       }
       return
     }
@@ -63,5 +74,47 @@ export default class extends Controller {
   animateBar(percentage) {
     this.barTarget.style.width = `${percentage}%`
     this.track?.setAttribute("aria-valuenow", percentage)
+  }
+
+  showCloseButton(delay) {
+    this.closeButtonTimeout = setTimeout(() => {
+      if (this.hasCloseButtonTarget) {
+        this.closeButtonTarget.hidden = false
+        this.closeButtonTarget.classList.add("animate-in")
+      }
+    }, delay)
+  }
+
+  fireCrossConfetti() {
+    const leftBounds = this.levelUpLogoTarget.querySelector(".cracker-left").getBoundingClientRect()
+    const rightBounds = this.levelUpLogoTarget.querySelector(".cracker-right").getBoundingClientRect()
+    const commonOptions = {
+      particleCount: 30,
+      spread: 60,
+      shapes: ["square"],
+      flat: true,
+      scalar: 1.2,
+      colors: ["#f8b700", "#f83800", "#00b800", "#008888", "#fcbc20", "#f878f8"],
+      disableForReducedMotion: true,
+      zIndex: 1300
+    }
+
+    confetti({
+      ...commonOptions,
+      angle: 45,
+      origin: {
+        x: (leftBounds.left + leftBounds.width / 2) / window.innerWidth,
+        y: (leftBounds.top + leftBounds.height / 2) / window.innerHeight
+      }
+    })
+
+    confetti({
+      ...commonOptions,
+      angle: 135,
+      origin: {
+        x: (rightBounds.left + rightBounds.width / 2) / window.innerWidth,
+        y: (rightBounds.top + rightBounds.height / 2) / window.innerHeight
+      }
+    })
   }
 }

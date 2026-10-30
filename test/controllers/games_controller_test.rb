@@ -59,6 +59,16 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "html[data-controller='timer']"
     assert_select "#floating-timer[data-timer-target='floating'][hidden]"
+    assert_select ".timer-warning[data-timer-target='warning'][hidden]"
+    assert_select ".timer-modal-overlay[data-timer-target='overlay'][hidden]"
+    assert_select ".timer-modal-poster[data-timer-target='poster'][hidden]"
+    assert_select ".timer-modal-title[data-timer-target='modalTitle']"
+    assert_select ".timer-modal-time-display[data-timer-target='modalTime']"
+    assert_select "#timer-clear-check[data-timer-target='clearCheck'][data-action='change->timer#toggleClearWarning']"
+    assert_select '[data-timer-target="clearWarning"][hidden]'
+    assert_select "img.cracker-icon[src*='cracker']"
+    assert_select "button[data-timer-target='saveButton'][data-action='click->timer#save']", text: "EXPを獲得して終了"
+    assert_select "button[data-action='click->timer#resume']", text: /計測を再開する/
     assert_select "button.btn-play[data-action='click->timer#start'][data-game-id='#{@game.id}'][data-game-title='#{@game.title}']"
   end
 
@@ -168,42 +178,29 @@ test "ログイン済みでゲームを登録できる" do
   assert_equal 130, Game.last.play_time
 end
 
-test "ゲーム登録でEXPを獲得した場合にリザルト用データを設定する" do
-  with_clerk_session do
-    post games_path, params: {
-      game: {
-        title: "プレイ時間EXPのゲーム",
-        status: "未着手",
-        play_time_minutes: "5"
-      }
-    }
-  end
-
-  assert_redirected_to game_path(Game.last)
-  assert_equal [ { type: :play_time, minutes: 5, exp: 10 } ], assigns(:game).earned_exp_results
-  assert_equal 1, assigns(:previous_level)
-  assert_equal 0, assigns(:previous_exp)
-  assert_equal 1, assigns(:new_level)
-  assert_equal 10, assigns(:new_exp)
-end
-
-test "EXP獲得時にTurbo Streamでリザルトモーダルを返す" do
+test "EXP獲得時に詳細画面で日本語リザルトモーダルを表示する" do
   with_clerk_session do
     patch game_path(@game), params: {
       game: { play_time: 2 }
     }, as: :turbo_stream
+    assert_redirected_to game_path(@game)
+    follow_redirect!
   end
 
   assert_response :success
-  assert_equal "text/vnd.turbo-stream.html", response.media_type
-  assert_includes response.body, 'action="append" targets="body"'
   assert_includes response.body, 'data-controller="exp-result"'
   assert_includes response.body, 'data-exp-result-target="levelText"'
   assert_includes response.body, 'data-exp-result-target="bar"'
-  assert_includes response.body, 'data-exp-result-target="levelUpMessage" hidden'
+  assert_includes response.body, 'data-exp-result-target="levelUpLogo" hidden'
+  assert_select "button.exp-result-close[data-exp-result-target='closeButton'][hidden]"
+  assert_includes response.body, "cracker-left"
+  assert_includes response.body, "cracker-right"
+  assert_includes response.body, "exp_results/levelup"
+  assert_includes response.body, "exp-result-levelup-logo-wrapper"
   assert_includes response.body, 'data-action="click->exp-result#close"'
-  assert_includes response.body, "プレイ時間"
-  assert_includes response.body, "合計獲得EXP"
+  assert_includes response.body, "プレイ時間ボーナス"
+  assert_includes response.body, "計："
+  assert_includes response.body, "冒 険 の 成 果"
   assert_includes response.body, "4 EXP"
 end
 
@@ -355,32 +352,10 @@ end
     assert_equal "更新後のタイトル", @game.reload.title
   end
 
-  test "更新でEXPを獲得した場合は詳細画面へリダイレクトしてモーダルを一度表示する" do
-    with_clerk_session do
-      patch game_path(@game),
-        params: { game: { play_time: 1 } },
-        headers: { "Accept" => "text/vnd.turbo-stream.html" }
-
-      assert_redirected_to game_path(@game)
-      assert_equal "ゲームを保存しました。", flash[:notice]
-      assert session[:exp_result_data].present?
-
-      follow_redirect!
-    end
-
-    assert_response :success
-    assert_equal "text/html", response.media_type
-    assert_includes response.body, 'data-controller="exp-result"'
-    assert_includes response.body, "ゼルダの伝説"
-    assert_includes response.body, "TOTAL EXP"
-    assert_equal 2, @user.reload.exp
-    assert_nil session[:exp_result_data]
-  end
-
   test "タイマーのプレイ時間を加算してEXPリザルトを返す" do
     with_clerk_session do
       post timer_update_game_path(@game),
-        params: { play_time_minutes: 25, status: "プレイ中" },
+        params: { play_time_minutes: 25 },
         as: :json,
         headers: { "Accept" => "text/vnd.turbo-stream.html" }
     end
@@ -391,29 +366,49 @@ end
     assert_equal "プレイ中", @game.status
     assert_equal 60, @user.reload.exp
     assert_includes response.body, 'action="append" targets="body"'
-    assert_includes response.body, "⏱️ タイマー稼働ボーナス"
+    assert_includes response.body, "タイマーボーナス"
     assert_includes response.body, "+ 10 EXP"
-    assert_includes response.body, "TOTAL EXP"
+    assert_includes response.body, "計："
+    response_fragment = Nokogiri::HTML.fragment(response.body)
+    stats_template = response_fragment.at_css('turbo-stream[target="game-stats"] template')
+    list_template = response_fragment.at_css('turbo-stream[target="games-list"] template')
+    assert_equal %w[1 0 1 0], stats_template.css(".stat-value").map { |value| value.text.strip }
+    assert_includes list_template.text, "プレイ中"
   end
 
-  test "1分のタイマー計測でも最低1EXPのボーナスが付与される" do
+  test "EXPを獲得しないタイマー記録でも0 EXPの内訳を表示する" do
     with_clerk_session do
       post timer_update_game_path(@game),
-        params: { play_time_minutes: 1, status: "プレイ中" },
+        params: { play_time_minutes: 0 },
         as: :json,
         headers: { "Accept" => "text/vnd.turbo-stream.html" }
     end
 
     assert_response :success
+    assert_includes response.body, "プレイ時間ボーナス (0分)"
+    assert_includes response.body, "+ 0 EXP"
+    assert_includes response.body, "計："
+  end
+
+  test "1分のタイマー計測でも最低1EXPのボーナスが付与される" do
+    with_clerk_session do
+      post timer_update_game_path(@game),
+        params: { play_time_minutes: 1 },
+        as: :json,
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :success
+    assert_equal "プレイ中", @game.reload.status
     assert_equal 3, @user.reload.exp
-    assert_includes response.body, "🕹️ プレイ時間 ( + 1分 )"
+    assert_includes response.body, "プレイ時間ボーナス (1分)"
     assert_includes response.body, "+ 1 EXP"
   end
 
   test "タイマーのクリア結果でプレイ時間とクリア状態を保存してEXPを付与する" do
     with_clerk_session do
       post timer_update_game_path(@game),
-        params: { play_time_minutes: 10, status: "クリア済" },
+        params: { play_time_minutes: 10, status: "cleared" },
         as: :json,
         headers: { "Accept" => "text/vnd.turbo-stream.html" }
     end
@@ -422,21 +417,45 @@ end
     assert_equal 10, @game.reload.play_time
     assert_equal "クリア済", @game.status
     assert_equal 5_024, @user.reload.exp
-    assert_includes response.body, "🎉 クリアボーナス"
-    assert_includes response.body, "⏱️ タイマー稼働ボーナス"
-    assert_includes response.body, "TOTAL EXP"
+    assert_includes response.body, "クリアボーナス"
+    assert_includes response.body, "タイマーボーナス"
+    assert_includes response.body, "計："
+  end
+
+  test "タイマー結果でゲーム一覧と件数を更新し、絞り込みから外れたカードを除く" do
+    other_game = @user.games.create!(title: "別の未着手ゲーム", status: "未着手")
+
+    with_clerk_session do
+      post timer_update_game_path(@game, filter_status: "未着手"),
+        params: { play_time_minutes: 10, status: "cleared" },
+        as: :json,
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :success
+    assert_equal "クリア済", @game.reload.status
+
+    response_fragment = Nokogiri::HTML.fragment(response.body)
+    stats_template = response_fragment.at_css('turbo-stream[target="game-stats"] template')
+    list_template = response_fragment.at_css('turbo-stream[target="games-list"] template')
+    assert stats_template
+    assert list_template
+    assert_equal %w[2 1 0 1], stats_template.css(".stat-value").map { |value| value.text.strip }
+    assert_includes stats_template.text, "クリア済 (50%)"
+    assert_includes list_template.text, other_game.title
+    refute_includes list_template.to_html, "poster_game_#{@game.id}"
   end
 
   test "不正なタイマー結果は保存しない" do
     with_clerk_session do
       post timer_update_game_path(@game),
-        params: { play_time_minutes: -1, status: "未着手" },
+        params: { play_time_minutes: -1 },
         as: :json,
         headers: { "Accept" => "text/vnd.turbo-stream.html" }
       assert_response :unprocessable_entity
 
       post timer_update_game_path(@game),
-        params: { play_time_minutes: "invalid", status: "プレイ中" },
+        params: { play_time_minutes: "invalid" },
         as: :json,
         headers: { "Accept" => "text/vnd.turbo-stream.html" }
     end
@@ -453,7 +472,7 @@ end
 
     with_clerk_session do
       post timer_update_game_path(other_game),
-        params: { play_time_minutes: 10, status: "プレイ中" },
+        params: { play_time_minutes: 10 },
         as: :json,
         headers: { "Accept" => "text/vnd.turbo-stream.html" }
     end

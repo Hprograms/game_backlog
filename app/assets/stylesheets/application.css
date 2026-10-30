@@ -10,3 +10,6 @@
  */
 
 @import "games.css";
+@import "game_card.css";
+@import "exp_result.css";
+@import "timer.css";

@@ -28,6 +28,22 @@ class GameTest < ActiveSupport::TestCase
     assert_nil game.play_time_minutes
   end
 
+  test "未着手ゲームのプレイ時間が1分以上になるとプレイ中に更新する" do
+    game = @user.games.create!(title: "Backlog Game", status: "未着手")
+
+    game.update!(play_time: 1)
+
+    assert_equal "プレイ中", game.reload.status
+  end
+
+  test "未着手ゲームのプレイ時間が0分なら未着手のままにする" do
+    game = @user.games.create!(title: "Zero Time Game", status: "未着手")
+
+    game.update!(play_time: 0)
+
+    assert_equal "未着手", game.reload.status
+  end
+
   test "プレイ時間を過去の記録より減らせない" do
     assert_not @game.update(play_time: 29)
 

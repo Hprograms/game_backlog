@@ -93,14 +93,14 @@
           </a>
           <div class="ms-auto">
             <% if clerk_authenticated? %>
-              <div data-controller="clerk-auth" class="d-flex align-items-center gap-3">
-                <%= link_to trophies_path, class: "btn btn-outline-light btn-sm d-inline-flex align-items-center gap-1" do %>
-                  <span class="material-symbols-outlined" aria-hidden="true">emoji_events</span>
-                  <span>トロフィー</span>
+              <div data-controller="clerk-auth" class="d-flex align-items-center gap-4">
+                <%= link_to trophies_path, class: "btn header-nav-btn d-inline-flex align-items-center gap-1" do %>
+                  <%= image_tag "trophies/trophy.png", class: "header-nav-icon", alt: "" %>
+                  <span class="header-nav-label">トロフィー</span>
                 <% end %>
-                <%= link_to activities_path, class: "btn btn-outline-light btn-sm d-inline-flex align-items-center gap-1" do %>
-                  <span class="material-symbols-outlined" aria-hidden="true">history</span>
-                  <span>冒険の書</span>
+                <%= link_to activities_path, class: "btn header-nav-btn d-inline-flex align-items-center gap-1" do %>
+                  <%= image_tag "adventures/book.png", class: "header-nav-icon", alt: "" %>
+                  <span class="header-nav-label">冒険の書</span>
                 <% end %>
                 <div class="user-profile-widget d-flex flex-column align-items-center">
                   <div data-clerk-auth-target="userButton"></div>

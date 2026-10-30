@@ -25,13 +25,13 @@ class TrophiesControllerTest < ActionDispatch::IntegrationTest
     )
     @play_time_trophy = Trophy.create!(
       code: "play_time_100",
-      name: "精神と時の部屋",
+      name: "長き旅路の果て",
       description: "100時間以上プレイした証",
       icon_name: "hourglass_empty"
     )
     @total_play_time_trophy = Trophy.create!(
       code: "total_play_time_500",
-      name: "時間泥棒の被害者",
+      name: "時を忘れた冒険者",
       description: "総プレイ時間500時間の証",
       icon_name: "schedule"
     )
@@ -63,11 +63,14 @@ class TrophiesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".trophy-category-heading h2", text: "ジャンルマスター"
     assert_select ".trophy-card.is-unlocked .trophy-card-name", text: "冒険の始まり"
     assert_select ".trophy-card.is-locked .trophy-card-name", text: "記念すべき第一歩"
-    assert_select ".trophy-card.is-unlocked .trophy-card-name", text: "時間泥棒の被害者"
-    assert_select ".trophy-card.is-locked .trophy-card-name", text: "精神と時の部屋"
+    assert_select ".trophy-card.is-unlocked .trophy-card-name", text: "時を忘れた冒険者"
+    assert_select ".trophy-card.is-locked .trophy-card-name", text: "長き旅路の果て"
     assert_select ".trophy-card.is-locked .trophy-card-name", text: "ロールプレイヤー"
     assert_select ".trophy-card-date", text: "2026.10.18 獲得"
-    assert_select ".trophy-card-icon", text: "military_tech"
+    assert_select "img.trophy-card-icon[alt=''][src*='trophies/levels/level_10']"
+    assert_select "img.trophy-card-icon[alt=''][src*='trophies/clears/clear_1']"
+    assert_select "img.trophy-card-icon[alt=''][src*='trophies/times/play_time_100']"
+    assert_select "img.trophy-card-icon[alt=''][src*='trophies/genre/genre_rpg_5']"
   end
 
   test "ヘッダーからトロフィー一覧へ移動できる" do
@@ -75,7 +78,9 @@ class TrophiesControllerTest < ActionDispatch::IntegrationTest
       get trophies_path
     end
 
-    assert_select "a[href='#{trophies_path}']", text: /トロフィー/
+    assert_select ".header-nav-links a[href='#{trophies_path}']", text: /トロフィー/
+    assert_select ".header-user-name[href='#{edit_profile_path}']", text: "トロフィー勇者"
+    assert_select "[data-clerk-auth-target='userButton']"
   end
 
   private

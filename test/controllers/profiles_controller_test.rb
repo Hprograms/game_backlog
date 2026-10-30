@@ -18,6 +18,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :success
+    assert_select "nav.navbar", count: 0
     assert_select ".profile-setup-title", text: "あなたの なまえを おしえてください"
     assert_select 'input[name="user[name]"][maxlength="15"]'
     assert_select ".profile-setup-cancel", count: 0

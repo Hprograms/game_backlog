@@ -14,6 +14,34 @@ html, body {
   padding-bottom: 1rem;
 }
 
+.header-navbar-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+}
+
+.header-nav-links {
+  grid-column: 2;
+  justify-self: center;
+}
+
+.header-account {
+  grid-column: 3;
+  justify-self: end;
+}
+
+.header-user-name {
+  color: #e2e8f0;
+  font-family: 'DotGothic16', sans-serif;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.header-user-name:hover,
+.header-user-name:focus-visible {
+  color: #67e8f9;
+}
+
 .header-nav-btn {
   background-color: rgba(0, 229, 255, 0.05);
   border: 1px solid rgba(148, 163, 184, 0.3);
@@ -777,6 +805,24 @@ html, body {
 .header-level-container {
   width: 100%;
   max-width: 48px;
+}
+
+@media (max-width: 767.98px) {
+  .header-navbar-content {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .header-nav-links {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: center;
+    margin-top: 0.75rem;
+  }
+
+  .header-account {
+    grid-column: 2;
+    grid-row: 1;
+  }
 }
 
 .header-progress-track {

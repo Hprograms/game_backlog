@@ -17,8 +17,8 @@ trophies = [
   { code: "clear_10", name: "十番勝負", description: "ゲームを10本クリアした証", icon_name: "swords" },
   { code: "clear_30", name: "積みゲー崩しの達人", description: "ゲームを30本クリアした証", icon_name: "psychiatry" },
   { code: "clear_50", name: "殿堂入り", description: "ゲームを50本クリアした証", icon_name: "castle" },
-  { code: "play_time_100", name: "精神と時の部屋", description: "1つのゲームを100時間以上プレイしてクリアした証", icon_name: "hourglass_empty" },
-  { code: "total_play_time_500", name: "時間泥棒の被害者", description: "クリアしたゲームの総プレイ時間が500時間を突破した証", icon_name: "schedule" },
+  { code: "play_time_100", name: "長き旅路の果て", description: "1つのゲームを100時間以上プレイしてクリアした証", icon_name: "hourglass_empty" },
+  { code: "total_play_time_500", name: "時を忘れた冒険者", description: "クリアしたゲームの総プレイ時間が500時間を突破した証", icon_name: "schedule" },
   { code: "genre_rpg_5", name: "ロールプレイヤー", description: "RPGを5本クリアした証", icon_name: "auto_fix_high" },
   { code: "genre_action_5", name: "歴戦の戦士", description: "Actionを5本クリアした証", icon_name: "local_fire_department" }
 ]

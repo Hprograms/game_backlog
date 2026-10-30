@@ -23,7 +23,6 @@ class GamesController < ApplicationController
     @previous_level = current_app_user.level
     @previous_exp = current_app_user.exp
     if @game.save
-      attach_igdb_image
       if @game.earned_exp_results.present?
         current_app_user.reload
         session[:exp_result_data] = {
@@ -40,6 +39,7 @@ class GamesController < ApplicationController
           { name: trophy.name, code: trophy.code, description: trophy.description }
         end
       end
+      attach_igdb_image
       redirect_to @game, notice: "ゲームを保存しました。"
     else
       render :new, status: :unprocessable_entity
@@ -53,7 +53,6 @@ class GamesController < ApplicationController
     @previous_level = current_app_user.level
     @previous_exp = current_app_user.exp
     if @game.update(game_params)
-      attach_igdb_image
       if @game.earned_exp_results.present?
         current_app_user.reload
         session[:exp_result_data] = {
@@ -70,6 +69,7 @@ class GamesController < ApplicationController
           { name: trophy.name, code: trophy.code, description: trophy.description }
         end
       end
+      attach_igdb_image
       redirect_to @game, notice: "ゲームを保存しました。"
     else
       render :edit, status: :unprocessable_entity

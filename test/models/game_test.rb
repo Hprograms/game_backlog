@@ -104,15 +104,18 @@ class GameTest < ActiveSupport::TestCase
     assert_equal 16, @user.level
     assert @game.reload.exp_awarded_for_clear
     assert @user.user_trophies.joins(:trophy).exists?(trophies: { code: "clear_1" })
+    assert_equal %w[clear_1 level_10], @game.newly_unlocked_trophies.map(&:code).sort
     assert Activity.exists?(user: @user, game: @game, action_type: "level_up")
     assert Activity.exists?(user: @user, game: @game, action_type: "trophy_unlocked")
   end
 
   test "クリア済ゲームのプレイ時間更新でトロフィーを判定する" do
     Trophy.find_or_create_by!(code: "play_time_100")
+    Trophy.find_or_create_by!(code: "total_play_time_500")
+    Trophy.find_or_create_by!(code: "level_30")
 
     @game.update!(status: "クリア済")
-    @game.update!(play_time: 100)
+    @game.update!(play_time: 100 * 60)
 
     assert @user.user_trophies.joins(:trophy).exists?(trophies: { code: "play_time_100" })
   end

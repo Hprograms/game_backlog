@@ -84,42 +84,45 @@
         <p class="timer-status-error" data-timer-target="error" role="alert" hidden></p>
       </div>
     </div>
-    <% unless controller_name == "home" %>
+    <% unless controller_name == "home" || (controller_name == "profiles" && action_name == "edit") %>
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid px-4 px-xl-5">
+        <div class="container-fluid px-4 px-xl-5 header-navbar-content">
           <a class="navbar-brand glow-effect d-flex align-items-center brand-title" href="/">
             <%= image_tag "TsumiQuest-logo.png", alt: "ロゴ", class: "brand-logo-image me-2" %>
             <span class="brand-title-text">ツミクエスト</span>
           </a>
-          <div class="ms-auto">
-            <% if clerk_authenticated? %>
-              <div data-controller="clerk-auth" class="d-flex align-items-center gap-4">
-                <%= link_to trophies_path, class: "btn header-nav-btn d-inline-flex align-items-center gap-1" do %>
-                  <%= image_tag "trophies/trophy.png", class: "header-nav-icon", alt: "" %>
-                  <span class="header-nav-label">トロフィー</span>
-                <% end %>
-                <%= link_to activities_path, class: "btn header-nav-btn d-inline-flex align-items-center gap-1" do %>
-                  <%= image_tag "adventures/book.png", class: "header-nav-icon", alt: "" %>
-                  <span class="header-nav-label">冒険の書</span>
-                <% end %>
-                <div class="user-profile-widget d-flex flex-column align-items-center">
-                  <div data-clerk-auth-target="userButton"></div>
-                  <% if current_user %>
-                    <% progress = level_progress(current_user) %>
-                    <div class="header-level-container mt-1" title="<%= progress[:current_exp] %> / <%= progress[:required_exp] %> EXP">
-                      <div class="d-flex justify-content-between align-items-center" style="font-size: 0.65rem; line-height: 1;">
-                        <span class="text-white fw-bold">Lv.<%= current_user.level %></span>
-                      </div>
-                      <div class="header-progress-track mt-1">
-                        <div class="header-progress-fill" style="width: <%= progress[:percentage] %>%"></div>
-                      </div>
+          <% if clerk_authenticated? %>
+            <div class="header-nav-links d-flex align-items-center gap-4">
+              <%= link_to trophies_path, class: "btn header-nav-btn d-inline-flex align-items-center gap-1" do %>
+                <%= image_tag "trophies/trophy.png", class: "header-nav-icon", alt: "" %>
+                <span class="header-nav-label">トロフィー</span>
+              <% end %>
+              <%= link_to activities_path, class: "btn header-nav-btn d-inline-flex align-items-center gap-1" do %>
+                <%= image_tag "adventures/book.png", class: "header-nav-icon", alt: "" %>
+                <span class="header-nav-label">冒険の書</span>
+              <% end %>
+            </div>
+            <div data-controller="clerk-auth" class="header-account d-flex align-items-center gap-3">
+              <% if current_user&.name.present? %>
+                <%= link_to current_user.name, edit_profile_path, class: "header-user-name" %>
+              <% end %>
+              <div class="user-profile-widget d-flex flex-column align-items-center">
+                <div data-clerk-auth-target="userButton"></div>
+                <% if current_user %>
+                  <% progress = level_progress(current_user) %>
+                  <div class="header-level-container mt-1" title="<%= progress[:current_exp] %> / <%= progress[:required_exp] %> EXP">
+                    <div class="d-flex justify-content-between align-items-center" style="font-size: 0.65rem; line-height: 1;">
+                      <span class="text-white fw-bold">Lv.<%= current_user.level %></span>
                     </div>
-                  <% end %>
-                </div>
-                <span class="text-danger" data-clerk-auth-target="error" role="alert" hidden></span>
+                    <div class="header-progress-track mt-1">
+                      <div class="header-progress-fill" style="width: <%= progress[:percentage] %>%"></div>
+                    </div>
+                  </div>
+                <% end %>
               </div>
-            <% end %>
-          </div>
+              <span class="text-danger" data-clerk-auth-target="error" role="alert" hidden></span>
+            </div>
+          <% end %>
         </div>
       </nav>
     <% end %>

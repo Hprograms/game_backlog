@@ -35,6 +35,11 @@ class GamesController < ApplicationController
           results: @game.earned_exp_results
         }
       end
+      if @game.newly_unlocked_trophies.present?
+        session[:unlocked_trophies_data] = @game.newly_unlocked_trophies.map do |trophy|
+          { name: trophy.name, code: trophy.code, description: trophy.description }
+        end
+      end
       redirect_to @game, notice: "ゲームを保存しました。"
     else
       render :new, status: :unprocessable_entity
@@ -59,6 +64,11 @@ class GamesController < ApplicationController
           new_exp: current_app_user.exp,
           results: @game.earned_exp_results
         }
+      end
+      if @game.newly_unlocked_trophies.present?
+        session[:unlocked_trophies_data] = @game.newly_unlocked_trophies.map do |trophy|
+          { name: trophy.name, code: trophy.code, description: trophy.description }
+        end
       end
       redirect_to @game, notice: "ゲームを保存しました。"
     else
@@ -106,6 +116,7 @@ class GamesController < ApplicationController
 
     @new_level = current_app_user.reload.level
     @new_exp = current_app_user.exp
+    @newly_unlocked_trophies = @game.newly_unlocked_trophies
     load_index_data(params[:filter_status])
     render :exp_result, formats: :turbo_stream
   end

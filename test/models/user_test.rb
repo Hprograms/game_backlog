@@ -116,18 +116,19 @@ class UserTest < ActiveSupport::TestCase
         title: "Game #{index}",
         genre: index < 5 ? "RPG" : (index < 10 ? "アクション" : "その他"),
         status: "未着手",
-        play_time: index.zero? ? 100 : 10
+        play_time: index.zero? ? 100 * 60 : 10
       )
     end
     user.games.update_all(status: "クリア済")
 
     trigger_game = user.games.first
-    user.unlock_trophies!(trigger_game)
+    newly_unlocked = user.unlock_trophies!(trigger_game)
+    assert_equal trophy_codes.sort, newly_unlocked.map(&:code).sort
     assert_equal 12, user.user_trophies.count
     assert user.user_trophies.all? { |user_trophy| user_trophy.unlocked_at.present? }
     assert_equal 12, Activity.where(user: user, game: trigger_game, action_type: "trophy_unlocked").count
 
-    user.unlock_trophies!(trigger_game)
+    assert_empty user.unlock_trophies!(trigger_game)
     assert_equal 12, user.user_trophies.count
     assert_equal 12, Activity.where(user: user, game: trigger_game, action_type: "trophy_unlocked").count
   end

@@ -352,6 +352,20 @@ end
     assert_equal "更新後のタイトル", @game.reload.title
   end
 
+  test "ゲーム更新で新たに獲得したトロフィーをセッションに保存する" do
+    with_clerk_session do
+      patch game_path(@game), params: {
+        game: { status: "クリア済" }
+      }
+    end
+
+    assert_redirected_to game_path(@game)
+    assert_equal [
+      { name: "レベル10", code: "level_10", description: "レベル10に到達した" },
+      { name: "初クリア", code: "clear_1", description: "初めてゲームをクリアした" }
+    ], session[:unlocked_trophies_data]
+  end
+
   test "タイマーのプレイ時間を加算してEXPリザルトを返す" do
     with_clerk_session do
       post timer_update_game_path(@game),

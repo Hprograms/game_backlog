@@ -1,5 +1,5 @@
 class Game < ApplicationRecord
-  attr_accessor :used_timer
+  attr_accessor :used_timer, :newly_unlocked_trophies
 
   belongs_to :user
   has_many :activities, dependent: :destroy
@@ -51,6 +51,7 @@ class Game < ApplicationRecord
 
   def reset_earned_exp_results
     @earned_exp_results = []
+    @newly_unlocked_trophies = []
   end
 
   def auto_update_status_to_playing
@@ -118,7 +119,7 @@ class Game < ApplicationRecord
   def unlock_trophies
     return if @trophies_unlocked_during_save
 
-    user.unlock_trophies!(self)
+    @newly_unlocked_trophies.concat(user.unlock_trophies!(self))
   ensure
     @trophies_unlocked_during_save = false
   end
@@ -127,7 +128,7 @@ class Game < ApplicationRecord
     updated = self.class.where(id: id, exp_awarded_for_clear: false).update_all(exp_awarded_for_clear: true)
     return unless updated == 1
 
-    user.add_exp!(5_000, self)
+    @newly_unlocked_trophies.concat(user.add_exp!(5_000, self))
     earned_exp_results << { type: :clear, exp: 5_000 }
     @trophies_unlocked_during_save = true
   end
@@ -140,12 +141,12 @@ class Game < ApplicationRecord
     update_column(:awarded_play_time, play_time)
 
     base_exp = diff * 2
-    user.add_exp!(base_exp, self)
+    @newly_unlocked_trophies.concat(user.add_exp!(base_exp, self))
     earned_exp_results << { type: :play_time, minutes: diff, exp: base_exp }
 
     if used_timer
       timer_bonus = (base_exp * 0.2).ceil
-      user.add_exp!(timer_bonus, self) if timer_bonus.positive?
+      @newly_unlocked_trophies.concat(user.add_exp!(timer_bonus, self)) if timer_bonus.positive?
       earned_exp_results << { type: :timer_bonus, exp: timer_bonus }
     end
 

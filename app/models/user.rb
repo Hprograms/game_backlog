@@ -36,6 +36,7 @@ class User < ApplicationRecord
   end
 
   def unlock_trophies!(game = nil)
+    newly_unlocked = []
     owned_trophy_ids = user_trophies.pluck(:trophy_id)
     cleared_games = games.where(status: "クリア済")
     cleared_counts_by_genre = cleared_games.group(:genre).count
@@ -66,7 +67,10 @@ class User < ApplicationRecord
 
       user_trophies.create!(trophy: trophy, unlocked_at: Time.current)
       create_activity("trophy_unlocked", game)
+      newly_unlocked << trophy
     end
+
+    newly_unlocked
   end
 
   def self.find_or_create_for_clerk!(clerk_user)

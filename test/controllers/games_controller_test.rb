@@ -20,6 +20,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     )
 
     Trophy.create!(code: "clear_1", name: "初クリア", description: "初めてゲームをクリアした")
+    Trophy.create!(code: "clear_10", name: "十番勝負", description: "ゲームを10本クリアした")
     Trophy.create!(code: "level_10", name: "レベル10", description: "レベル10に到達した")
   end
 
@@ -364,6 +365,49 @@ end
       { name: "レベル10", code: "level_10", description: "レベル10に到達した" },
       { name: "初クリア", code: "clear_1", description: "初めてゲームをクリアした" }
     ], session[:unlocked_trophies_data]
+
+    with_clerk_session do
+      follow_redirect!
+    end
+
+    assert_response :success
+    assert_select '[data-controller="trophy-result"]'
+    assert_select ".trophy-result-card", count: 2
+    assert_select "img.trophy-result-icon[src*='trophies/levels/level_10']"
+    assert_select "img.trophy-result-icon[src*='trophies/clears/clear_1']"
+    assert_select "img.trophy-result-logo[alt='トロフィーを獲得！'][src*='trophies/trophy_get']"
+    assert_select "img.exp-result-cracker.cracker-left[src*='exp_results/cracker']"
+    assert_select "img.exp-result-cracker.cracker-right[src*='exp_results/cracker']"
+    assert_select "button[data-trophy-result-target='closeButton'][hidden]"
+    assert_nil session[:unlocked_trophies_data]
+  end
+
+  test "10本目のクリア済みゲーム登録後にトロフィー獲得モーダルを表示する" do
+    8.times do |index|
+      @user.games.create!(title: "Cleared game #{index}", status: "未着手")
+    end
+    @user.games.update_all(status: "クリア済")
+    @user.unlock_trophies!
+
+    with_clerk_session do
+      post games_path, params: {
+        game: { title: "Tenth cleared game", status: "クリア済" }
+      }
+    end
+
+    assert_redirected_to game_path(Game.order(:created_at).last)
+    assert @user.user_trophies.joins(:trophy).exists?(trophies: { code: "clear_10" })
+    assert_equal [ { name: "十番勝負", code: "clear_10", description: "ゲームを10本クリアした" } ],
+      session[:unlocked_trophies_data]
+
+    with_clerk_session do
+      follow_redirect!
+    end
+
+    assert_response :success
+    assert_select '[data-controller="trophy-result"]'
+    assert_select ".trophy-result-name", text: "十番勝負"
+    assert_nil session[:unlocked_trophies_data]
   end
 
   test "タイマーのプレイ時間を加算してEXPリザルトを返す" do
@@ -434,6 +478,9 @@ end
     assert_includes response.body, "クリアボーナス"
     assert_includes response.body, "タイマーボーナス"
     assert_includes response.body, "計："
+    assert_includes response.body, 'data-controller="trophy-result"'
+    assert_includes response.body, "初クリア"
+    assert_match %r{trophies/clears/clear_1-[^"]+\.png}, response.body
   end
 
   test "タイマー結果でゲーム一覧と件数を更新し、絞り込みから外れたカードを除く" do

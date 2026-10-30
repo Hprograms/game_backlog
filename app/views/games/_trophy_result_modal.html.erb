@@ -1,0 +1,29 @@
+<div class="trophy-result-overlay" data-controller="trophy-result">
+  <div class="trophy-result-stage">
+    <div class="trophy-result-logo-wrapper">
+      <%= image_tag "exp_results/cracker.png", class: "exp-result-cracker cracker-left", alt: "" %>
+      <%= image_tag "trophies/trophy_get.png", class: "trophy-result-logo", alt: "トロフィーを獲得！" %>
+      <%= image_tag "exp_results/cracker.png", class: "exp-result-cracker cracker-right", alt: "" %>
+    </div>
+    <section class="trophy-result-modal" role="dialog" aria-modal="true" aria-labelledby="trophy-result-title">
+      <h2 id="trophy-result-title" class="visually-hidden">トロフィーを獲得！</h2>
+      <div class="trophy-result-grid">
+        <% unlocked_trophies.each do |trophy| %>
+          <% folder = case trophy[:code]
+          when /\Alevel_/ then "levels"
+          when /\Aclear_/ then "clears"
+          when /\A(?:play_time_|total_play_time_)/ then "times"
+          when /\Agenre_/ then "genre"
+          end %>
+          <% image_path = folder ? "trophies/#{folder}/#{trophy[:code]}.png" : "trophies/trophy.png" %>
+          <article class="trophy-result-card">
+            <%= image_tag image_path, class: "trophy-result-icon", alt: "" %>
+            <h3 class="trophy-result-name"><%= trophy[:name] %></h3>
+            <p class="trophy-result-description"><%= trophy[:description] %></p>
+          </article>
+        <% end %>
+      </div>
+      <button type="button" class="trophy-result-close" data-trophy-result-target="closeButton" data-action="click->trophy-result#close" hidden>閉じる</button>
+    </section>
+  </div>
+</div>

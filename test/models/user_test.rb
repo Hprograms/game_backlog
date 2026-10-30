@@ -116,7 +116,7 @@ class UserTest < ActiveSupport::TestCase
         title: "Game #{index}",
         genre: index < 5 ? "RPG" : (index < 10 ? "アクション" : "その他"),
         status: "未着手",
-        play_time: index.zero? ? 100 * 60 : 10
+        play_time: index.zero? ? 500 * 60 : 10
       )
     end
     user.games.update_all(status: "クリア済")

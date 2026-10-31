@@ -321,6 +321,15 @@ html, body {
   transition: all 0.3s ease;
 }
 
+.title-search #game_title::placeholder,
+.title-search .title-input::placeholder,
+#game_memo::placeholder,
+.memo-textarea::placeholder {
+  color: rgba(248, 250, 252, 0.45) !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: rgba(248, 250, 252, 0.45) !important;
+}
+
 .modern-input:focus {
   border-bottom-color: var(--cyan-accent, #00e5ff) !important;
   box-shadow: 0 1px 0 var(--cyan-accent, #00e5ff) !important;

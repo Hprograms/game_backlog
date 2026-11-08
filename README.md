@@ -49,6 +49,10 @@ https://canva.link/fg6ae2idpqml1ql
   * Gemini Pro（企画・要件定義・調べもの）
   * Github Copilot（コーディング）
 
+## AWSアーキテクチャ
+<img width="580" height="799" alt="image" src="https://github.com/user-attachments/assets/453f3e16-1540-4aa0-a590-e3b27dee4569" />
+
+
 ## 技術的なこだわり・アピールポイント
 
 ### 1. モダンなRails 8アーキテクチャの積極採用

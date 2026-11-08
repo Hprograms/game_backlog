@@ -50,8 +50,7 @@ https://canva.link/fg6ae2idpqml1ql
   * Github Copilot（コーディング）
 
 ## AWSアーキテクチャ
-<img width="580" height="799" alt="image" src="https://github.com/user-attachments/assets/453f3e16-1540-4aa0-a590-e3b27dee4569" />
-
+<img width="1541" height="1181" alt="AWSアーキテクチャ" src="https://github.com/user-attachments/assets/227ad9e3-e934-4b28-93b9-3b6da6b76216" />
 
 ## 技術的なこだわり・アピールポイント
 

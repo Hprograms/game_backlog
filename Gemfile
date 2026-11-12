@@ -18,6 +18,7 @@ gem "stimulus-rails"
 gem "jbuilder"
 # Complete identity and user management for Rails [https://github.com/clerk/clerk-sdk-ruby]
 gem "clerk-sdk-ruby"
+gem "aws-sdk-s3", "~> 1.233", require: false
 
 gem "dotenv-rails", groups: [ :development, :test ]
 gem "minitest", "~> 5.25"
@@ -64,4 +65,3 @@ group :test do
   gem "rails-controller-testing"
 end
 
-gem "aws-sdk-s3", "~> 1.233"

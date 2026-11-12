@@ -10,3 +10,9 @@ terraform {
 provider "aws" {
   region = "ap-northeast-1"
 }
+
+# 現在のAWSアカウント情報を取得
+data "aws_caller_identity" "current" {}
+
+# 現在のリージョン情報を取得
+data "aws_region" "current" {}

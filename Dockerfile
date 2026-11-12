@@ -67,6 +67,10 @@ COPY --from=build /rails /rails
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp
+
+USER root
+RUN apt-get update -qq && apt-get install --no-install-recommends -y libcap2-bin \
+    && setcap 'cap_net_bind_service=+ep' $(which ruby)    
 USER 1000:1000
 
 # Entrypoint prepares the database.

@@ -1,0 +1,78 @@
+name: Deploy to Amazon ECS
+
+on:
+  push:
+    branches:
+      - main # mainブランチにプッシュされたら自動実行
+
+env:
+  AWS_REGION: ap-northeast-1
+  ECR_REPOSITORY: tsumiquest-rails
+  ECS_CLUSTER: tsumiquest-ecs
+  ECS_SERVICE: tsumiquest-ecs-service
+  DOMAIN_NAME: tsumiquest.com
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: latest
+        run: |
+          docker build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Force new deployment on ECS
+        run: |
+          aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_SERVICE }} --force-new-deployment
+
+      - name: Wait for ECS service to become stable
+        run: |
+          echo "新しいタスクの起動と古いタスクの停止を待機しています..."
+          aws ecs wait services-stable --cluster ${{ env.ECS_CLUSTER }} --services ${{ env.ECS_SERVICE }}
+
+      - name: Update Route 53 with new Fargate Public IP
+        run: |
+          # 1. 起動中の新しいタスクARNを取得
+          TASK_ARN=$(aws ecs list-tasks --cluster ${{ env.ECS_CLUSTER }} --service-name ${{ env.ECS_SERVICE }} --desired-status RUNNING --query 'taskArns[0]' --output text)
+          
+          # 2. タスクのネットワークインターフェース(ENI)IDを取得
+          ENI_ID=$(aws ecs describe-tasks --cluster ${{ env.ECS_CLUSTER }} --tasks $TASK_ARN --query 'tasks[0].attachments[0].details[?name==`networkInterfaceId`].value' --output text)
+          
+          # 3. ENIから新しいパブリックIPアドレスを取得
+          PUBLIC_IP=$(aws ec2 describe-network-interfaces --network-interface-ids $ENI_ID --query 'NetworkInterfaces[0].Association.PublicIp' --output text)
+          
+          echo "取得した新しいパブリックIP: $PUBLIC_IP"
+          
+          # 4. Route 53のAレコードを新しいIPで上書き更新
+          aws route53 change-resource-record-sets \
+            --hosted-zone-id ${{ secrets.AWS_ROUTE53_ZONE_ID }} \
+            --change-batch '{
+              "Comment": "Auto updated by GitHub Actions",
+              "Changes": [{
+                "Action": "UPSERT",
+                "ResourceRecordSet": {
+                  "Name": "${{ env.DOMAIN_NAME }}",
+                  "Type": "A",
+                  "TTL": 300,
+                  "Records": [{"Value": "'$PUBLIC_IP'"}]
+                }
+              }]
+            }'

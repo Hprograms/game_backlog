@@ -31,7 +31,7 @@ resource "aws_ecs_task_definition" "app" {
       environment = [
         { name = "RAILS_ENV", value = "production" },
         { name = "RAILS_LOG_TO_STDOUT", value = "true" },
-        { name = "DATABASE_URL", value = "postgres://postgres:${urlencode(var.db_password)}@${aws_db_instance.main.endpoint}/tsumiquest_production" },
+        { name = "DATABASE_URL", value = "postgres://postgres:${urlencode(data.aws_ssm_parameter.db_password.value)}@${aws_db_instance.main.endpoint}/tsumiquest_production" },
         { name = "RAILS_SERVE_STATIC_FILES", value = "true" },
         { name = "REDIS_URL", value = "redis://${aws_elasticache_cluster.main.cache_nodes[0].address}:6379/0" },
         { name = "AWS_BUCKET", value = aws_s3_bucket.app_storage.bucket },

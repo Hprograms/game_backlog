@@ -61,7 +61,7 @@ jobs:
           
           echo "取得した新しいパブリックIP: $PUBLIC_IP"
           
-          # 4. Route 53のAレコードを新しいIPで上書き更新
+          # 4. Route 53のAレコードを新しいIPで上書き更新（Records → ResourceRecords に修正）
           aws route53 change-resource-record-sets \
             --hosted-zone-id ${{ secrets.AWS_ROUTE53_ZONE_ID }} \
             --change-batch '{
@@ -72,7 +72,7 @@ jobs:
                   "Name": "${{ env.DOMAIN_NAME }}",
                   "Type": "A",
                   "TTL": 300,
-                  "Records": [{"Value": "'$PUBLIC_IP'"}]
+                  "ResourceRecords": [{"Value": "'$PUBLIC_IP'"}]
                 }
               }]
             }'

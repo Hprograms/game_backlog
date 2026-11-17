@@ -13,6 +13,7 @@ resource "aws_route53_record" "app" {
   # GitHub Actions側でIPを自動更新するため、Terraform側では変更を無視する
   lifecycle {
     ignore_changes = [records]
+    prevent_destroy = true
   }
 }
 

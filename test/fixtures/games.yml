@@ -1,0 +1,9 @@
+one:
+  user: one
+  title: Test Game One
+  status: 未着手
+
+two:
+  user: two
+  title: Test Game Two
+  status: 未着手

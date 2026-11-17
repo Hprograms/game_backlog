@@ -44,7 +44,12 @@ class IgdbApiService
       games = perform_json_request(request.uri, request)
       next [] unless games
 
-      games.first(5).map { |game| format_game(game) }
+      filtered_games = games.select do |game|
+        category = game["category"] || game.dig("game_type", "id")
+        category.nil? || SEARCHABLE_GAME_CATEGORIES.include?(category)
+      end
+
+      filtered_games.first(5).map { |game| format_game(game) }
     end
   rescue StandardError => e
     Rails.logger.error("IGDB API Error: #{e.message}")

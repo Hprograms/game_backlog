@@ -19,6 +19,7 @@ gem "jbuilder"
 # Complete identity and user management for Rails [https://github.com/clerk/clerk-sdk-ruby]
 gem "clerk-sdk-ruby"
 gem "aws-sdk-s3", "~> 1.233", require: false
+gem "redis", "~> 5.0"
 
 gem "dotenv-rails", groups: [ :development, :test ]
 gem "minitest", "~> 5.25"

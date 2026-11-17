@@ -303,6 +303,10 @@ GEM
       prism (>= 1.6.0)
       rbs (>= 4.0.0)
       tsort
+    redis (5.4.1)
+      redis-client (>= 0.22.0)
+    redis-client (0.31.0)
+      connection_pool
     regexp_parser (2.11.3)
     reline (0.7.0)
       io-console (~> 0.5)
@@ -421,6 +425,7 @@ DEPENDENCIES
   puma (>= 5.0)
   rails (~> 8.1.4)
   rails-controller-testing
+  redis (~> 5.0)
   rubocop-rails-omakase
   selenium-webdriver
   solid_cable

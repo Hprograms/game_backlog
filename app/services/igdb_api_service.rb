@@ -26,21 +26,31 @@ class IgdbApiService
   }.freeze
 
   def self.search(query)
+    normalized_query = query.to_s.strip.downcase
+    return [] if normalized_query.blank?
+
     client_id = ENV["IGDB_CLIENT_ID"]
     token = access_token
     return [] if client_id.blank? || token.blank?
 
-    request = Net::HTTP::Post.new(URI("https://api.igdb.com/v4/games"))
-    request["Client-ID"] = client_id
-    request["Authorization"] = "Bearer #{token}"
-    request["Content-Type"] = "text/plain"
-    request.body = apicalypse_query(query)
+    cache_key = "igdb_game_search_v1:#{normalized_query}"
+    Rails.cache.fetch(cache_key, expires_in: 24.hours) do
+      request = Net::HTTP::Post.new(URI("https://api.igdb.com/v4/games"))
+      request["Client-ID"] = client_id
+      request["Authorization"] = "Bearer #{token}"
+      request["Content-Type"] = "text/plain"
+      request.body = apicalypse_query(query.to_s.strip)
 
-    games = perform_json_request(request.uri, request)
-    return [] unless games
+      games = perform_json_request(request.uri, request)
+      next [] unless games
 
-    # API側で完璧にフィルタリングされるため、Ruby側のreject処理は全削除してOK
-    games.first(5).map { |game| format_game(game) }
+      filtered_games = games.select do |game|
+        category = game["category"] || game.dig("game_type", "id")
+        category.nil? || SEARCHABLE_GAME_CATEGORIES.include?(category)
+      end
+
+      filtered_games.first(5).map { |game| format_game(game) }
+    end
   rescue StandardError => e
     Rails.logger.error("IGDB API Error: #{e.message}")
     []

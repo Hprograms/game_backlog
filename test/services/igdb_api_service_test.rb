@@ -76,7 +76,7 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
     IgdbApiService.stub(:access_token, "token") do
       IgdbApiService.stub(:perform_request, ->(*) { responses.shift }) do
         @results = IgdbApiService.search("Example Game")
-        @retained_later_categories = IgdbApiService.search("Example Game").map { |game| game[:name] }
+        @retained_later_categories = IgdbApiService.search("Example Game 2").map { |game| game[:name] }
       end
     end
 
@@ -134,6 +134,44 @@ class IgdbApiServiceTest < ActiveSupport::TestCase
     Rails.cache.delete(IgdbApiService::TOKEN_CACHE_KEY)
     %w[IGDB_CLIENT_ID IGDB_CLIENT_SECRET].each { |key| ENV.delete(key) }
     previous_env.each { |key, value| ENV[key] = value }
+  end
+
+  test "ゲーム検索結果は正規化されたキーでキャッシュされ、2回目以降はAPIを叩かない" do
+    previous_client_id = ENV["IGDB_CLIENT_ID"]
+    ENV["IGDB_CLIENT_ID"] = "client-id"
+    memory_cache = ActiveSupport::Cache::MemoryStore.new
+    request_count = 0
+
+    response = Response.new("200", [ {
+      name: "Dragon Quest XI",
+      cover: { url: "//images.igdb.com/igdb/image/upload/t_thumb/co123.jpg" },
+      platforms: [ { name: "Nintendo Switch" } ],
+      genres: [ { name: "Role-playing (RPG)" } ],
+      involved_companies: [ { company: { name: "Square Enix" } } ],
+      storyline: "An RPG adventure.",
+      total_rating: 91.2
+    } ].to_json)
+
+    Rails.stub(:cache, memory_cache) do
+      IgdbApiService.stub(:access_token, "bearer-token") do
+        IgdbApiService.stub(:perform_request, ->(_uri, _request) {
+          request_count += 1
+          response
+        }) do
+          # 1回目: APIにリクエストが飛ぶ
+          first_results = IgdbApiService.search("Dragon Quest XI")
+          # 2回目: 大文字小文字や前後の空白が異なっても正規化されてキャッシュがヒットする
+          second_results = IgdbApiService.search("  dragon quest xi  ")
+
+          assert_equal first_results, second_results
+          assert_equal "Dragon Quest XI", second_results.first[:name]
+          assert_equal 1, request_count
+          assert memory_cache.exist?("igdb_game_search_v1:dragon quest xi")
+        end
+      end
+    end
+  ensure
+    previous_client_id.nil? ? ENV.delete("IGDB_CLIENT_ID") : ENV["IGDB_CLIENT_ID"] = previous_client_id
   end
 
   test "翻訳に失敗した場合は元の要約を返す" do

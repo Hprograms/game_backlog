@@ -291,6 +291,43 @@ test "IGDB検索結果をJSON形式で返す" do
   assert_not response.parsed_body.first.key?("metacritic")
 end
 
+test "サジェスト検索で同じクエリを2回検索するとキャッシュが使われる" do
+  previous_client_id = ENV["IGDB_CLIENT_ID"]
+  ENV["IGDB_CLIENT_ID"] = "client-id"
+  memory_cache = ActiveSupport::Cache::MemoryStore.new
+  api_call_count = 0
+  api_response = Struct.new(:code, :body) do
+    def is_a?(type)
+      type == Net::HTTPSuccess || super
+    end
+  end.new("200", [ { name: "Cached Game" } ].to_json)
+
+  Rails.stub(:cache, memory_cache) do
+    IgdbApiService.stub(:access_token, "token") do
+      IgdbApiService.stub(:perform_request, ->(*) {
+        api_call_count += 1
+        api_response
+      }) do
+        with_clerk_session do
+          get search_games_path, params: { query: "Cached Game" }
+          assert_response :success
+          first_body = response.parsed_body
+
+          get search_games_path, params: { query: "cached game" }
+          assert_response :success
+          second_body = response.parsed_body
+
+          assert_equal first_body, second_body
+          assert_equal "Cached Game", second_body.first["name"]
+          assert_equal 1, api_call_count
+        end
+      end
+    end
+  end
+ensure
+  previous_client_id.nil? ? ENV.delete("IGDB_CLIENT_ID") : ENV["IGDB_CLIENT_ID"] = previous_client_id
+end
+
 # タイトルなしでは登録できない
 test "タイトルなしでは登録できない" do
   assert_no_difference("Game.count") do

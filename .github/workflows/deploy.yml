@@ -69,7 +69,7 @@ jobs:
               "Changes": [{
                 "Action": "UPSERT",
                 "ResourceRecordSet": {
-                  "Name": "${{ env.DOMAIN_NAME }}",
+                  "Name": "origin.tsumiquest.com",
                   "Type": "A",
                   "TTL": 300,
                   "ResourceRecords": [{"Value": "'$PUBLIC_IP'"}]

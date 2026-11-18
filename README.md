@@ -118,8 +118,6 @@ IGDB APIから取得したゲームの基本情報・詳細情報をRedisにキ�
 
 <img width="1498" height="1282" alt="AWSアーキテクチャ図" src="https://github.com/user-attachments/assets/c26680de-7554-4bb2-b76a-6eafcb954278" />
 
-> **※ インフラ稼働状況について**
-> 個人開発におけるランニングコスト最適化のため、非稼働時は課金対象リソース（ECS / RDS / ElastiCache）を停止しています。Terraform および GitHub Actions により数分で本番環境を再構築・起動できる構成としており、選考・面接時には稼働状態にしてご案内可能です。
 
 ### 技術選定理由
 

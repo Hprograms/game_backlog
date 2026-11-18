@@ -1,24 +1,34 @@
-# ホストゾーンの作成
+# 1〜4行目の既存の aws_route53_zone ブロックはそのまま残す
 resource "aws_route53_zone" "main" {
-  name = var.domain_name
-}
+  name = "tsumiquest.com"
 
-resource "aws_route53_record" "app" {
-  zone_id = aws_route53_zone.main.zone_id
-  name    = var.domain_name
-  type    = "A"
-  ttl     = 300
-  records = [var.ecs_public_ip]
-
-  # GitHub Actions側でIPを自動更新するため、Terraform側では変更を無視する
   lifecycle {
-    ignore_changes = [records]
     prevent_destroy = true
   }
 }
 
-# 取得したドメインのネームサーバー設定に使う情報を出力
-output "route53_name_servers" {
-  description = "Name servers for the Route 53 zone"
-  value       = aws_route53_zone.main.name_servers
+# 公開ドメイン -> CloudFront へ向ける（古い app 定義は削除してこちらに差し替え）
+resource "aws_route53_record" "app" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "tsumiquest.com"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.app.domain_name
+    zone_id                = aws_cloudfront_distribution.app.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+# CloudFrontのオリジン用 -> GitHub Actionsが最新Fargate IPで上書きする
+resource "aws_route53_record" "origin" {
+  zone_id = aws_route53_zone.main.zone_id
+  name    = "origin.tsumiquest.com"
+  type    = "A"
+  ttl     = 60
+  records = ["127.0.0.1"]
+
+  lifecycle {
+    ignore_changes = [records]
+  }
 }

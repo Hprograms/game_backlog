@@ -35,3 +35,19 @@ resource "aws_lambda_function" "discord_notifier" {
     Name = "tsumiquest-discord-notifier"
   }
 }
+
+# SNSトピックからのメッセージをLambdaへ転送する紐づけ
+resource "aws_sns_topic_subscription" "discord_notifier" {
+  topic_arn = aws_sns_topic.alerts.arn
+  protocol  = "lambda"
+  endpoint  = aws_lambda_function.discord_notifier.arn
+}
+
+# SNSサービスがこのLambda関数を呼び出すことを許可する権限
+resource "aws_lambda_permission" "allow_sns" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.discord_notifier.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.alerts.arn
+}

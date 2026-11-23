@@ -39,3 +39,7 @@
 *.tfstate.*
 crash.log
 *.tfvars
+
+# Lambda build artifacts
+terraform/lambda/**/bootstrap
+terraform/lambda/**/*.zip

@@ -6,7 +6,9 @@
 
 ゲームのプレイ時間やクリア状況に応じて経験値を獲得したり、条件を達成してトロフィーを収集したりすることで、積みゲーを消化する過程そのものを楽しめる体験を提供します。
 
-[![Deploy Status](https://img.shields.io/badge/Render-Deployed-success?logo=render)](https://game-backlog.onrender.com)
+[![Deploy Status](https://img.shields.io/badge/AWS-tsumiquest.com-FF9900?logo=amazonaws&logoColor=white)](https://tsumiquest.com)
+
+> ※インフラコスト最適化のため、非稼働時は Terraform の `-target` 指定により ECS・RDS・ElastiCache を停止しています（IaCは `terraform/` ディレクトリで公開しています）。
 
 ## ハッカソン出場
 
@@ -101,35 +103,53 @@ IGDB APIから取得したゲームの基本情報・詳細情報をRedisにキ�
 
 これにより、これからプレイするゲームだけでなく、これまで遊んできたゲームも登録してコレクションしていく楽しさを提供しています。
 
+### 3. CloudFront + ACM によるHTTPS化とデプロイ時のIP自動紐づけ
+
+独自ドメイン（`tsumiquest.com`）で安全に通信できるよう、Amazon CloudFront と AWS Certificate Manager（ACM）を組み合わせてHTTPS化を行いました。
+
+また、ECS Fargate ではタスクが再起動・再デプロイされるたびにパブリックIPアドレスが動的に変化します。そこで、GitHub Actions のデプロイワークフロー内に、起動したECSタスクの最新パブリックIPを AWS CLI で自動取得し、Route 53 のAレコード（`origin.tsumiquest.com`）を自動更新（`UPSERT`）する処理を組み込みました。これにより、`tsumiquest.com` と最新のECSコンテナが常に自動で紐づく仕組みを実現しています。
+
+### 4. サーバーレスなシステム監視とDiscord通知基盤の構築
+
+アプリケーションのエラーやリソースの高負荷を即座に検知できるよう、CloudWatch・Amazon SNS・AWS Lambda を連携させた監視・通知基盤を Terraform で構築しました。
+
+- **アプリエラー監視：** CloudWatch Logs のメトリクスフィルターで Rails の500エラーや例外ログを検知
+- **リソース監視：** CloudWatch Alarms で ECS の CPU・メモリ使用率の異常を検知
+- **通知処理（Go製Lambda）：** Go で通知関数を実装し、異常検知時（`ALARM`）と自動復旧時（`OK`）に Discord へ自動通知
+
 ## 技術スタック
 
 | 分類 | 技術 |
 | :--- | :--- |
 | バックエンド | Ruby 3.4 / Ruby on Rails 8.0 |
 | フロントエンド | Turbo / Stimulus (Hotwire), CSS |
-| データベース | PostgreSQL |
+| データベース | PostgreSQL (Amazon RDS) |
 | キャッシュ | Amazon ElastiCache for Redis |
-| デプロイ | Render / AWS |
+| インフラ | AWS (VPC, ECS Fargate, S3, CloudFront, Route 53, ACM, SSM) |
+| IaC | Terraform |
+| 監視・通知 | Amazon CloudWatch / Amazon SNS / AWS Lambda (Go) / Discord Webhook |
+| CI/CD | GitHub Actions |
 | 外部API | IGDB API / DeepL API |
 | 認証 | Clerk |
 | AI | Gemini Pro / GitHub Copilot |
 
 ## AWSアーキテクチャ
 
-<img width="1498" height="1282" alt="AWSアーキテクチャ図" src="https://github.com/user-attachments/assets/c26680de-7554-4bb2-b76a-6eafcb954278" />
+<img width="1498" height="1282" alt="AWSアーキテクチャ図" src="docs/aws_architecture.png" />
 
 
 ### 技術選定理由
 
 | 技術 / サービス | 選定理由 |
 | :--- | :--- |
-| **Terraform (IaC)** | AWSリソース（VPC、ECS、RDS、ElastiCache等）の構築をコード化し、再現性を担保するため。非稼働時は独自ドメインのネームサーバー設定を維持する Route 53 ホストゾーン（`prevent_destroy`）のみを残し、課金リソースを `-target` 指定で選択的に停止・再構築することで待機コストを最小化しています。 |
-| **GitHub Actions (CI/CD)** | `main` ブランチへのマージをトリガーに、Dockerイメージのビルド・ECRへのプッシュ・ECSへのデプロイを自動化するため。また、ALBを省いた最小構成で発生する「タスク再起動ごとのパブリックIP変動」を解消するため、デプロイ後にAWS CLIで最新IPを動的取得し Route 53 のAレコードを自動更新（`UPSERT`）する処理を実装しています。 |
+| **Terraform (IaC)** | AWSリソースの構築をコード化し、再現性を担保するため。 |
+| **GitHub Actions (CI/CD)** | `main` ブランチへのマージをトリガーに、Dockerイメージのビルド・ECRへのプッシュ・ECSへのデプロイを自動化するため。デプロイ完了後には AWS CLI で新しいECSタスクのパブリックIPを動的取得し、Route 53 のAレコードを自動更新（`UPSERT`）することで、`tsumiquest.com` とECSの紐づけを自動化しています。 |
+| **Amazon CloudFront / ACM** | 独自ドメイン（`tsumiquest.com`）でのSSL/TLS終端によるHTTPS化と、ゲームパッケージ画像のCDN配信を行うため。静的アセットの高速配信とセキュアな通信を両立しています。 |
 | **Amazon ECS (Fargate)** | EC2のOS管理やパッチ適用などのサーバー運用負荷を省き、コンテナベースでアプリケーションを安定稼働させるため。 |
 | **Amazon RDS (PostgreSQL)** | ユーザー情報、ゲーム記録、トロフィーなどの永続データを安全に管理するため。インターネットから隔離されたプライベートサブネットに配置しています。 |
-| **Amazon ElastiCache (Redis)** | 外部API（IGDB API）のレート制限回避と検索サジェストの高速化のため。検索クエリの正規化（前後空白削除・小文字統一）とあわせて検索結果をキャッシュし、2回目以降の応答時間を約350msから約5msまで短縮しました。 |
-| **Amazon S3 / CloudFront** | Active Storageでアップロード・取得したゲームカバー画像をアプリケーションサーバーから分離し、CDN経由で高速配信することでECSへの負荷を軽減するため。 |
-| **VPC / Security Group** | 月額固定費の高いNAT GatewayやALBを省きコストを最適化しつつ、データストア層（RDS / ElastiCache）をプライベートサブネットへ分離するため。Security GroupによりECSからの特定ポート通信のみを許可しています。 |
+| **Amazon ElastiCache (Redis)** | 外部API（IGDB API）のレート制限回避と検索サジェストの高速化のため。検索クエリの正規化（前後空白削除・小文字統一）とあわせて検索結果をキャッシュし、キャッシュ利用時のサジェスト表示時間を約20msまで短縮しました。 |
+| **VPC / Security Group** | データストア層（RDS / ElastiCache）をインターネットから隔離されたプライベートサブネットへ配置し、Security Group によってECSからの特定ポート通信のみを許可する堅牢なネットワークを構成するため。 |
+| **CloudWatch / SNS / Lambda (Go)** | アプリケーションの500エラーログやECSのCPU・メモリ高負荷を自動検知し、Discordへリアルタイム通知するため。通知関数はコールドスタートが速くメモリ消費の少ない Go で実装しています。 |
 | **SSM Parameter Store** | DB認証情報や外部APIキーなどの機密情報をソースコードやリポジトリに一切残さず、`SecureString` として暗号化・一元管理するため。 |
 
 ## AIを活用した開発プロセス
@@ -147,4 +167,3 @@ IGDB APIから取得したゲームの基本情報・詳細情報をRedisにキ�
 
 - ユーザー同士でゲームのプレイ記録や進捗を共有する機能
 - ゲームのプレイ予定を管理できるカレンダー機能
-- ジョブや転職など、よりRPGらしい成長要素の追加

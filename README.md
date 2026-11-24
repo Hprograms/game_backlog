@@ -1,10 +1,16 @@
+<div align="center">
+
 # ツミクエスト (Tsumi-Quest)
-<img src="docs/TsumiQuest-logo2.png" width="600">
+
+<img src="docs/TsumiQuest-logo2.png" width="280" alt="ツミクエスト ロゴ">
+
 **積まれたゲームは、あなたが挑むべきクエストだ！**
 
 「ツミクエスト」は、増え続ける積みゲーをRPG感覚で楽しく消化することを目指したWebアプリケーションです。ゲームのプレイ時間やクリア状況に応じて経験値を獲得したり、条件を達成してトロフィーを収集したりすることで、積みゲーを消化する過程そのものを楽しめる体験を提供します。
 
 [![Deploy Status](https://img.shields.io/badge/AWS-tsumiquest.com-FF9900?logo=amazonaws&logoColor=white)](https://tsumiquest.com)
+
+</div>
 
 > ※インフラコスト最適化のため、非稼働時は Terraform の `-target` 指定により ECS・RDS・ElastiCache を停止しています（IaCは `terraform/` ディレクトリで公開しています）。
 

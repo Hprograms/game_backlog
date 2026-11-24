@@ -8,9 +8,12 @@
 
 「ツミクエスト」は、増え続ける積みゲーをRPG感覚で楽しく消化することを目指したWebアプリケーションです。ゲームのプレイ時間やクリア状況に応じて経験値を獲得したり、条件を達成してトロフィーを収集したりすることで、積みゲーを消化する過程そのものを楽しめる体験を提供します。
 
+</div>
+
+<br>
+
 [![Deploy Status](https://img.shields.io/badge/AWS-tsumiquest.com-FF9900?logo=amazonaws&logoColor=white)](https://tsumiquest.com)
 
-</div>
 
 > ※インフラコスト最適化のため、非稼働時は Terraform の `-target` 指定により ECS・RDS・ElastiCache を停止しています（IaCは `terraform/` ディレクトリで公開しています）。
 
@@ -57,7 +60,7 @@
 そこで、次の2つを重視して設計しました。
 
 - **プレイするきっかけを作る：** ゲームのプレイ時間に応じて経験値を獲得できるようにし、ゲームを遊ぶこと自体がモチベーションにつながる仕組みを取り入れました。
-- **クリアする達成感を高める：** ゲームをクリアすると固定の経験値報酬を獲得できるようにし、最後まで遊び切ることにも報酬を設けました。
+- **クリアする達成感を高める：** ゲームをクリアすると大量の経験値を獲得できるようにし、最後まで遊び切ることにも報酬を設けました。
 
 単にゲームの進行状況を記録するだけでなく、ゲームを遊ぶことやクリアすることに楽しさを加えることを目指しています。
 
@@ -72,7 +75,7 @@
 - 「未プレイ」「プレイ中」「クリア済」などのステータス管理
 - Active Storageによるオリジナル画像のアップロード
 
-### RPG要素
+### ゲーミフィケーション
 - プレイ時間に応じた経験値の獲得
 - ゲームクリア時の固定経験値報酬
 - 経験値に応じたレベルアップ
@@ -141,6 +144,7 @@
 | フロントエンド | Turbo / Stimulus (Hotwire), CSS |
 | データベース | PostgreSQL (Amazon RDS) |
 | キャッシュ | Amazon ElastiCache for Redis |
+| コンテナ | Docker |
 | インフラ | AWS (VPC, ECS Fargate, S3, CloudFront, Route 53, ACM, SSM) |
 | IaC | Terraform |
 | 監視・通知 | Amazon CloudWatch / Amazon SNS / AWS Lambda (Go) / Discord Webhook |
@@ -161,7 +165,7 @@
 | :--- | :--- |
 | **Terraform (IaC)** | AWSリソースの構築をコード化し、再現性を担保するため。 |
 | **GitHub Actions (CI/CD)** | `main` ブランチへのマージをトリガーに、Dockerイメージのビルド・ECRへのプッシュ・ECSへのデプロイを自動化するため。デプロイ完了後には AWS CLI で新しいECSタスクのパブリックIPを動的取得し、Route 53 のAレコードを自動更新（`UPSERT`）することで、`tsumiquest.com` とECSの紐づけを自動化しています。 |
-| **Amazon CloudFront / ACM** | 独自ドメイン（`tsumiquest.com`）でのSSL/TLS終端によるHTTPS化と、ゲームパッケージ画像のCDN配信を行うため。静的アセットの高速配信とセキュアな通信を両立しています。 |
+| **Amazon CloudFront / ACM** | 独自ドメイン（`tsumiquest.com`）のHTTPS化と、ゲームパッケージ画像のCDN配信を行うため。静的アセットの高速配信とセキュアな通信を両立しています。 |
 | **Amazon ECS (Fargate)** | EC2のOS管理やパッチ適用などのサーバー運用負荷を省き、コンテナベースでアプリケーションを安定稼働させるため。 |
 | **Amazon RDS (PostgreSQL)** | ユーザー情報、ゲーム記録、トロフィーなどの永続データを安全に管理するため。インターネットから隔離されたプライベートサブネットに配置しています。 |
 | **Amazon ElastiCache (Redis)** | 外部API（IGDB API）のレート制限回避と検索サジェストの高速化のため。検索クエリの正規化（前後空白削除・小文字統一）とあわせて検索結果をキャッシュし、キャッシュ利用時のサジェスト表示時間を約20msまで短縮しました。 |
